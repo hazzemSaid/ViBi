@@ -47,7 +47,7 @@ class _FullAnswerModalState extends State<FullAnswerModal> {
     final state = context.read<AnswerQuestionCubit>().state;
     if (!state.hasError) {
       // Show share sheet before closing; user can skip if they prefer.
-      await _showShareDialog(answerText);
+      await showShareDialog(answerText);
       if (!mounted) return;
 
       Navigator.of(context).pop();
@@ -60,7 +60,7 @@ class _FullAnswerModalState extends State<FullAnswerModal> {
     }
   }
 
-  Future<void> _showShareDialog(String answeredText) async {
+  Future<void> showShareDialog(String answeredText) async {
     final user = Supabase.instance.client.auth.currentUser;
     final username =
         (user?.userMetadata?['username'] as String?)?.trim() ??

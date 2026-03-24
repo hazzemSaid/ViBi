@@ -108,196 +108,208 @@ class _ShareSheetState extends State<_ShareSheet> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-            // Drag handle
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
+              // Drag handle
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Share your Answer',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+              const SizedBox(height: 16),
+              const Text(
+                'Share your Answer',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              'Choose a style first, then share it to Instagram Stories or any app',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white38, fontSize: 13),
-            ),
-            const SizedBox(height: 20),
+              const SizedBox(height: 4),
+              const Text(
+                'Choose a style first, then share it to Instagram Stories or any app',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white38, fontSize: 13),
+              ),
+              const SizedBox(height: 20),
 
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Choose your template',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.06),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Choose your template',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    _selectedTemplate.subtitle,
-                    style: const TextStyle(color: Colors.white54, fontSize: 12),
-                  ),
-                  const SizedBox(height: 14),
-                  SizedBox(
-                    height: 172,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: ShareCardTemplate.values.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 12),
-                      itemBuilder: (context, index) {
-                        final template = ShareCardTemplate.values[index];
-                        final isSelected = template == _selectedTemplate;
+                    const SizedBox(height: 6),
+                    Text(
+                      _selectedTemplate.subtitle,
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      height: 172,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: ShareCardTemplate.values.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          final template = ShareCardTemplate.values[index];
+                          final isSelected = template == _selectedTemplate;
 
-                        return GestureDetector(
-                          onTap: _isSharing
-                              ? null
-                              : () => setState(() => _selectedTemplate = template),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 180),
-                            width: 132,
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColors.primary.withValues(alpha: 0.14)
-                                  : Colors.white.withValues(alpha: 0.04),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
+                          return GestureDetector(
+                            onTap: _isSharing
+                                ? null
+                                : () => setState(
+                                    () => _selectedTemplate = template,
+                                  ),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              width: 132,
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
                                 color: isSelected
-                                    ? AppColors.primary
-                                    : Colors.white.withValues(alpha: 0.06),
-                                width: isSelected ? 1.5 : 1,
+                                    ? AppColors.primary.withValues(alpha: 0.14)
+                                    : Colors.white.withValues(alpha: 0.04),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? AppColors.primary
+                                      : Colors.white.withValues(alpha: 0.06),
+                                  width: isSelected ? 1.5 : 1,
+                                ),
                               ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: ColoredBox(
-                                      color: Colors.black,
-                                      child: FittedBox(
-                                        fit: BoxFit.cover,
-                                        alignment: Alignment.topCenter,
-                                        child: SizedBox(
-                                          width: AnswerShareCard.storyWidth,
-                                          height: AnswerShareCard.storyHeight,
-                                          child: IgnorePointer(
-                                            child: AnswerShareCard(
-                                              questionText: widget.questionText,
-                                              answerText: widget.answerText,
-                                              username: widget.username,
-                                              isAnonymous: widget.isAnonymous,
-                                              template: template,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: ColoredBox(
+                                        color: Colors.black,
+                                        child: FittedBox(
+                                          fit: BoxFit.cover,
+                                          alignment: Alignment.topCenter,
+                                          child: SizedBox(
+                                            width: AnswerShareCard.width,
+                                            height: AnswerShareCard.height,
+                                            child: IgnorePointer(
+                                              child: AnswerShareCard(
+                                                questionText:
+                                                    widget.questionText,
+                                                answerText: widget.answerText,
+                                                username: widget.username,
+                                                isAnonymous: widget.isAnonymous,
+                                                template: template,
+                                              ),
                                             ),
                                           ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  template.title,
-                                  style: TextStyle(
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.white70,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 12,
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    template.title,
+                                    style: TextStyle(
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Colors.white70,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 12,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Card preview (this is what gets captured)
-            Center(
-              child: Screenshot(
-                controller: _screenshotController,
-                child: AnswerShareCard(
-                  questionText: widget.questionText,
-                  answerText: widget.answerText,
-                  username: widget.username,
-                  isAnonymous: widget.isAnonymous,
-                  template: _selectedTemplate,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Share button
-            ElevatedButton.icon(
-              onPressed: _isSharing ? null : _share,
-              icon: _isSharing
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          );
+                        },
                       ),
-                    )
-                  : const Icon(Icons.ios_share_rounded, size: 20),
-              label: Text(
-                _isSharing ? 'Preparing…' : 'Share',
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
+                    ),
+                  ],
                 ),
               ),
-              style: ElevatedButton.styleFrom(
-                // Instagram gradient start color
-                backgroundColor: const Color(0xFFE1306C),
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 52),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
+              const SizedBox(height: 20),
 
-            // Skip button
-            TextButton(
-              onPressed: _isSharing ? null : () => Navigator.of(context).pop(),
-              style: TextButton.styleFrom(
-                minimumSize: const Size(double.infinity, 44),
+              // Card preview (this is what gets captured)
+              Center(
+                child: Screenshot(
+                  controller: _screenshotController,
+                  child: AnswerShareCard(
+                    questionText: widget.questionText,
+                    answerText: widget.answerText,
+                    username: widget.username,
+                    isAnonymous: widget.isAnonymous,
+                    template: _selectedTemplate,
+                  ),
+                ),
               ),
-              child: const Text(
-                'Skip',
-                style: TextStyle(color: Colors.white54, fontSize: 15),
+              const SizedBox(height: 24),
+
+              // Share button
+              ElevatedButton.icon(
+                onPressed: _isSharing ? null : _share,
+                icon: _isSharing
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      )
+                    : const Icon(Icons.ios_share_rounded, size: 20),
+                label: Text(
+                  _isSharing ? 'Preparing…' : 'Share',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  // Instagram gradient start color
+                  backgroundColor: const Color(0xFFE1306C),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 52),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(height: 10),
+
+              // Skip button
+              TextButton(
+                onPressed: _isSharing
+                    ? null
+                    : () => Navigator.of(context).pop(),
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 44),
+                ),
+                child: const Text(
+                  'Skip',
+                  style: TextStyle(color: Colors.white54, fontSize: 15),
+                ),
+              ),
             ],
           ),
         ),

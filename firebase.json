@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"auvnet-flutter","appId":"1:486602688494:android:fc685864c5886ea229b0ff","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"auvnet-flutter","configurations":{"android":"1:486602688494:android:fc685864c5886ea229b0ff","ios":"1:486602688494:ios:f48f1784674764e529b0ff"}}}}}}

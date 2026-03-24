@@ -1,0 +1,184 @@
+name: Release (Android & iOS)
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release tag to create (example: v1.0.1)'
+        required: true
+        default: 'v1.0.1'
+
+jobs:
+  build-android:
+    name: Build Android APK & AAB
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build APK (release)
+        run: flutter build apk --release
+
+      - name: Build APK (split per ABI)
+        run: flutter build apk --release --split-per-abi
+
+      - name: Build App Bundle (AAB)
+        run: flutter build appbundle --release
+
+      - name: Upload Android artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release
+          path: build/app/outputs/
+          retention-days: 7
+
+  build-ios:
+    name: Build iOS Simulator
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Setup iOS
+        run: |
+          cd ios
+          # Ensure minimum iOS deployment target is 12.0
+          sed -i "s/platform :ios, '.*/platform :ios, '12.0'/" Podfile || echo "platform :ios, '12.0'" >> Podfile
+          pod repo update
+          pod install --repo-update
+          cd ..
+
+      - name: Build iOS Simulator
+        run: flutter build ios --simulator --release
+
+      - name: Upload iOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-simulator-build
+          path: build/ios/Release-iphonesimulator/
+          retention-days: 7
+
+  create-release:
+    name: Create GitHub Release
+    needs: [build-android, build-ios]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Android artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: android-release
+          path: artifacts/android
+
+      - name: Download iOS simulator artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-simulator-build
+          path: artifacts/ios-simulator
+
+      - name: Resolve release tag and version
+        id: release_meta
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.release_tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.release_meta.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: ViBi ${{ steps.release_meta.outputs.version }}
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/android/flutter-apk/app-release.apk
+            artifacts/android/flutter-apk/app-armeabi-v7a-release.apk
+            artifacts/android/flutter-apk/app-arm64-v8a-release.apk
+            artifacts/android/flutter-apk/app-x86_64-release.apk
+            artifacts/android/bundle/release/app-release.aab
+          body: |
+            # ViBi Release ${{ steps.release_meta.outputs.version }}
+
+            ## 📱 Downloads
+
+            ### Android
+            - **app-release.apk** - Universal APK (all architectures included)
+            - **app-armeabi-v7a-release.apk** - 32-bit ARM (older devices)
+            - **app-arm64-v8a-release.apk** - 64-bit ARM (modern devices)
+            - **app-x86_64-release.apk** - Intel x86 (emulators)
+            - **app-release.aab** - Google Play App Bundle
+
+            ### iOS
+            - **iOS Simulator Build** - Available in artifacts for testing on simulator
+            - For production, submit IPA to App Store Connect
+
+            ## 📝 Build Information
+            - **Release Date**: ${{ github.event.head_commit.timestamp }}
+            - **Commit**: ${{ github.sha }}
+            - **Branch**: main
+
+            ## 🚀 Installation Guide
+
+            ### Android
+            **Direct Installation (APK)**:
+            ```bash
+            adb install artifacts/android/flutter-apk/app-arm64-v8a-release.apk
+            ```
+
+            **Google Play Store**:
+            1. Upload `app-release.aab` to Google Play Console
+            2. Fill in store listing details
+            3. Submit for review
+
+            ### iOS
+            **Run on Simulator**:
+            ```bash
+            flutter run -d <simulator-device-id>
+            ```
+
+            **For Production (App Store)**:
+            For App Store submission, you'll need to:
+            1. Generate an iOS Distribution certificate
+            2. Create a provisioning profile
+            3. Build with: `flutter build ipa --release`
+            4. Upload to App Store Connect
+
+            ## ✅ Changes in This Release
+            See commit history for detailed changes.

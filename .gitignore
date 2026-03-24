@@ -1,0 +1,86 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+
+#space kit
+.specify
+
+# Allow GitHub workflows
+!.github/
+!.github/workflows/
+!.github/RELEASE_WORKFLOW_SETUP.md
+.vscode
+.env
+.env.*
+!.env.example
+
+# Sensitive credentials
+secret/
+assets/*firebase-admin*.json
+assets/*adminsdk*.json
+assets/auvnet-flutter-*.json
+
+# Firebase and platform secrets
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+android/key.properties
+android/**/*.keystore
+android/**/*.jks
+
+# Internal and migration data
+supabase
+DATABASE_QUICK_REFERENCE.md
+DATABASE_SETUP.md
+DATABASE_SETUP_SUMMARY.md
+dart_models_examples.dart
+dart_models_social_stories.dart
+supabase_migration.sql
+supabase_storage_setup.md
+supabase_test_data.sql
+supabase/supabase_test_data.sql
+supabase/supabase_test_data_real.sql
+.v
+vibi_share_web

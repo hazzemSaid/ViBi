@@ -6,9 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
+import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
 import 'package:vibi/features/profile/domain/entities/user_profile.dart';
+import 'package:vibi/features/profile/domain/repositories/profile_repository.dart';
 import 'package:vibi/features/profile/presentation/providers/profile_providers.dart';
 import 'package:vibi/features/profile/presentation/widgets/edit_profile_basic_info_section.dart';
 import 'package:vibi/features/profile/presentation/widgets/edit_profile_public_web_section.dart';
@@ -27,6 +29,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _usernameController;
   late TextEditingController _bioController;
   late TextEditingController _ctaController;
+  late final ProfileUpdateCubit _profileUpdateCubit;
   File? _imageFile;
   String? _currentImageUrl;
   bool _isPrivate = false;
@@ -57,6 +60,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
+    _profileUpdateCubit = getIt<ProfileUpdateCubit>();
     _nameController = TextEditingController();
     _usernameController = TextEditingController();
     _bioController = TextEditingController();
@@ -66,7 +70,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (!mounted) return;
       final user = context.read<AuthCubit>().currentUser;
       if (user != null) {
-        profileRepository.fetchProfile(user.id).then((profile) {
+        getIt<ProfileRepository>().fetchProfile(user.id).then((profile) {
           if (!mounted || profile == null) return;
 
           setState(() {
@@ -92,6 +96,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _usernameController.dispose();
     _bioController.dispose();
     _ctaController.dispose();
+    _profileUpdateCubit.close();
     super.dispose();
   }
 
@@ -125,8 +130,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final user = context.read<AuthCubit>().currentUser;
     if (user == null) return;
 
-    final repository = profileRepository;
-    final notifier = context.read<ProfileUpdateCubit>();
+    final repository = getIt<ProfileRepository>();
 
     String? imageUrl = _currentImageUrl;
 
@@ -150,7 +154,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             : _ctaController.text.trim(),
       );
 
-      await notifier.updateProfile(profile);
+      await _profileUpdateCubit.updateProfile(profile);
       if (mounted) context.pop();
     } catch (e) {
       if (mounted) {
@@ -163,8 +167,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => ProfileUpdateCubit(profileRepository),
+    return BlocProvider<ProfileUpdateCubit>.value(
+      value: _profileUpdateCubit,
       child: Builder(
         builder: (context) {
           final isLoading = context.watch<ProfileUpdateCubit>().state.isLoading;
@@ -187,7 +191,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   onPressed: () {
                     final user = context.read<AuthCubit>().currentUser;
                     if (user != null) {
-                      profileRepository.fetchProfile(user.id).then((profile) {
+                      getIt<ProfileRepository>().fetchProfile(user.id).then((
+                        profile,
+                      ) {
                         if (profile != null && mounted) {
                           setState(() {
                             _nameController.text = profile.name ?? '';

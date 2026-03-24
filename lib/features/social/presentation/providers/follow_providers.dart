@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/social/domain/repositories/follow_repository.dart';
 
@@ -50,5 +49,3 @@ class FollowCubit extends Cubit<ViewState<void>> {
     }
   }
 }
-
-FollowRepository get followRepository => getIt<FollowRepository>();

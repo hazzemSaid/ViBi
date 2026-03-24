@@ -2,15 +2,13 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/inbox/data/datasources/graphql_inbox_datasource.dart';
 import 'package:vibi/features/inbox/data/repositories/inbox_repository_impl.dart';
 import 'package:vibi/features/inbox/domain/entities/inbox_question.dart';
 import 'package:vibi/features/inbox/domain/repositories/inbox_repository.dart';
 
-InboxRepository buildInboxRepository() {
-  final dataSource = getIt<GraphQLInboxDataSource>();
+InboxRepository buildInboxRepository(GraphQLInboxDataSource dataSource) {
   final currentUserId = Supabase.instance.client.auth.currentUser?.id ?? '';
   return InboxRepositoryImpl(dataSource, currentUserId);
 }
@@ -22,16 +20,19 @@ InboxRepository buildInboxRepository() {
 // - Questions are deleted
 // The channel subscription is scoped to current user and auto-disposes when provider is no longer used
 class PendingQuestionsCubit extends Cubit<ViewState<List<InboxQuestion>>> {
-  PendingQuestionsCubit() : super(const ViewState(status: ViewStatus.loading)) {
+  PendingQuestionsCubit(this._dataSource)
+    : super(const ViewState(status: ViewStatus.loading)) {
     _setupRealtimeSubscription();
     _loadInitialData();
   }
+
+  final GraphQLInboxDataSource _dataSource;
 
   RealtimeChannel? _channel;
 
   Future<void> _loadInitialData() async {
     try {
-      final repository = buildInboxRepository();
+      final repository = buildInboxRepository(_dataSource);
       final questions = await repository.getPendingQuestions();
       emit(ViewState(status: ViewStatus.success, data: questions));
     } catch (e) {
@@ -97,7 +98,7 @@ class PendingQuestionsCubit extends Cubit<ViewState<List<InboxQuestion>>> {
 
   Future<void> _refreshQuestions() async {
     try {
-      final repository = buildInboxRepository();
+      final repository = buildInboxRepository(_dataSource);
       final questions = await repository.getPendingQuestions();
       emit(ViewState(status: ViewStatus.success, data: questions));
     } catch (e) {
@@ -119,7 +120,9 @@ class PendingQuestionsCubit extends Cubit<ViewState<List<InboxQuestion>>> {
 }
 
 class AnswerQuestionCubit extends Cubit<ViewState<void>> {
-  AnswerQuestionCubit() : super(const ViewState());
+  AnswerQuestionCubit(this._dataSource) : super(const ViewState());
+
+  final GraphQLInboxDataSource _dataSource;
 
   Future<void> answerQuestion({
     required String questionId,
@@ -127,7 +130,7 @@ class AnswerQuestionCubit extends Cubit<ViewState<void>> {
   }) async {
     emit(const ViewState(status: ViewStatus.loading));
     try {
-      final repository = buildInboxRepository();
+      final repository = buildInboxRepository(_dataSource);
       await repository.answerQuestion(
         questionId: questionId,
         answerText: answerText,
@@ -140,12 +143,14 @@ class AnswerQuestionCubit extends Cubit<ViewState<void>> {
 }
 
 class DeleteQuestionCubit extends Cubit<ViewState<void>> {
-  DeleteQuestionCubit() : super(const ViewState());
+  DeleteQuestionCubit(this._dataSource) : super(const ViewState());
+
+  final GraphQLInboxDataSource _dataSource;
 
   Future<void> deleteQuestion(String questionId) async {
     emit(const ViewState(status: ViewStatus.loading));
     try {
-      final repository = buildInboxRepository();
+      final repository = buildInboxRepository(_dataSource);
       await repository.deleteQuestion(questionId);
       emit(const ViewState(status: ViewStatus.success));
     } catch (e) {

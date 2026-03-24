@@ -2,10 +2,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:go_router/go_router.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:go_router/go_router.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
 import 'package:vibi/features/auth/presentation/controllers/auth_controller.dart';
@@ -70,9 +70,9 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _authCubit = AuthCubit(authRepository);
-    _authController = AuthController();
-    _pendingQuestionsCubit = PendingQuestionsCubit();
+    _authCubit = getIt<AuthCubit>();
+    _authController = getIt<AuthController>();
+    _pendingQuestionsCubit = getIt<PendingQuestionsCubit>();
     _routerHolder = AppRouterHolder(createAppRouter(_authCubit));
   }
 
@@ -91,7 +91,9 @@ class _MyAppState extends State<MyApp> {
       providers: [
         BlocProvider<AuthCubit>.value(value: _authCubit),
         BlocProvider<AuthController>.value(value: _authController),
-        BlocProvider<PendingQuestionsCubit>.value(value: _pendingQuestionsCubit),
+        BlocProvider<PendingQuestionsCubit>.value(
+          value: _pendingQuestionsCubit,
+        ),
       ],
       child: MaterialApp.router(
         title: 'ViBi',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
+import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/inbox/domain/entities/inbox_question.dart';
@@ -39,7 +40,7 @@ class _InboxScreenState extends State<InboxScreen> {
       builder: (context) => MultiBlocProvider(
         providers: [
           BlocProvider.value(value: context.read<PendingQuestionsCubit>()),
-          BlocProvider(create: (_) => AnswerQuestionCubit()),
+          BlocProvider(create: (_) => getIt<AnswerQuestionCubit>()),
         ],
         child: FullAnswerModal(
           questionId: question.id,
@@ -106,8 +107,8 @@ class _InboxScreenState extends State<InboxScreen> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => PendingQuestionsCubit()),
-        BlocProvider(create: (_) => DeleteQuestionCubit()),
+        BlocProvider(create: (_) => getIt<PendingQuestionsCubit>()),
+        BlocProvider(create: (_) => getIt<DeleteQuestionCubit>()),
       ],
       child: Scaffold(
         backgroundColor: AppColors.background,

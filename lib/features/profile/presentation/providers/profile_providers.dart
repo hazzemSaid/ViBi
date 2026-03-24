@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/profile/data/sources/graphql_profile_datasource.dart';
 import 'package:vibi/features/profile/domain/entities/answered_question.dart';
@@ -93,7 +92,12 @@ class FollowersCubit extends Cubit<ViewState<List<FollowerUser>>> {
   Future<void> load(String userId) async {
     emit(const ViewState(status: ViewStatus.loading));
     try {
-      emit(ViewState(status: ViewStatus.success, data: await _dataSource.getFollowers(userId)));
+      emit(
+        ViewState(
+          status: ViewStatus.success,
+          data: await _dataSource.getFollowers(userId),
+        ),
+      );
     } catch (e) {
       emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
     }
@@ -107,12 +111,14 @@ class FollowingCubit extends Cubit<ViewState<List<FollowingUser>>> {
   Future<void> load(String userId) async {
     emit(const ViewState(status: ViewStatus.loading));
     try {
-      emit(ViewState(status: ViewStatus.success, data: await _dataSource.getFollowing(userId)));
+      emit(
+        ViewState(
+          status: ViewStatus.success,
+          data: await _dataSource.getFollowing(userId),
+        ),
+      );
     } catch (e) {
       emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
     }
   }
 }
-
-ProfileRepository get profileRepository => getIt<ProfileRepository>();
-PublicProfileRepository get publicProfileRepository => getIt<PublicProfileRepository>();

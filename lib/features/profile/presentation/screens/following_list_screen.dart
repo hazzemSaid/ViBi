@@ -8,7 +8,7 @@ import 'package:vibi/features/profile/domain/entities/following_user.dart';
 import 'package:vibi/features/profile/presentation/providers/profile_providers.dart';
 import 'package:vibi/features/social/presentation/providers/follow_providers.dart';
 
-class FollowingListScreen extends StatelessWidget {
+class FollowingListScreen extends StatefulWidget {
   final String userId;
   final bool isCurrentUser;
 
@@ -19,121 +19,149 @@ class FollowingListScreen extends StatelessWidget {
   });
 
   @override
+  State<FollowingListScreen> createState() => _FollowingListScreenState();
+}
+
+class _FollowingListScreenState extends State<FollowingListScreen> {
+  late final FollowingCubit _followingCubit;
+  late final FollowCubit _followCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _followingCubit = getIt<FollowingCubit>()..load(widget.userId);
+    _followCubit = getIt<FollowCubit>();
+  }
+
+  @override
+  void dispose() {
+    _followingCubit.close();
+    _followCubit.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => FollowingCubit(getIt())..load(userId)),
-        BlocProvider(create: (_) => FollowCubit(followRepository)),
+        BlocProvider<FollowingCubit>.value(value: _followingCubit),
+        BlocProvider<FollowCubit>.value(value: _followCubit),
       ],
       child: Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
         backgroundColor: AppColors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => context.pop(),
-        ),
-        title: const Text(
-          'Following',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+        appBar: AppBar(
+          backgroundColor: AppColors.background,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+            onPressed: () => context.pop(),
+          ),
+          title: const Text(
+            'Following',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-      ),
-      body: BlocBuilder<FollowingCubit, ViewState<List<FollowingUser>>>(
-        builder: (context, followingAsync) {
-          if (followingAsync.status == ViewStatus.success) {
-            final following = followingAsync.data ?? [];
-          if (following.isEmpty) {
-            return const Center(
-              child: Text(
-                'Not following anyone yet',
-                style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
-              ),
-            );
-          }
-
-          return ListView.builder(
-            itemCount: following.length,
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            itemBuilder: (context, index) {
-              final followingUser = following[index];
-              return ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                leading: CircleAvatar(
-                  radius: 28,
-                  backgroundImage: followingUser.avatarUrl != null
-                      ? NetworkImage(followingUser.avatarUrl!)
-                      : null,
-                  child: followingUser.avatarUrl == null
-                      ? Text(
-                          followingUser.username
-                                  ?.substring(0, 1)
-                                  .toUpperCase() ??
-                              'U',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      : null,
-                ),
-                title: Text(
-                  followingUser.fullName ?? followingUser.username ?? 'Unknown',
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+        body: BlocBuilder<FollowingCubit, ViewState<List<FollowingUser>>>(
+          builder: (context, followingAsync) {
+            if (followingAsync.status == ViewStatus.success) {
+              final following = followingAsync.data ?? [];
+              if (following.isEmpty) {
+                return const Center(
+                  child: Text(
+                    'Not following anyone yet',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 16,
+                    ),
                   ),
-                ),
-                subtitle: followingUser.bio != null
-                    ? Text(
-                        followingUser.bio!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
-                        ),
-                      )
-                    : null,
-                trailing: isCurrentUser
-                    ? _UnfollowButton(
-                        followingUserId: followingUser.id,
-                        currentUserId: userId,
-                        onUnfollowed: () {
-                          context.read<FollowingCubit>().load(userId);
-                        },
-                      )
-                    : null,
-                onTap: () {
-                  context.pushNamed(
-                    'public-profile',
-                    pathParameters: {'userId': followingUser.id},
+                );
+              }
+
+              return ListView.builder(
+                itemCount: following.length,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemBuilder: (context, index) {
+                  final followingUser = following[index];
+                  return ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    leading: CircleAvatar(
+                      radius: 28,
+                      backgroundImage: followingUser.avatarUrl != null
+                          ? NetworkImage(followingUser.avatarUrl!)
+                          : null,
+                      child: followingUser.avatarUrl == null
+                          ? Text(
+                              followingUser.username
+                                      ?.substring(0, 1)
+                                      .toUpperCase() ??
+                                  'U',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                          : null,
+                    ),
+                    title: Text(
+                      followingUser.fullName ??
+                          followingUser.username ??
+                          'Unknown',
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    subtitle: followingUser.bio != null
+                        ? Text(
+                            followingUser.bio!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 14,
+                            ),
+                          )
+                        : null,
+                    trailing: widget.isCurrentUser
+                        ? _UnfollowButton(
+                            followingUserId: followingUser.id,
+                            currentUserId: widget.userId,
+                            onUnfollowed: () {
+                              _followingCubit.load(widget.userId);
+                            },
+                          )
+                        : null,
+                    onTap: () {
+                      context.pushNamed(
+                        'public-profile',
+                        pathParameters: {'userId': followingUser.id},
+                      );
+                    },
                   );
                 },
               );
-            },
-          );
-          }
-          if (followingAsync.status == ViewStatus.loading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          return Center(
-          child: Text(
-            'Error: ${followingAsync.errorMessage}',
-            style: const TextStyle(color: AppColors.textSecondary),
-          ),
-        );
-        },
+            }
+            if (followingAsync.status == ViewStatus.loading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            return Center(
+              child: Text(
+                'Error: ${followingAsync.errorMessage}',
+                style: const TextStyle(color: AppColors.textSecondary),
+              ),
+            );
+          },
+        ),
       ),
-    ));
+    );
   }
 }
 
@@ -181,8 +209,8 @@ class _UnfollowButton extends StatelessWidget {
 
         if (confirmed == true && context.mounted) {
           try {
-            await context.read<FollowCubit>().unfollowUser(followingUserId);
-
+            final followCubit = context.read<FollowCubit>();
+            await followCubit.unfollowUser(followingUserId);
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(

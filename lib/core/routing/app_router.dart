@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/widgets/main_layout.dart';
+import 'package:vibi/features/auth/domain/repositories/auth_repository.dart';
 import 'package:vibi/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
 import 'package:vibi/features/auth/presentation/screens/login_screen.dart';
@@ -36,6 +38,7 @@ class GoRouterRefreshStream extends ChangeNotifier {
 }
 
 GoRouter createAppRouter(AuthCubit authCubit) {
+  final authRepository = getIt<AuthRepository>();
   return GoRouter(
     initialLocation: '/splash',
     refreshListenable: GoRouterRefreshStream(authRepository.authStateChanges),
@@ -175,31 +178,32 @@ GoRouter createAppRouter(AuthCubit authCubit) {
 
       final user = authCubit.currentUser;
       if (user != null) {
-            // User is authenticated
-            if (!user.emailVerified) {
-              // Need verification
-              if (state.matchedLocation != '/verify-email') {
-                return '/verify-email';
-              }
-              return null;
-            } else {
-              // User is verified
-              if (loggingIn ||
-                  state.matchedLocation == '/splash' ||
-                  state.matchedLocation == '/verify-email') {
-                return '/home';
-              }
-            }
+        // User is authenticated
+        if (!user.emailVerified) {
+          // Need verification
+          if (state.matchedLocation != '/verify-email') {
+            return '/verify-email';
+          }
+          return null;
+        } else {
+          // User is verified
+          if (loggingIn ||
+              state.matchedLocation == '/splash' ||
+              state.matchedLocation == '/verify-email') {
+            return '/home';
+          }
+        }
       } else {
-            // If logged out and not on auth screens, go welcome (after splash)
-            if (!loggingIn &&
-                state.matchedLocation != '/splash' &&
-                state.matchedLocation != '/onboarding' &&
-                state.matchedLocation != '/verify-email') {
-              return '/welcome';
-            }
+        // If logged out and not on auth screens, go welcome (after splash)
+        if (!loggingIn &&
+            state.matchedLocation != '/splash' &&
+            state.matchedLocation != '/onboarding' &&
+            state.matchedLocation != '/verify-email') {
+          return '/welcome';
+        }
       }
-      if (authCubit.state.isLoading || authControllerState.isLoading) return null;
+      if (authCubit.state.isLoading || authControllerState.isLoading)
+        return null;
       return null;
     },
   );

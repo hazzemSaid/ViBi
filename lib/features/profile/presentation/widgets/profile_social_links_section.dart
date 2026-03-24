@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
+import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
@@ -9,16 +10,35 @@ import 'package:vibi/features/profile/presentation/providers/social_links_provid
 import 'package:vibi/features/profile/presentation/widgets/social_link_dialog.dart';
 import 'package:vibi/features/profile/presentation/widgets/social_link_platform.dart';
 
-class ProfileSocialLinksSection extends StatelessWidget {
+class ProfileSocialLinksSection extends StatefulWidget {
   final String userId;
 
   const ProfileSocialLinksSection({super.key, required this.userId});
 
   @override
+  State<ProfileSocialLinksSection> createState() =>
+      _ProfileSocialLinksSectionState();
+}
+
+class _ProfileSocialLinksSectionState extends State<ProfileSocialLinksSection> {
+  late final SocialLinksCubit _socialLinksCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _socialLinksCubit = getIt<SocialLinksCubit>(param1: widget.userId);
+  }
+
+  @override
+  void dispose() {
+    _socialLinksCubit.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) =>
-          SocialLinksCubit(userId: userId, dataSource: socialLinksDataSource),
+    return BlocProvider<SocialLinksCubit>.value(
+      value: _socialLinksCubit,
       child: BlocBuilder<SocialLinksCubit, ViewState<List<SocialLink>>>(
         builder: (context, socialLinksAsync) {
           final links = socialLinksAsync.data ?? const <SocialLink>[];
@@ -40,9 +60,9 @@ class ProfileSocialLinksSection extends StatelessWidget {
                   IconButton(
                     onPressed: () => SocialLinkDialog.show(
                       context,
-                      userId,
+                      widget.userId,
                       nextOrder: _getNextOrder(links),
-                      onSaved: () => context.read<SocialLinksCubit>().refresh(),
+                      onSaved: () => _socialLinksCubit.refresh(),
                     ),
                     icon: const Icon(
                       Icons.add_circle_outline,
@@ -96,11 +116,10 @@ class ProfileSocialLinksSection extends StatelessWidget {
                           link: link,
                           onTap: () => SocialLinkDialog.show(
                             context,
-                            userId,
+                            widget.userId,
                             existingLink: link,
                             nextOrder: link.displayOrder,
-                            onSaved: () =>
-                                context.read<SocialLinksCubit>().refresh(),
+                            onSaved: () => _socialLinksCubit.refresh(),
                           ),
                           onLongPress: () async {
                             try {
@@ -123,9 +142,7 @@ class ProfileSocialLinksSection extends StatelessWidget {
                             }
                           },
                           onDelete: () {
-                            context.read<SocialLinksCubit>().deleteLink(
-                              link.id,
-                            );
+                            _socialLinksCubit.deleteLink(link.id);
                           },
                         ),
                       )

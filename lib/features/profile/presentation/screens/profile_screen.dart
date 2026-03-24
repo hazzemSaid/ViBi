@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
+import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
@@ -15,8 +16,27 @@ import 'package:vibi/features/profile/presentation/widgets/profile_latest_answer
 import 'package:vibi/features/profile/presentation/widgets/profile_social_links_section.dart';
 import 'package:vibi/features/profile/presentation/widgets/profile_stats_card.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  late final UserProfileCubit _userProfileCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _userProfileCubit = getIt<UserProfileCubit>();
+  }
+
+  @override
+  void dispose() {
+    _userProfileCubit.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +49,13 @@ class ProfileScreen extends StatelessWidget {
       return const Scaffold(body: Center(child: Text('Not signed in')));
     }
 
-    return BlocProvider(
-      create: (_) => UserProfileCubit(profileRepository)..load(user.id),
+    // Load profile when user is available
+    if (_userProfileCubit.state.status != ViewStatus.success) {
+      _userProfileCubit.load(user.id);
+    }
+
+    return BlocProvider<UserProfileCubit>.value(
+      value: _userProfileCubit,
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: BlocBuilder<UserProfileCubit, ViewState<UserProfile?>>(

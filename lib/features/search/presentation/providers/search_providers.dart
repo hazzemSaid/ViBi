@@ -1,5 +1,4 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/search/domain/entities/content_search_result.dart';
 import 'package:vibi/features/search/domain/entities/user_search_result.dart';
@@ -42,5 +41,3 @@ class ContentSearchCubit extends Cubit<ViewState<List<ContentSearchResult>>> {
     }
   }
 }
-
-SearchRepository get searchRepository => getIt<SearchRepository>();

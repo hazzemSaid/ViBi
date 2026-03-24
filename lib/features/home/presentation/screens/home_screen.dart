@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/home/domain/entities/feed_item.dart';
 import 'package:vibi/features/home/presentation/providers/feed_providers.dart';
@@ -19,11 +20,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late ScrollController _scrollController;
+  late final GlobalFeedCubit _globalFeedCubit;
   bool _isBottomBarVisible = true;
 
   @override
   void initState() {
     super.initState();
+    _globalFeedCubit = getIt<GlobalFeedCubit>();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
   }
@@ -38,96 +41,96 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
-      context.read<GlobalFeedCubit>().fetchMore();
+      _globalFeedCubit.fetchMore();
     }
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _globalFeedCubit.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => GlobalFeedCubit(feedRepository),
+    return BlocProvider<GlobalFeedCubit>.value(
+      value: _globalFeedCubit,
       child: Scaffold(
         backgroundColor: const Color(0xFF0F1419),
         body: RefreshIndicator(
-          onRefresh: () => context.read<GlobalFeedCubit>().refresh(),
+          onRefresh: _globalFeedCubit.refresh,
           color: const Color(0xFF5A4FCF),
           backgroundColor: const Color(0xFF1C212A),
           child: CustomScrollView(
             controller: _scrollController,
             slivers: [
-            const HomeAppBar(),
-            SliverList(
-              delegate: SliverChildListDelegate([
-                const SizedBox(height: 8),
-                const StoriesSection(),
-                Divider(color: Colors.white.withOpacity(0.05), height: 1),
-              ]),
-            ),
-            BlocBuilder<GlobalFeedCubit, ViewState<List<FeedItem>>>(
-              builder: (context, feedAsync) {
-                if (feedAsync.status == ViewStatus.success) {
-                  final items = feedAsync.data ?? [];
-                  if (items.isEmpty) return const FeedEmptyState();
-                final hasMore = context.read<GlobalFeedCubit>().hasMore;
-                
-                return SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (index == items.length) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24.0),
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: Color(0xFF5A4FCF),
+              const HomeAppBar(),
+              SliverList(
+                delegate: SliverChildListDelegate([
+                  const SizedBox(height: 8),
+                  const StoriesSection(),
+                  Divider(color: Colors.white.withOpacity(0.05), height: 1),
+                ]),
+              ),
+              BlocBuilder<GlobalFeedCubit, ViewState<List<FeedItem>>>(
+                builder: (context, feedAsync) {
+                  if (feedAsync.status == ViewStatus.success) {
+                    final items = feedAsync.data ?? [];
+                    if (items.isEmpty) return const FeedEmptyState();
+                    final hasMore = _globalFeedCubit.hasMore;
+
+                    return SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        if (index == items.length) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 24.0),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF5A4FCF),
+                              ),
                             ),
-                          ),
-                        );
-                      }
-                      
-                      return Column(
-                        children: [
-                          PostItem(item: items[index]),
-                          Divider(
-                            color: Colors.white.withOpacity(0.05),
-                            height: 1,
-                          ),
-                          if (index == 0) ...[
-                            const SuggestedSection(),
+                          );
+                        }
+
+                        return Column(
+                          children: [
+                            PostItem(item: items[index]),
                             Divider(
                               color: Colors.white.withOpacity(0.05),
                               height: 1,
                             ),
+                            if (index == 0) ...[
+                              const SuggestedSection(),
+                              Divider(
+                                color: Colors.white.withOpacity(0.05),
+                                height: 1,
+                              ),
+                            ],
                           ],
-                        ],
-                      );
-                    },
-                    childCount: items.length + (hasMore ? 1 : 0),
-                  ),
-                );
-                }
-                if (feedAsync.status == ViewStatus.loading) {
-                  return const SliverFillRemaining(
+                        );
+                      }, childCount: items.length + (hasMore ? 1 : 0)),
+                    );
+                  }
+                  if (feedAsync.status == ViewStatus.loading) {
+                    return const SliverFillRemaining(
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFF5A4FCF),
+                        ),
+                      ),
+                    );
+                  }
+                  return SliverFillRemaining(
                     child: Center(
-                      child: CircularProgressIndicator(color: Color(0xFF5A4FCF)),
+                      child: Text(
+                        'Error: ${feedAsync.errorMessage}',
+                        style: const TextStyle(color: Colors.redAccent),
+                      ),
                     ),
                   );
-                }
-                return SliverFillRemaining(
-                  child: Center(
-                    child: Text(
-                      'Error: ${feedAsync.errorMessage}',
-                      style: const TextStyle(color: Colors.redAccent),
-                    ),
-                  ),
-                );
-              },
-            ),
+                },
+              ),
             ],
           ),
         ),

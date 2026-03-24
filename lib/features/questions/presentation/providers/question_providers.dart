@@ -1,6 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/questions/domain/repositories/question_repository.dart';
 
@@ -28,5 +27,3 @@ class SendQuestionCubit extends Cubit<ViewState<void>> {
     }
   }
 }
-
-QuestionRepository get questionRepository => getIt<QuestionRepository>();

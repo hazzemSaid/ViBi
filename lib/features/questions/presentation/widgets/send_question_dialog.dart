@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
+import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/questions/presentation/providers/question_providers.dart';
@@ -59,7 +60,7 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => SendQuestionCubit(questionRepository),
+      create: (_) => getIt<SendQuestionCubit>(),
       child: BlocBuilder<SendQuestionCubit, ViewState<void>>(
         builder: (context, sendState) {
           final isLoading = sendState.isLoading;

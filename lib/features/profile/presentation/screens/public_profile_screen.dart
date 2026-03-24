@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
+import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/answered_question.dart';
@@ -12,8 +13,9 @@ import 'package:vibi/features/profile/presentation/widgets/public_profile_answer
 import 'package:vibi/features/profile/presentation/widgets/public_profile_header_widget.dart';
 import 'package:vibi/features/profile/presentation/widgets/public_profile_private_content.dart';
 import 'package:vibi/features/profile/presentation/widgets/public_profile_social_links_section.dart';
+import 'package:vibi/features/social/presentation/providers/follow_providers.dart';
 
-class PublicProfileScreen extends StatelessWidget {
+class PublicProfileScreen extends StatefulWidget {
   final String lookupValue;
   final bool isUsernameLookup;
 
@@ -26,26 +28,48 @@ class PublicProfileScreen extends StatelessWidget {
       isUsernameLookup = true;
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) {
-        final cubit = PublicProfileCubit(publicProfileRepository);
-        _loadProfile(cubit);
-        return cubit;
-      },
-      child: _PublicProfileBody(
-        lookupValue: lookupValue,
-        isUsernameLookup: isUsernameLookup,
-      ),
-    );
+  State<PublicProfileScreen> createState() => _PublicProfileScreenState();
+}
+
+class _PublicProfileScreenState extends State<PublicProfileScreen> {
+  late final PublicProfileCubit _publicProfileCubit;
+  late final FollowCubit _followCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _publicProfileCubit = getIt<PublicProfileCubit>();
+    _followCubit = getIt<FollowCubit>();
+    _loadProfile();
   }
 
-  void _loadProfile(PublicProfileCubit cubit) {
-    if (isUsernameLookup) {
-      cubit.loadByUsername(lookupValue);
+  @override
+  void dispose() {
+    _publicProfileCubit.close();
+    _followCubit.close();
+    super.dispose();
+  }
+
+  void _loadProfile() {
+    if (widget.isUsernameLookup) {
+      _publicProfileCubit.loadByUsername(widget.lookupValue);
     } else {
-      cubit.loadById(lookupValue);
+      _publicProfileCubit.loadById(widget.lookupValue);
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<PublicProfileCubit>.value(value: _publicProfileCubit),
+        BlocProvider<FollowCubit>.value(value: _followCubit),
+      ],
+      child: _PublicProfileBody(
+        lookupValue: widget.lookupValue,
+        isUsernameLookup: widget.isUsernameLookup,
+      ),
+    );
   }
 }
 
@@ -159,8 +183,7 @@ class _PublicProfileBody extends StatelessWidget {
                         else
                           BlocProvider(
                             create: (_) =>
-                                UserAnswersCubit(publicProfileRepository)
-                                  ..load(profile.id),
+                                getIt<UserAnswersCubit>()..load(profile.id),
                             child:
                                 BlocBuilder<
                                   UserAnswersCubit,

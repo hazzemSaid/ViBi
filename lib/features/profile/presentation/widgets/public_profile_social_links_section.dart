@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
+import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
@@ -9,16 +10,36 @@ import 'package:vibi/features/profile/presentation/providers/social_links_provid
 import 'package:vibi/features/profile/presentation/widgets/social_link_platform.dart';
 
 /// Read-only social links section for public profiles
-class PublicProfileSocialLinksSection extends StatelessWidget {
+class PublicProfileSocialLinksSection extends StatefulWidget {
   final String userId;
 
   const PublicProfileSocialLinksSection({super.key, required this.userId});
 
   @override
+  State<PublicProfileSocialLinksSection> createState() =>
+      _PublicProfileSocialLinksSectionState();
+}
+
+class _PublicProfileSocialLinksSectionState
+    extends State<PublicProfileSocialLinksSection> {
+  late final SocialLinksCubit _socialLinksCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _socialLinksCubit = getIt<SocialLinksCubit>(param1: widget.userId);
+  }
+
+  @override
+  void dispose() {
+    _socialLinksCubit.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) =>
-          SocialLinksCubit(userId: userId, dataSource: socialLinksDataSource),
+    return BlocProvider<SocialLinksCubit>.value(
+      value: _socialLinksCubit,
       child: BlocBuilder<SocialLinksCubit, ViewState<List<SocialLink>>>(
         builder: (context, socialLinksAsync) {
           if (socialLinksAsync.status == ViewStatus.loading) {

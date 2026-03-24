@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/features/auth/data/datasources/supabase_auth_datasource.dart';
 import 'package:vibi/features/auth/domain/entities/app_user.dart';
 import 'package:vibi/features/auth/domain/repositories/auth_repository.dart';
 
@@ -35,6 +33,3 @@ class AuthCubit extends Cubit<AuthState> {
     return super.close();
   }
 }
-
-SupabaseAuthDataSource get supabaseAuthDataSource => getIt<SupabaseAuthDataSource>();
-AuthRepository get authRepository => getIt<AuthRepository>();

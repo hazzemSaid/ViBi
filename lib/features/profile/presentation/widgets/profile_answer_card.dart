@@ -9,8 +9,16 @@ import 'profile_answer_card/profile_question_card.dart';
 
 class ProfileAnswerCard extends StatelessWidget {
   final AnsweredQuestion answer;
+  final void Function(String answerId, int reactionsCount, int commentsCount)?
+  onCountsChanged;
+  final bool compactActions;
 
-  const ProfileAnswerCard({super.key, required this.answer});
+  const ProfileAnswerCard({
+    super.key,
+    required this.answer,
+    this.onCountsChanged,
+    this.compactActions = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +52,7 @@ class ProfileAnswerCard extends StatelessWidget {
           const SizedBox(height: 20),
           ProfileAnswerActionRow(
             answer: answer,
+            compact: compactActions,
             onShareTap: () => InstagramShareService.showShareSheet(
               context,
               questionText: answer.questionText,
@@ -51,6 +60,7 @@ class ProfileAnswerCard extends StatelessWidget {
               username: answer.answererUsername ?? 'me',
               isAnonymous: answer.isAnonymous,
             ),
+            onCountsChanged: onCountsChanged,
           ),
         ],
       ),

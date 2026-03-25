@@ -29,6 +29,39 @@ class FeedItem {
     required this.isAnonymous,
   });
 
+  FeedItem copyWith({
+    String? id,
+    String? userId,
+    String? username,
+    String? avatarUrl,
+    String? answerAuthorUsername,
+    String? answerAuthorAvatarUrl,
+    String? questionText,
+    String? answerText,
+    int? likesCount,
+    int? commentsCount,
+    int? sharesCount,
+    DateTime? createdAt,
+    bool? isAnonymous,
+  }) {
+    return FeedItem(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      username: username ?? this.username,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      answerAuthorUsername: answerAuthorUsername ?? this.answerAuthorUsername,
+      answerAuthorAvatarUrl:
+          answerAuthorAvatarUrl ?? this.answerAuthorAvatarUrl,
+      questionText: questionText ?? this.questionText,
+      answerText: answerText ?? this.answerText,
+      likesCount: likesCount ?? this.likesCount,
+      commentsCount: commentsCount ?? this.commentsCount,
+      sharesCount: sharesCount ?? this.sharesCount,
+      createdAt: createdAt ?? this.createdAt,
+      isAnonymous: isAnonymous ?? this.isAnonymous,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

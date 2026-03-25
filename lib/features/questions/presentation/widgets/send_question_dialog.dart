@@ -23,11 +23,19 @@ class SendQuestionDialog extends StatefulWidget {
 class _SendQuestionDialogState extends State<SendQuestionDialog> {
   final _formKey = GlobalKey<FormState>();
   final _questionController = TextEditingController();
+  late final SendQuestionCubit _sendQuestionCubit;
   bool _isAnonymous = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _sendQuestionCubit = getIt<SendQuestionCubit>();
+  }
 
   @override
   void dispose() {
     _questionController.dispose();
+    _sendQuestionCubit.close();
     super.dispose();
   }
 
@@ -35,16 +43,14 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
     if (!_formKey.currentState!.validate()) return;
 
     final questionText = _questionController.text.trim();
-    final cubit = context.read<SendQuestionCubit>();
-
-    await cubit.sendQuestion(
+    await _sendQuestionCubit.sendQuestion(
       recipientId: widget.recipientId,
       questionText: questionText,
       isAnonymous: _isAnonymous,
     );
 
     if (mounted) {
-      final state = cubit.state;
+      final state = _sendQuestionCubit.state;
       if (!state.hasError) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -59,8 +65,8 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<SendQuestionCubit>(),
+    return BlocProvider<SendQuestionCubit>.value(
+      value: _sendQuestionCubit,
       child: BlocBuilder<SendQuestionCubit, ViewState<void>>(
         builder: (context, sendState) {
           final isLoading = sendState.isLoading;
@@ -126,9 +132,6 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
                         if (value == null || value.trim().isEmpty) {
                           return 'Please enter a question';
                         }
-                        if (value.trim().length < 1) {
-                          return 'Question must be at least 1 character';
-                        }
                         if (value.trim().length > 1000) {
                           return 'Question must be less than 1000 characters';
                         }
@@ -173,7 +176,7 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
                                       _isAnonymous = value;
                                     });
                                   },
-                            activeColor: AppColors.primary,
+                            activeThumbColor: AppColors.primary,
                           ),
                         ],
                       ),

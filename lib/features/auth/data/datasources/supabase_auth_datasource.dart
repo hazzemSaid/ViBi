@@ -67,6 +67,8 @@ class SupabaseAuthDataSource {
   }
 
   Future<void> signOut() async {
+    await _client.removeAllChannels();
+
     await Future.wait([_client.auth.signOut(), _googleSignIn.signOut()]);
   }
 

@@ -93,7 +93,7 @@ class FeedQueries {
                           edges {
                             node {
                               id
-                              comment_text
+                              body
                               profiles {
                                 username
                                 avatar_url
@@ -167,7 +167,7 @@ class FeedQueries {
               edges {
                 node {
                   id
-                  comment_text
+                  body
                   likes_count
                   created_at
                   updated_at

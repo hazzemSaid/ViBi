@@ -171,7 +171,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                           const SizedBox(height: AppSizes.s32),
-                          ProfileLatestAnswersSection(userId: user.id),
+                          ProfileLatestAnswersSection(
+                            userId: user.id,
+                            compactActions: true,
+                          ),
                           const SizedBox(height: AppSizes.s40),
                         ],
                       ),

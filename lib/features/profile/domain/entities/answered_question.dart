@@ -29,6 +29,38 @@ class AnsweredQuestion {
     this.answererAvatarUrl,
   });
 
+  AnsweredQuestion copyWith({
+    String? id,
+    String? userId,
+    String? questionText,
+    String? answerText,
+    int? likesCount,
+    int? commentsCount,
+    int? sharesCount,
+    DateTime? createdAt,
+    bool? isAnonymous,
+    String? senderUsername,
+    String? senderAvatarUrl,
+    String? answererUsername,
+    String? answererAvatarUrl,
+  }) {
+    return AnsweredQuestion(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      questionText: questionText ?? this.questionText,
+      answerText: answerText ?? this.answerText,
+      likesCount: likesCount ?? this.likesCount,
+      commentsCount: commentsCount ?? this.commentsCount,
+      sharesCount: sharesCount ?? this.sharesCount,
+      createdAt: createdAt ?? this.createdAt,
+      isAnonymous: isAnonymous ?? this.isAnonymous,
+      senderUsername: senderUsername ?? this.senderUsername,
+      senderAvatarUrl: senderAvatarUrl ?? this.senderAvatarUrl,
+      answererUsername: answererUsername ?? this.answererUsername,
+      answererAvatarUrl: answererAvatarUrl ?? this.answererAvatarUrl,
+    );
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

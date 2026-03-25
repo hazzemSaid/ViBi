@@ -85,22 +85,63 @@ class GraphQLMutations {
 
   /// Add a comment
   static const String createComment = r'''
-    mutation CreateComment($answerId: UUID!, $userId: UUID!, $commentText: String!) {
+    mutation CreateComment($answerId: UUID!, $userId: UUID!, $body: String!) {
       insertIntoCommentsCollection(
         objects: [{
           answer_id: $answerId
           user_id: $userId
-          comment_text: $commentText
+          body: $body
         }]
       ) {
         records {
           id
-          comment_text
+          body
           created_at
           profiles {
             username
             avatar_url
           }
+        }
+      }
+    }
+  ''';
+
+  /// Upsert a reaction on an answer
+  static const String upsertReaction = r'''
+    mutation UpsertReaction($answerId: UUID!, $userId: UUID!, $reaction: String!) {
+      insertIntoReactionsCollection(
+        objects: [{
+          answer_id: $answerId
+          user_id: $userId
+          reaction: $reaction
+        }]
+        onConflict: {
+          constraint: reactions_answer_id_user_id_key
+          updateColumns: [reaction]
+        }
+      ) {
+        records {
+          id
+          answer_id
+          user_id
+          reaction
+          created_at
+        }
+      }
+    }
+  ''';
+
+  /// Remove reaction from an answer
+  static const String deleteReaction = r'''
+    mutation DeleteReaction($answerId: UUID!, $userId: UUID!) {
+      deleteFromReactionsCollection(
+        filter: {
+          answer_id: { eq: $answerId }
+          user_id: { eq: $userId }
+        }
+      ) {
+        records {
+          id
         }
       }
     }

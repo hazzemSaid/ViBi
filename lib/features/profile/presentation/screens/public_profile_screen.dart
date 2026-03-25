@@ -192,6 +192,7 @@ class _PublicProfileBody extends StatelessWidget {
                                   builder: (context, answersAsync) {
                                     return PublicProfileAnswersSection(
                                       answersAsync: answersAsync,
+                                      compactActions: true,
                                     );
                                   },
                                 ),

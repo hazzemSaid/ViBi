@@ -43,6 +43,10 @@ class FeedItemModel extends FeedItem {
   factory FeedItemModel.fromGraphQL(Map<String, dynamic> node) {
     // Extract answers data (nested structure from global feed query)
     final answersData = node['answers'] as Map<String, dynamic>?;
+    final answerId =
+        (answersData?['id'] as String?) ??
+        (node['answer_id'] as String?) ??
+        (node['id'] as String);
 
     // Get answer author's profile
     final answerAuthorProfile =
@@ -67,7 +71,7 @@ class FeedItemModel extends FeedItem {
         : (questionerProfile?['avatar_url'] as String?);
 
     return FeedItemModel(
-      id: node['id'] as String,
+      id: answerId,
       userId: node['user_id'] as String,
       username: displayName,
       avatarUrl: displayAvatar,

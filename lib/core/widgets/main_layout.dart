@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/features/inbox/presentation/providers/inbox_providers.dart';
 
@@ -16,14 +16,22 @@ class MainLayout extends StatelessWidget {
     );
   }
 
+  bool _isModalOpen(BuildContext context) {
+    // Check if there's a modal/dialog open above the main navigation
+    // Navigator.canPop() returns true if there's a route that can be popped
+    return Navigator.of(context).canPop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: navigationShell,
-      bottomNavigationBar: _BottomNavBar(
-        currentIndex: navigationShell.currentIndex,
-        onTap: _onTap,
-      ),
+      bottomNavigationBar: _isModalOpen(context)
+          ? null
+          : _BottomNavBar(
+              currentIndex: navigationShell.currentIndex,
+              onTap: _onTap,
+            ),
     );
   }
 }

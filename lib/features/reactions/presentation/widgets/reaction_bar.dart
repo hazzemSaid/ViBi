@@ -1,0 +1,297 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibi/core/di/service_locator.dart';
+import 'package:vibi/core/state/view_state.dart';
+import 'package:vibi/features/reactions/domain/entities/reaction_summary.dart';
+import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
+import 'package:vibi/features/reactions/presentation/providers/reaction_cubit.dart';
+import 'package:vibi/features/reactions/presentation/widgets/comment_sheet.dart';
+
+const Map<String, String> _emojis = {'love': '❤️', 'sad': '😢', 'haha': '😂'};
+const Map<String, IconData> _reactionIcons = {
+  'love': Icons.favorite_border,
+  'sad': Icons.sentiment_dissatisfied_outlined,
+  'haha': Icons.sentiment_very_satisfied_outlined,
+};
+
+class ReactionBar extends StatefulWidget {
+  const ReactionBar({
+    super.key,
+    required this.answerId,
+    this.initialCommentCount = 0,
+    this.onCountsChanged,
+    this.compact = false,
+    this.showCommentButton = true,
+    this.inactiveColor = Colors.white54,
+    this.activeColor = const Color(0xFF5A4FCF),
+  });
+
+  final String answerId;
+  final int initialCommentCount;
+  final void Function(int reactionsCount, int commentsCount)? onCountsChanged;
+  final bool compact;
+  final bool showCommentButton;
+  final Color inactiveColor;
+  final Color activeColor;
+
+  @override
+  State<ReactionBar> createState() => _ReactionBarState();
+}
+
+class _ReactionBarState extends State<ReactionBar> {
+  late final ReactionCubit _reactionCubit;
+  late final ReactionsRepository _repository;
+
+  String? _animating;
+  late int _commentCount;
+
+  @override
+  void initState() {
+    super.initState();
+    _reactionCubit = getIt<ReactionCubit>();
+    _repository = getIt<ReactionsRepository>();
+    _commentCount = widget.initialCommentCount;
+
+    _reactionCubit.load(widget.answerId);
+    _loadCommentCount();
+  }
+
+  @override
+  void dispose() {
+    _reactionCubit.close();
+    super.dispose();
+  }
+
+  Future<void> _loadCommentCount() async {
+    try {
+      final count = await _repository.getCommentsCount(widget.answerId);
+      if (!mounted) return;
+      setState(() => _commentCount = count);
+      _notifyCounts(reactionsCount: _reactionCubit.state.data?.total ?? 0);
+    } catch (_) {
+      // Keep existing count if refresh fails.
+    }
+  }
+
+  void _notifyCounts({required int reactionsCount}) {
+    widget.onCountsChanged?.call(reactionsCount, _commentCount);
+  }
+
+  Future<void> _pick(String reaction) async {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _animating = reaction;
+    });
+
+    await _reactionCubit.toggleReaction(
+      answerId: widget.answerId,
+      reaction: reaction,
+    );
+  }
+
+  Future<void> _openComments() async {
+    await CommentSheet.show(context, widget.answerId);
+    await _loadCommentCount();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: _reactionCubit,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BlocConsumer<ReactionCubit, ViewState<ReactionSummary>>(
+            listenWhen: (previous, current) {
+              final previousTotal = previous.data?.total;
+              final currentTotal = current.data?.total;
+              return previousTotal != currentTotal;
+            },
+            listener: (_, state) {
+              _notifyCounts(reactionsCount: state.data?.total ?? 0);
+            },
+            builder: (context, state) {
+              final data =
+                  state.data ??
+                  const ReactionSummary(
+                    counts: {'love': 0, 'sad': 0, 'haha': 0},
+                  );
+
+              if (widget.compact) {
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: _reactionIcons.entries.map((entry) {
+                    final isActive = data.myReaction == entry.key;
+                    final count = data.counts[entry.key] ?? 0;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: GestureDetector(
+                        onTap: () => _pick(entry.key),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              entry.value,
+                              size: 26,
+                              color: isActive
+                                  ? widget.activeColor
+                                  : widget.inactiveColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$count',
+                              style: TextStyle(
+                                color: isActive
+                                    ? widget.activeColor
+                                    : Colors.white70,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                );
+              }
+
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: _emojis.entries.map((entry) {
+                  final isActive = data.myReaction == entry.key;
+                  return _ReactionChip(
+                    emoji: entry.value,
+                    count: data.counts[entry.key] ?? 0,
+                    active: isActive,
+                    animating: _animating == entry.key,
+                    onAnimated: () => setState(() => _animating = null),
+                    onTap: () => _pick(entry.key),
+                  );
+                }).toList(),
+              );
+            },
+          ),
+          if (widget.showCommentButton) ...[
+            const SizedBox(height: 2),
+            TextButton.icon(
+              onPressed: _openComments,
+              icon: const Icon(Icons.chat_bubble_outline, size: 16),
+              label: Text('Comment ($_commentCount)'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white54,
+                padding: const EdgeInsets.symmetric(horizontal: 0),
+                minimumSize: const Size(0, 28),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ReactionChip extends StatefulWidget {
+  const _ReactionChip({
+    required this.emoji,
+    required this.count,
+    required this.active,
+    required this.animating,
+    required this.onAnimated,
+    required this.onTap,
+  });
+
+  final String emoji;
+  final int count;
+  final bool active;
+  final bool animating;
+  final VoidCallback onAnimated;
+  final VoidCallback onTap;
+
+  @override
+  State<_ReactionChip> createState() => _ReactionChipState();
+}
+
+class _ReactionChipState extends State<_ReactionChip>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
+
+    _scale = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.5), weight: 40),
+      TweenSequenceItem(tween: Tween(begin: 1.5, end: 0.9), weight: 30),
+      TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.0), weight: 30),
+    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+  }
+
+  @override
+  void didUpdateWidget(covariant _ReactionChip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.animating && !oldWidget.animating) {
+      _controller.forward(from: 0).then((_) => widget.onAnimated());
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: AnimatedBuilder(
+        animation: _scale,
+        builder: (_, child) =>
+            Transform.scale(scale: _scale.value, child: child),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: const EdgeInsets.only(right: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: widget.active
+                ? const Color(0xFF5A4FCF).withValues(alpha: 0.2)
+                : Colors.white.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: widget.active
+                  ? const Color(0xFF5A4FCF)
+                  : Colors.transparent,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(widget.emoji, style: const TextStyle(fontSize: 16)),
+              if (widget.count > 0) ...[
+                const SizedBox(width: 4),
+                Text(
+                  '${widget.count}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: widget.active
+                        ? const Color(0xFF5A4FCF)
+                        : Colors.white,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

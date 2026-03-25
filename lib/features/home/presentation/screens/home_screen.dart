@@ -70,7 +70,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 delegate: SliverChildListDelegate([
                   const SizedBox(height: 8),
                   const StoriesSection(),
-                  Divider(color: Colors.white.withOpacity(0.05), height: 1),
+                  Divider(
+                    color: Colors.white.withValues(alpha: 0.05),
+                    height: 1,
+                  ),
                 ]),
               ),
               BlocBuilder<GlobalFeedCubit, ViewState<List<FeedItem>>>(
@@ -95,15 +98,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         return Column(
                           children: [
-                            PostItem(item: items[index]),
+                            PostItem(
+                              item: items[index],
+                              onCountsChanged:
+                                  (answerId, reactionsCount, commentsCount) {
+                                    _globalFeedCubit.patchAnswerCounts(
+                                      answerId: answerId,
+                                      reactionsCount: reactionsCount,
+                                      commentsCount: commentsCount,
+                                    );
+                                  },
+                            ),
                             Divider(
-                              color: Colors.white.withOpacity(0.05),
+                              color: Colors.white.withValues(alpha: 0.05),
                               height: 1,
                             ),
                             if (index == 0) ...[
                               const SuggestedSection(),
                               Divider(
-                                color: Colors.white.withOpacity(0.05),
+                                color: Colors.white.withValues(alpha: 0.05),
                                 height: 1,
                               ),
                             ],

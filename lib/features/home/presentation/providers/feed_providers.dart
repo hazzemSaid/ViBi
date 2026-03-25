@@ -66,6 +66,28 @@ class GlobalFeedCubit extends Cubit<ViewState<List<FeedItem>>> {
       _isLoadingMore = false;
     }
   }
+
+  void patchAnswerCounts({
+    required String answerId,
+    int? reactionsCount,
+    int? commentsCount,
+  }) {
+    final currentItems = state.data;
+    if (currentItems == null || currentItems.isEmpty) return;
+
+    final updatedItems = currentItems
+        .map(
+          (item) => item.id == answerId
+              ? item.copyWith(
+                  likesCount: reactionsCount ?? item.likesCount,
+                  commentsCount: commentsCount ?? item.commentsCount,
+                )
+              : item,
+        )
+        .toList(growable: false);
+
+    emit(ViewState(status: ViewStatus.success, data: updatedItems));
+  }
 }
 
 class FollowingFeedCubit extends Cubit<ViewState<List<FeedItem>>> {
@@ -139,5 +161,27 @@ class FollowingFeedCubit extends Cubit<ViewState<List<FeedItem>>> {
     } finally {
       _isLoadingMore = false;
     }
+  }
+
+  void patchAnswerCounts({
+    required String answerId,
+    int? reactionsCount,
+    int? commentsCount,
+  }) {
+    final currentItems = state.data;
+    if (currentItems == null || currentItems.isEmpty) return;
+
+    final updatedItems = currentItems
+        .map(
+          (item) => item.id == answerId
+              ? item.copyWith(
+                  likesCount: reactionsCount ?? item.likesCount,
+                  commentsCount: commentsCount ?? item.commentsCount,
+                )
+              : item,
+        )
+        .toList(growable: false);
+
+    emit(ViewState(status: ViewStatus.success, data: updatedItems));
   }
 }

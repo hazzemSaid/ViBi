@@ -83,6 +83,28 @@ class UserAnswersCubit extends Cubit<ViewState<List<AnsweredQuestion>>> {
       emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
     }
   }
+
+  void patchAnswerCounts({
+    required String answerId,
+    int? reactionsCount,
+    int? commentsCount,
+  }) {
+    final currentAnswers = state.data;
+    if (currentAnswers == null || currentAnswers.isEmpty) return;
+
+    final updated = currentAnswers
+        .map(
+          (answer) => answer.id == answerId
+              ? answer.copyWith(
+                  likesCount: reactionsCount ?? answer.likesCount,
+                  commentsCount: commentsCount ?? answer.commentsCount,
+                )
+              : answer,
+        )
+        .toList(growable: false);
+
+    emit(ViewState(status: ViewStatus.success, data: updated));
+  }
 }
 
 class FollowersCubit extends Cubit<ViewState<List<FollowerUser>>> {

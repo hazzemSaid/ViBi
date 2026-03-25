@@ -24,6 +24,11 @@ import 'package:vibi/features/questions/data/datasources/graphql_question_dataso
 import 'package:vibi/features/questions/data/repositories/question_repository_impl.dart';
 import 'package:vibi/features/questions/domain/repositories/question_repository.dart';
 import 'package:vibi/features/questions/presentation/providers/question_providers.dart';
+import 'package:vibi/features/reactions/data/datasources/reactions_remote_data_source.dart';
+import 'package:vibi/features/reactions/data/repositories/reactions_repository_impl.dart';
+import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
+import 'package:vibi/features/reactions/presentation/providers/comments_cubit.dart';
+import 'package:vibi/features/reactions/presentation/providers/reaction_cubit.dart';
 import 'package:vibi/features/search/data/datasources/graphql_search_datasource.dart';
 import 'package:vibi/features/search/data/repositories/search_repository_impl.dart';
 import 'package:vibi/features/search/domain/repositories/search_repository.dart';
@@ -122,6 +127,19 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   );
   getIt.registerFactory<SendQuestionCubit>(
     () => SendQuestionCubit(getIt<QuestionRepository>()),
+  );
+
+  getIt.registerLazySingleton<ReactionsRemoteDataSource>(
+    ReactionsRemoteDataSource.new,
+  );
+  getIt.registerLazySingleton<ReactionsRepository>(
+    () => ReactionsRepositoryImpl(getIt<ReactionsRemoteDataSource>()),
+  );
+  getIt.registerFactory<ReactionCubit>(
+    () => ReactionCubit(getIt<ReactionsRepository>()),
+  );
+  getIt.registerFactory<CommentsCubit>(
+    () => CommentsCubit(getIt<ReactionsRepository>()),
   );
 
   getIt.registerLazySingleton<GraphQLInboxDataSource>(

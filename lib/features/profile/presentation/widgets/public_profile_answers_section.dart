@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/answered_question.dart';
+import 'package:vibi/features/profile/presentation/providers/profile_providers.dart';
 import 'package:vibi/features/profile/presentation/widgets/profile_answer_card.dart';
 
 class PublicProfileAnswersSection extends StatelessWidget {
   final ViewState<List<AnsweredQuestion>> answersAsync;
+  final bool compactActions;
 
-  const PublicProfileAnswersSection({super.key, required this.answersAsync});
+  const PublicProfileAnswersSection({
+    super.key,
+    required this.answersAsync,
+    this.compactActions = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final answersCubit = context.read<UserAnswersCubit>();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -58,7 +67,20 @@ class PublicProfileAnswersSection extends StatelessWidget {
               }
               return Column(
                 children: answers
-                    .map((answer) => ProfileAnswerCard(answer: answer))
+                    .map(
+                      (answer) => ProfileAnswerCard(
+                        answer: answer,
+                        compactActions: compactActions,
+                        onCountsChanged:
+                            (answerId, reactionsCount, commentsCount) {
+                              answersCubit.patchAnswerCounts(
+                                answerId: answerId,
+                                reactionsCount: reactionsCount,
+                                commentsCount: commentsCount,
+                              );
+                            },
+                      ),
+                    )
                     .toList(),
               );
             },

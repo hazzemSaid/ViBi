@@ -22,10 +22,14 @@ class ProfileStatsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: AppSizes.s20),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppSizes.r20,
+        horizontal: AppSizes.s8,
+      ),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(AppSizes.r24),
+        color: Colors.white.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: Colors.white12),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -41,7 +45,7 @@ class ProfileStatsCard extends StatelessWidget {
               );
             },
           ),
-          Container(width: 1, height: 40, color: Colors.white24),
+          Container(width: 1, height: 28, color: Colors.white24),
           StatItem(
             value: followingCount,
             label: 'Following',
@@ -53,7 +57,7 @@ class ProfileStatsCard extends StatelessWidget {
               );
             },
           ),
-          Container(width: 1, height: 40, color: Colors.white24),
+          Container(width: 1, height: 28, color: Colors.white24),
           StatItem(value: answersCount, label: 'Answers'),
         ],
       ),

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
 import 'package:vibi/features/profile/presentation/providers/social_links_provider.dart';
-import 'package:vibi/features/profile/presentation/widgets/public_profile_social_links_section/public_social_media_card.dart';
+import 'package:vibi/features/profile/presentation/widgets/social_link_platform.dart';
 
 /// Read-only social links section for public profiles
 class PublicProfileSocialLinksSection extends StatefulWidget {
@@ -53,31 +54,47 @@ class _PublicProfileSocialLinksSectionState
           }
 
           final links = socialLinksAsync.data ?? const <SocialLink>[];
-          if (links.isEmpty) {
+          final activeLinks = links.where((link) => link.isActive).toList();
+          if (activeLinks.isEmpty) {
             return const SizedBox.shrink();
           }
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Social Media',
-                style: TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: AppSizes.s12),
-              Column(
-                children: links
-                    .map((link) => PublicSocialMediaCard(link: link))
-                    .toList(),
-              ),
-            ],
+          return Wrap(
+            alignment: WrapAlignment.center,
+            spacing: AppSizes.s12,
+            runSpacing: AppSizes.s8,
+            children: activeLinks
+                .map(
+                  (link) => InkResponse(
+                    onTap: () => _launchUrl(link.url),
+                    radius: 18,
+                    child: Icon(
+                      socialPlatformIcon(link.platform),
+                      color: AppColors.textPrimary,
+                      size: 18,
+                    ),
+                  ),
+                )
+                .toList(),
           );
         },
       ),
     );
+  }
+
+  Future<void> _launchUrl(String urlString) async {
+    try {
+      final url = urlString.trim();
+      final webUrl = url.startsWith('https') ? url : 'https://$url';
+      final webUri = Uri.parse(webUrl);
+
+      if (await canLaunchUrl(webUri)) {
+        await launchUrl(webUri, mode: LaunchMode.externalApplication);
+      } else {
+        debugPrint('Could not launch $webUrl');
+      }
+    } catch (e) {
+      debugPrint('Error launching URL: $e');
+    }
   }
 }

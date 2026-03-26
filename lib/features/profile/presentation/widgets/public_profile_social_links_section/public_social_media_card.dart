@@ -16,7 +16,7 @@ class PublicSocialMediaCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSizes.s12),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: link.isActive ? 0.06 : 0.03),
-        borderRadius: BorderRadius.circular(AppSizes.r14),
+        borderRadius: BorderRadius.circular(AppSizes.r24),
         border: Border.all(
           color: link.isActive ? Colors.white24 : Colors.white10,
         ),
@@ -25,30 +25,15 @@ class PublicSocialMediaCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _launchUrl(link.url),
-          borderRadius: BorderRadius.circular(AppSizes.r14),
+          borderRadius: BorderRadius.circular(AppSizes.r24),
           child: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSizes.r14,
+              horizontal: AppSizes.s16,
               vertical: AppSizes.s12,
             ),
             child: Row(
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(AppSizes.r12),
-                    border: Border.all(color: Colors.white12),
-                  ),
-                  child: Icon(
-                    socialPlatformIcon(link.platform),
-                    color: link.isActive
-                        ? AppColors.textPrimary
-                        : Colors.white54,
-                    size: 22,
-                  ),
-                ),
+                _SocialPlatformImage(link: link),
                 const SizedBox(width: AppSizes.s12),
                 Expanded(
                   child: Column(
@@ -105,6 +90,60 @@ class PublicSocialMediaCard extends StatelessWidget {
       }
     } catch (e) {
       debugPrint('Error launching URL: $e');
+    }
+  }
+}
+
+class _SocialPlatformImage extends StatelessWidget {
+  const _SocialPlatformImage({required this.link});
+
+  final SocialLink link;
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrl = _faviconFromUrl(link.url);
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppSizes.r12),
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.08),
+          border: Border.all(color: Colors.white12),
+        ),
+        child: Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _fallbackIcon(),
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+            return _fallbackIcon();
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _fallbackIcon() {
+    return Icon(
+      socialPlatformIcon(link.platform),
+      color: link.isActive ? AppColors.textPrimary : Colors.white54,
+      size: 22,
+    );
+  }
+
+  String _faviconFromUrl(String rawUrl) {
+    try {
+      final input = rawUrl.trim();
+      final withScheme = input.startsWith('http') ? input : 'https://$input';
+      final host = Uri.parse(withScheme).host;
+      if (host.isEmpty) {
+        return 'https://www.google.com/s2/favicons?sz=128&domain=vibi.social';
+      }
+      return 'https://www.google.com/s2/favicons?sz=128&domain=$host';
+    } catch (_) {
+      return 'https://www.google.com/s2/favicons?sz=128&domain=vibi.social';
     }
   }
 }

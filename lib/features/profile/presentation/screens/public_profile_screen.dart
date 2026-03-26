@@ -137,6 +137,10 @@ class _PublicProfileBody extends StatelessWidget {
                       Icons.arrow_back,
                       color: AppColors.textPrimary,
                     ),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.white.withValues(alpha: 0.06),
+                      shape: const CircleBorder(),
+                    ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   actions: [
@@ -145,6 +149,10 @@ class _PublicProfileBody extends StatelessWidget {
                         Icons.refresh,
                         color: AppColors.textPrimary,
                       ),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.white.withValues(alpha: 0.06),
+                        shape: const CircleBorder(),
+                      ),
                       onPressed: () => _reloadProfile(context),
                     ),
                     IconButton(
@@ -152,8 +160,13 @@ class _PublicProfileBody extends StatelessWidget {
                         Icons.more_vert,
                         color: AppColors.textPrimary,
                       ),
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.white.withValues(alpha: 0.06),
+                        shape: const CircleBorder(),
+                      ),
                       onPressed: () {},
                     ),
+                    const SizedBox(width: AppSizes.s4),
                   ],
                 ),
                 SliverToBoxAdapter(

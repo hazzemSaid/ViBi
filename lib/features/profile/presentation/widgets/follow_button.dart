@@ -25,13 +25,9 @@ class FollowButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
           foregroundColor: foregroundColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSizes.r16),
-          ),
-          padding: const EdgeInsets.symmetric(
-            vertical: AppSizes.s12,
-            horizontal: AppSizes.s16,
-          ),
+          shape: const StadiumBorder(),
+          minimumSize: const Size.fromHeight(52),
+          padding: const EdgeInsets.symmetric(horizontal: AppSizes.s16),
         ),
         onPressed: isLoading ? null : onPressed,
         child: isLoading

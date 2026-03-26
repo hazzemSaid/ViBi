@@ -62,7 +62,7 @@ class ProfileHeaderWidget extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(AppSizes.r16),
+            borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
             username,

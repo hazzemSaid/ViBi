@@ -21,10 +21,9 @@ class PublicProfileActionsRow extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.white.withValues(alpha: 0.1),
               foregroundColor: AppColors.textPrimary,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSizes.r16),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: AppSizes.s12),
+              shape: const StadiumBorder(),
+              minimumSize: const Size.fromHeight(52),
+              side: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
             ),
             onPressed: profile.allowAnonymousQuestions
                 ? () {

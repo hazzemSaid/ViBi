@@ -42,11 +42,29 @@ class GraphQLProfileDataSource {
               public_profile_enabled
               public_theme_key
               public_cta_text
+              followersCount: followsByFollowingId(first: 1000) {
+                edges {
+                  node {
+                    id
+                  }
+                }
+              }
+              followingCount: followsByFollowerId(first: 1000) {
+                edges {
+                  node {
+                    id
+                  }
+                }
+              }
+              answersCount: answersCollection(first: 1000) {
+                edges {
+                  node {
+                    id
+                  }
+                }
+              }
               updated_at
               created_at
-              followers_count
-              following_count
-              answers_count
             }
           }
         }
@@ -218,9 +236,27 @@ class GraphQLProfileDataSource {
               public_profile_enabled
               public_theme_key
               public_cta_text
-              followers_count
-              following_count
-              answers_count
+              followersCount: followsByFollowingId(first: 1000) {
+                edges {
+                  node {
+                    id
+                  }
+                }
+              }
+              followingCount: followsByFollowerId(first: 1000) {
+                edges {
+                  node {
+                    id
+                  }
+                }
+              }
+              answersCount: answersCollection(first: 1000) {
+                edges {
+                  node {
+                    id
+                  }
+                }
+              }
               updated_at
             }
           }
@@ -277,9 +313,27 @@ class GraphQLProfileDataSource {
               public_profile_enabled
               public_theme_key
               public_cta_text
-              followers_count
-              following_count
-              answers_count
+              followersCount: followsByFollowingId(first: 1000) {
+                edges {
+                  node {
+                    id
+                  }
+                }
+              }
+              followingCount: followsByFollowerId(first: 1000) {
+                edges {
+                  node {
+                    id
+                  }
+                }
+              }
+              answersCount: answersCollection(first: 1000) {
+                edges {
+                  node {
+                    id
+                  }
+                }
+              }
               updated_at
             }
           }
@@ -297,7 +351,9 @@ class GraphQLProfileDataSource {
       );
 
       if (result.hasException) {
-        print('GraphQL get public profile by username error: ${result.exception}');
+        print(
+          'GraphQL get public profile by username error: ${result.exception}',
+        );
         return _getPublicProfileByUsernameViaRest(username, currentUserId);
       }
 
@@ -578,7 +634,6 @@ class GraphQLProfileDataSource {
                 username
                 avatar_url
                 bio
-                followers_count
               }
             }
           }
@@ -611,7 +666,7 @@ class GraphQLProfileDataSource {
           fullName: profileData['full_name'] as String?,
           avatarUrl: profileData['avatar_url'] as String?,
           bio: profileData['bio'] as String?,
-          followersCount: profileData['followers_count'] as int? ?? 0,
+          followersCount: 0, // Will be calculated separately if needed
           followedAt: DateTime.parse(node['created_at'] as String),
         );
       }).toList();
@@ -644,7 +699,6 @@ class GraphQLProfileDataSource {
                 username
                 avatar_url
                 bio
-                followers_count
               }
             }
           }
@@ -677,7 +731,7 @@ class GraphQLProfileDataSource {
           fullName: profileData['full_name'] as String?,
           avatarUrl: profileData['avatar_url'] as String?,
           bio: profileData['bio'] as String?,
-          followersCount: profileData['followers_count'] as int? ?? 0,
+          followersCount: 0, // Will be calculated separately if needed
           followedAt: DateTime.parse(node['created_at'] as String),
         );
       }).toList();

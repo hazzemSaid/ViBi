@@ -54,9 +54,18 @@ class UserProfileModel extends UserProfile {
       updatedAt: node['updated_at'] != null
           ? DateTime.parse(node['updated_at'] as String)
           : null,
-      followers_count: node['followers_count'],
-      following_count: node['following_count'],
-      answers_count: node['answers_count'],
+      followers_count: _extractCount(
+        node['followersCount'],
+        fallback: node['followers_count'],
+      ),
+      following_count: _extractCount(
+        node['followingCount'],
+        fallback: node['following_count'],
+      ),
+      answers_count: _extractCount(
+        node['answersCount'],
+        fallback: node['answers_count'],
+      ),
       isPrivate: node['is_private'] as bool? ?? false,
       allowAnonymousQuestions:
           node['allow_anonymous_questions'] as bool? ?? true,
@@ -65,6 +74,19 @@ class UserProfileModel extends UserProfile {
       publicCtaText: node['public_cta_text'] as String?,
       fcmToken: node['fcm_token'] as String?,
     );
+  }
+
+  static int _extractCount(dynamic value, {dynamic fallback}) {
+    if (value is int) return value;
+    if (value is Map<String, dynamic>) {
+      final total = value['totalCount'];
+      if (total is int) return total;
+      final edges = value['edges'];
+      if (edges is List) return edges.length;
+      return 0;
+    }
+    if (fallback is int) return fallback;
+    return 0;
   }
 
   Map<String, dynamic> toMap() {

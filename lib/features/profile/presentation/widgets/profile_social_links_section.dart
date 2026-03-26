@@ -7,8 +7,8 @@ import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
 import 'package:vibi/features/profile/presentation/providers/social_links_provider.dart';
-import 'package:vibi/features/profile/presentation/widgets/profile_social_links_section/social_media_card.dart';
 import 'package:vibi/features/profile/presentation/widgets/social_link_dialog.dart';
+import 'package:vibi/features/profile/presentation/widgets/social_link_platform.dart';
 
 class ProfileSocialLinksSection extends StatefulWidget {
   final String userId;
@@ -43,111 +43,75 @@ class _ProfileSocialLinksSectionState extends State<ProfileSocialLinksSection> {
         builder: (context, socialLinksAsync) {
           final links = socialLinksAsync.data ?? const <SocialLink>[];
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Social Media',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => SocialLinkDialog.show(
-                      context,
-                      widget.userId,
-                      nextOrder: _getNextOrder(links),
-                      onSaved: () => _socialLinksCubit.refresh(),
-                    ),
-                    icon: const Icon(
-                      Icons.add_circle_outline,
-                      color: AppColors.textPrimary,
-                    ),
-                    tooltip: 'Add social link',
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSizes.s8),
-              if (socialLinksAsync.status == ViewStatus.loading)
-                const Padding(
-                  padding: EdgeInsets.all(AppSizes.s12),
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              else if (socialLinksAsync.status == ViewStatus.failure)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(AppSizes.s12),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(AppSizes.r12),
-                  ),
-                  child: Text(
-                    'Failed to load social links: ${socialLinksAsync.errorMessage}',
-                    style: const TextStyle(color: Colors.redAccent),
-                  ),
-                )
-              else if (links.isEmpty)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(AppSizes.s16),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.04),
-                    borderRadius: BorderRadius.circular(AppSizes.r16),
-                    border: Border.all(color: Colors.white10),
-                  ),
-                  child: const Text(
-                    'No social links yet. Tap + to add Instagram, X, YouTube, Website, and more.',
-                    style: TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
-                )
-              else
-                Column(
-                  children: links
-                      .map(
-                        (link) => SocialMediaCard(
-                          link: link,
-                          onTap: () => SocialLinkDialog.show(
-                            context,
-                            widget.userId,
-                            existingLink: link,
-                            nextOrder: link.displayOrder,
-                            onSaved: () => _socialLinksCubit.refresh(),
-                          ),
-                          onLongPress: () async {
-                            try {
-                              final urlString = link.url.trim();
-                              final webUrl = urlString.startsWith('https')
-                                  ? urlString
-                                  : 'https://$urlString';
-                              final webUri = Uri.parse(webUrl);
+          if (socialLinksAsync.status == ViewStatus.loading) {
+            return const Padding(
+              padding: EdgeInsets.all(AppSizes.s12),
+              child: CircularProgressIndicator(strokeWidth: 2),
+            );
+          }
 
-                              if (await canLaunchUrl(webUri)) {
-                                await launchUrl(
-                                  webUri,
-                                  mode: LaunchMode.externalApplication,
-                                );
-                              } else {
-                                debugPrint('Could not launch $webUrl');
-                              }
-                            } catch (e) {
-                              debugPrint('Error launching URL: $e');
-                            }
-                          },
-                          onDelete: () {
-                            _socialLinksCubit.deleteLink(link.id);
-                          },
-                        ),
-                      )
-                      .toList(),
+          if (socialLinksAsync.status == ViewStatus.failure) {
+            return const SizedBox.shrink();
+          }
+
+          final activeLinks = links.where((link) => link.isActive).toList();
+
+          return Wrap(
+            alignment: WrapAlignment.center,
+            spacing: AppSizes.s12,
+            runSpacing: AppSizes.s8,
+            children: [
+              ...activeLinks.map(
+                (link) => InkResponse(
+                  onTap: () => SocialLinkDialog.show(
+                    context,
+                    widget.userId,
+                    existingLink: link,
+                    nextOrder: link.displayOrder,
+                    onSaved: () => _socialLinksCubit.refresh(),
+                  ),
+                  onLongPress: () async {
+                    try {
+                      final urlString = link.url.trim();
+                      final webUrl = urlString.startsWith('https')
+                          ? urlString
+                          : 'https://$urlString';
+                      final webUri = Uri.parse(webUrl);
+
+                      if (await canLaunchUrl(webUri)) {
+                        await launchUrl(
+                          webUri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      } else {
+                        debugPrint('Could not launch $webUrl');
+                      }
+                    } catch (e) {
+                      debugPrint('Error launching URL: $e');
+                    }
+                  },
+                  radius: 18,
+                  child: Icon(
+                    socialPlatformIcon(link.platform),
+                    color: AppColors.textPrimary,
+                    size: 18,
+                  ),
                 ),
+              ),
+              InkResponse(
+                onTap: () => SocialLinkDialog.show(
+                  context,
+                  widget.userId,
+                  nextOrder: _getNextOrder(links),
+                  onSaved: () => _socialLinksCubit.refresh(),
+                ),
+                radius: 18,
+                child: Icon(
+                  links.isEmpty ? Icons.add_circle_outline : Icons.add,
+                  color: AppColors.textPrimary,
+                  size: 18,
+                ),
+              ),
             ],
           );
         },

@@ -35,18 +35,27 @@ class PublicProfileModel extends PublicProfile {
       username: node['username'] as String?,
       bio: node['bio'] as String?,
       profileImageUrl: node['avatar_url'] as String?,
-      followersCount: node['followers_count'] as int? ?? 0,
-      followingCount: node['following_count'] as int? ?? 0,
-      answersCount: node['answers_count'] as int? ?? 0,
+      followersCount: _extractCount(
+        node['followersCount'],
+        fallback: node['followers_count'],
+      ),
+      followingCount: _extractCount(
+        node['followingCount'],
+        fallback: node['following_count'],
+      ),
+      answersCount: _extractCount(
+        node['answersCount'],
+        fallback: node['answers_count'],
+      ),
       isPrivate: isPrivate,
       isFollowing: isFollowing,
       hasRequestedFollow: hasRequestedFollow,
       canViewContent: canViewContent,
-        allowAnonymousQuestions:
+      allowAnonymousQuestions:
           node['allow_anonymous_questions'] as bool? ?? true,
-        publicProfileEnabled: node['public_profile_enabled'] as bool? ?? true,
-        publicThemeKey: node['public_theme_key'] as String? ?? 'tellonym_dark',
-        publicCtaText: node['public_cta_text'] as String?,
+      publicProfileEnabled: node['public_profile_enabled'] as bool? ?? true,
+      publicThemeKey: node['public_theme_key'] as String? ?? 'tellonym_dark',
+      publicCtaText: node['public_cta_text'] as String?,
       updatedAt: node['updated_at'] != null
           ? DateTime.parse(node['updated_at'] as String)
           : null,
@@ -67,21 +76,34 @@ class PublicProfileModel extends PublicProfile {
       username: map['username'] as String?,
       bio: map['bio'] as String?,
       profileImageUrl: map['avatar_url'] as String?,
-      followersCount: map['followers_count'] as int? ?? 0,
-      followingCount: map['following_count'] as int? ?? 0,
-      answersCount: map['answers_count'] as int? ?? 0,
+      followersCount: _extractCount(map['followers_count']),
+      followingCount: _extractCount(map['following_count']),
+      answersCount: _extractCount(map['answers_count']),
       isPrivate: isPrivate,
       isFollowing: isFollowing,
       hasRequestedFollow: hasRequestedFollow,
       canViewContent: canViewContent,
-        allowAnonymousQuestions:
+      allowAnonymousQuestions:
           map['allow_anonymous_questions'] as bool? ?? true,
-        publicProfileEnabled: map['public_profile_enabled'] as bool? ?? true,
-        publicThemeKey: map['public_theme_key'] as String? ?? 'tellonym_dark',
-        publicCtaText: map['public_cta_text'] as String?,
+      publicProfileEnabled: map['public_profile_enabled'] as bool? ?? true,
+      publicThemeKey: map['public_theme_key'] as String? ?? 'tellonym_dark',
+      publicCtaText: map['public_cta_text'] as String?,
       updatedAt: map['updated_at'] != null
           ? DateTime.parse(map['updated_at'] as String)
           : null,
     );
+  }
+
+  static int _extractCount(dynamic value, {dynamic fallback}) {
+    if (value is int) return value;
+    if (value is Map<String, dynamic>) {
+      final total = value['totalCount'];
+      if (total is int) return total;
+      final edges = value['edges'];
+      if (edges is List) return edges.length;
+      return 0;
+    }
+    if (fallback is int) return fallback;
+    return 0;
   }
 }

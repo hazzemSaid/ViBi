@@ -13,10 +13,6 @@ class GraphQLFollowDataSource {
         'follower_id': followerId,
         'following_id': followingId,
       });
-
-      // Update follower counts
-      await _updateFollowerCounts(followingId, true);
-      await _updateFollowingCounts(followerId, true);
     } catch (e) {
       print('Follow user error: $e');
       rethrow;
@@ -31,10 +27,6 @@ class GraphQLFollowDataSource {
           .delete()
           .eq('follower_id', followerId)
           .eq('following_id', followingId);
-
-      // Update follower counts
-      await _updateFollowerCounts(followingId, false);
-      await _updateFollowingCounts(followerId, false);
     } catch (e) {
       print('Unfollow user error: $e');
       rethrow;
@@ -50,16 +42,6 @@ class GraphQLFollowDataSource {
           .delete()
           .eq('follower_id', followerId)
           .eq('following_id', currentUserId);
-
-      // Update follower counts
-      await _updateFollowerCounts(
-        currentUserId,
-        false,
-      ); // Decrease current user's followers
-      await _updateFollowingCounts(
-        followerId,
-        false,
-      ); // Decrease follower's following count
     } catch (e) {
       print('Remove follower error: $e');
       rethrow;
@@ -112,10 +94,6 @@ class GraphQLFollowDataSource {
           'follower_id': requesterId,
           'following_id': targetId,
         });
-
-        // Update follower counts
-        await _updateFollowerCounts(targetId, true);
-        await _updateFollowingCounts(requesterId, true);
       } else {
         // Update request status to rejected
         await _client
@@ -142,56 +120,6 @@ class GraphQLFollowDataSource {
     } catch (e) {
       print('Check is following error: $e');
       return false;
-    }
-  }
-
-  Future<void> _updateFollowerCounts(String userId, bool increment) async {
-    try {
-      // Fetch current count
-      final profile = await _client
-          .from('profiles')
-          .select('followers_count')
-          .eq('id', userId)
-          .maybeSingle();
-
-      if (profile != null) {
-        final currentCount = profile['followers_count'] as int? ?? 0;
-        final newCount = increment
-            ? currentCount + 1
-            : (currentCount > 0 ? currentCount - 1 : 0);
-
-        await _client
-            .from('profiles')
-            .update({'followers_count': newCount})
-            .eq('id', userId);
-      }
-    } catch (e) {
-      print('Update follower counts error: $e');
-    }
-  }
-
-  Future<void> _updateFollowingCounts(String userId, bool increment) async {
-    try {
-      // Fetch current count
-      final profile = await _client
-          .from('profiles')
-          .select('following_count')
-          .eq('id', userId)
-          .maybeSingle();
-
-      if (profile != null) {
-        final currentCount = profile['following_count'] as int? ?? 0;
-        final newCount = increment
-            ? currentCount + 1
-            : (currentCount > 0 ? currentCount - 1 : 0);
-
-        await _client
-            .from('profiles')
-            .update({'following_count': newCount})
-            .eq('id', userId);
-      }
-    } catch (e) {
-      print('Update following counts error: $e');
     }
   }
 }

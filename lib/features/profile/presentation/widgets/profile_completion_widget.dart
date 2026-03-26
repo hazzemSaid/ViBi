@@ -77,12 +77,12 @@ class ProfileCompletionWidget extends StatelessWidget {
         ),
         const SizedBox(height: AppSizes.s12),
         ClipRRect(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(999),
           child: LinearProgressIndicator(
             value: progress,
             backgroundColor: Colors.white10,
             valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
-            minHeight: 6,
+            minHeight: 8,
           ),
         ),
         const SizedBox(height: AppSizes.s16),

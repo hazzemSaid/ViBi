@@ -25,6 +25,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   late final UserProfileCubit _userProfileCubit;
+  String? _loadedUserId;
 
   @override
   void initState() {
@@ -38,6 +39,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
+  void _loadProfileIfNeeded(String userId) {
+    if (_loadedUserId == userId) return;
+    _loadedUserId = userId;
+    _userProfileCubit.load(userId);
+  }
+
+  Future<void> _reloadProfile(String userId) async {
+    _userProfileCubit.load(userId);
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -49,10 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return const Scaffold(body: Center(child: Text('Not signed in')));
     }
 
-    // Load profile when user is available
-    if (_userProfileCubit.state.status != ViewStatus.success) {
-      _userProfileCubit.load(user.id);
-    }
+    _loadProfileIfNeeded(user.id);
 
     return BlocProvider<UserProfileCubit>.value(
       value: _userProfileCubit,
@@ -96,97 +104,139 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 }
               }
 
-              return CustomScrollView(
-                slivers: [
-                  SliverAppBar(
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    pinned: true,
-                    leading: IconButton(
-                      icon: const Icon(
-                        Icons.settings_outlined,
-                        color: AppColors.textPrimary,
-                      ),
-                      onPressed: () => context.pushNamed('edit-profile'),
-                    ),
-                    actions: [
-                      IconButton(
+              return RefreshIndicator(
+                onRefresh: () => _reloadProfile(user.id),
+                child: CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      pinned: true,
+                      leading: IconButton(
                         icon: const Icon(
-                          Icons.edit_outlined,
+                          Icons.settings_outlined,
                           color: AppColors.textPrimary,
+                        ),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.white.withValues(alpha: 0.06),
+                          shape: const CircleBorder(),
                         ),
                         onPressed: () => context.pushNamed('edit-profile'),
                       ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.ios_share,
-                          color: AppColors.textPrimary,
-                        ),
-                        onPressed: copyShareLink,
-                      ),
-                    ],
-                  ),
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: padding),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          ProfileHeaderWidget(profile: profile),
-                          ProfileCompletionWidget(profile: profile),
-                          const SizedBox(height: AppSizes.s24),
-                          ProfileStatsCard(
-                            followersCount: profile.followers_count.toString(),
-                            followingCount: (profile.following_count)
-                                .toString(),
-                            answersCount: (profile.answers_count).toString(),
-                            userId: user.id,
-                            isCurrentUser: true,
+                      actions: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.refresh,
+                            color: AppColors.textPrimary,
                           ),
-                          const SizedBox(height: AppSizes.s24),
-                          ProfileSocialLinksSection(userId: user.id),
-                          const SizedBox(height: AppSizes.s24),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 56,
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.black,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    AppSizes.r24,
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.06,
+                            ),
+                            shape: const CircleBorder(),
+                          ),
+                          onPressed: () => _reloadProfile(user.id),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.edit_outlined,
+                            color: AppColors.textPrimary,
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.06,
+                            ),
+                            shape: const CircleBorder(),
+                          ),
+                          onPressed: () => context.pushNamed('edit-profile'),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.ios_share,
+                            color: AppColors.textPrimary,
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.06,
+                            ),
+                            shape: const CircleBorder(),
+                          ),
+                          onPressed: copyShareLink,
+                        ),
+                        const SizedBox(width: AppSizes.s4),
+                      ],
+                    ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: padding),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            ProfileHeaderWidget(profile: profile),
+                            ProfileCompletionWidget(profile: profile),
+                            const SizedBox(height: AppSizes.s24),
+                            ProfileStatsCard(
+                              followersCount: profile.followers_count
+                                  .toString(),
+                              followingCount: (profile.following_count)
+                                  .toString(),
+                              answersCount: (profile.answers_count).toString(),
+                              userId: user.id,
+                              isCurrentUser: true,
+                            ),
+                            const SizedBox(height: AppSizes.s24),
+                            ProfileSocialLinksSection(userId: user.id),
+                            const SizedBox(height: AppSizes.s24),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.black,
+                                  shape: const StadiumBorder(),
+                                ),
+                                onPressed: copyShareLink,
+                                icon: const Icon(Icons.send_outlined, size: 20),
+                                label: const Text(
+                                  'Share Profile Link',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
-                              onPressed: copyShareLink,
-                              icon: const Icon(Icons.send_outlined, size: 20),
-                              label: const Text(
-                                'Share Profile Link',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
                             ),
-                          ),
-                          const SizedBox(height: AppSizes.s32),
-                          ProfileLatestAnswersSection(
-                            userId: user.id,
-                            compactActions: true,
-                          ),
-                          const SizedBox(height: AppSizes.s40),
-                        ],
+                            const SizedBox(height: AppSizes.s32),
+                            ProfileLatestAnswersSection(
+                              userId: user.id,
+                              compactActions: true,
+                            ),
+                            const SizedBox(height: AppSizes.s40),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               );
             }
             if (profileAsync.status == ViewStatus.loading) {
               return const Center(child: CircularProgressIndicator());
             }
-            return Center(child: Text('Error: ${profileAsync.errorMessage}'));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Error: ${profileAsync.errorMessage}'),
+                  const SizedBox(height: AppSizes.s16),
+                  ElevatedButton(
+                    onPressed: () => _reloadProfile(user.id),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
           },
         ),
       ),

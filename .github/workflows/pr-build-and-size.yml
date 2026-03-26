@@ -52,13 +52,19 @@ jobs:
         run: |
           if [ -f android/app/google-services.json ]; then
             echo "google-services.json already exists"
+          elif [ -n "${{ secrets.GOOGLE_SERVICES_JSON_B64 }}" ]; then
+            printf "%s" "${{ secrets.GOOGLE_SERVICES_JSON_B64 }}" | base64 --decode > android/app/google-services.json
+            echo "google-services.json created from GOOGLE_SERVICES_JSON_B64"
           elif [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
             printf "%s" "${{ secrets.GOOGLE_SERVICES_JSON }}" > android/app/google-services.json
-            echo "google-services.json created from secret"
+            echo "google-services.json created from GOOGLE_SERVICES_JSON"
           else
-            echo "Missing GOOGLE_SERVICES_JSON secret" >&2
+            echo "Missing GOOGLE_SERVICES_JSON_B64 / GOOGLE_SERVICES_JSON secret" >&2
             exit 1
           fi
+
+          python3 -c "import json; json.load(open('android/app/google-services.json', 'r', encoding='utf-8'))"
+          echo "google-services.json is valid JSON"
 
       - name: Build Android APK (new)
         run: |
@@ -90,13 +96,19 @@ jobs:
 
           if [ -f android/app/google-services.json ]; then
             echo "google-services.json already exists"
+          elif [ -n "${{ secrets.GOOGLE_SERVICES_JSON_B64 }}" ]; then
+            printf "%s" "${{ secrets.GOOGLE_SERVICES_JSON_B64 }}" | base64 --decode > android/app/google-services.json
+            echo "google-services.json created from GOOGLE_SERVICES_JSON_B64"
           elif [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
             printf "%s" "${{ secrets.GOOGLE_SERVICES_JSON }}" > android/app/google-services.json
-            echo "google-services.json created from secret"
+            echo "google-services.json created from GOOGLE_SERVICES_JSON"
           else
-            echo "Missing GOOGLE_SERVICES_JSON secret"
+            echo "Missing GOOGLE_SERVICES_JSON_B64 / GOOGLE_SERVICES_JSON secret"
             exit 1
           fi
+
+          python3 -c "import json; json.load(open('android/app/google-services.json', 'r', encoding='utf-8'))"
+          echo "google-services.json is valid JSON"
 
           flutter pub get
           flutter build apk --release

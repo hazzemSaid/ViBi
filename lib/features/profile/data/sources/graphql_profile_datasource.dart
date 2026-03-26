@@ -165,7 +165,9 @@ class GraphQLProfileDataSource {
   Future<String> uploadProfileImage(String uid, File image) async {
     try {
       final fileExt = image.path.split('.').last;
-      final fileName = 'avatar.$fileExt';
+      // Add a short timestamp to the filename to avoid collisions / caching issues
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final fileName = 'avatar_$timestamp.$fileExt';
       final filePath = '$uid/$fileName';
 
       print('=== UPLOAD IMAGE DEBUG ===');

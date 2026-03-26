@@ -1,5 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+
+const customCacheKey = 'myCustomCacheKey';
+
+final customCacheManager = CacheManager(
+  Config(
+    customCacheKey,
+    stalePeriod: const Duration(minutes: 2),
+    maxNrOfCacheObjects: 100,
+    repo: JsonCacheInfoRepository(databaseName: customCacheKey),
+    fileService: HttpFileService(),
+  ),
+);
 
 class StoryCard extends StatelessWidget {
   const StoryCard({
@@ -47,6 +60,8 @@ class StoryCard extends StatelessWidget {
             children: [
               CachedNetworkImage(
                 imageUrl: imageUrl,
+                cacheManager: customCacheManager,
+                useOldImageOnUrlChange: true,
                 fit: BoxFit.cover,
                 placeholder: (context, url) =>
                     Container(color: const Color(0xFF1C212A)),

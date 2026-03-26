@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:vibi/features/home/domain/entities/feed_item.dart';
+import 'package:vibi/features/home/presentation/widgets/story_card.dart';
 
 class AnswerAuthorRow extends StatelessWidget {
   const AnswerAuthorRow({super.key, required this.item});
@@ -14,7 +15,10 @@ class AnswerAuthorRow extends StatelessWidget {
         CircleAvatar(
           radius: 20,
           backgroundImage: item.answerAuthorAvatarUrl != null
-              ? CachedNetworkImageProvider(item.answerAuthorAvatarUrl!)
+              ? CachedNetworkImageProvider(
+                  item.answerAuthorAvatarUrl!,
+                  cacheManager: customCacheManager,
+                )
               : null,
           backgroundColor: Colors.grey.withOpacity(0.3),
           child: item.answerAuthorAvatarUrl == null

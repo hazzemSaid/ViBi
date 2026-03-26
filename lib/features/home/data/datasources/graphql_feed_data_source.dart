@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:vibi/features/home/data/datasources/feed_data_source_interface.dart';
 import 'package:vibi/features/home/data/models/feed_item_model.dart';
 
 class GraphQLFeedDataSource implements FeedDataSource {
   final GraphQLClient client;
+  static const Duration _queryTimeout = Duration(seconds: 20);
 
   GraphQLFeedDataSource(this.client);
 
@@ -92,14 +95,20 @@ class GraphQLFeedDataSource implements FeedDataSource {
     required String query,
     required Map<String, dynamic> variables,
   }) async {
+    final options = QueryOptions(
+      document: gql(query),
+      variables: variables,
+      fetchPolicy: FetchPolicy.networkOnly,
+      queryRequestTimeout: _queryTimeout,
+    );
+
     try {
-      final result = await client.query(
-        QueryOptions(
-          document: gql(query),
-          variables: variables,
-          fetchPolicy: FetchPolicy.networkOnly,
-        ),
-      );
+      QueryResult result = await client.query(options);
+
+      if (_isTimeoutResult(result)) {
+        // Retry once for transient network delays before surfacing an error.
+        result = await client.query(options);
+      }
 
       if (result.hasException) {
         print('GraphQL exception: ${result.exception}');
@@ -139,6 +148,13 @@ class GraphQLFeedDataSource implements FeedDataSource {
       print('Full error in _loadFeedFromAnswers: $e');
       rethrow;
     }
+  }
+
+  bool _isTimeoutResult(QueryResult result) {
+    final exceptionText = result.exception.toString();
+    return result.hasException &&
+        (exceptionText.contains('TimeoutException') ||
+            exceptionText.contains('No stream event'));
   }
 
   @override

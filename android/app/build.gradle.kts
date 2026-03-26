@@ -45,3 +45,8 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // Required by OpenTelemetry classes pulled in by Firebase Android SDK during R8 minification.
+    implementation("com.google.auto.value:auto-value-annotations:1.11.0")
+}

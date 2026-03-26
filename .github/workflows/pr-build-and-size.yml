@@ -224,6 +224,37 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Prepare .env for iOS
+        shell: bash
+        run: |
+          if [ -f .env ]; then
+            echo ".env already exists"
+          elif [ -n "${{ secrets.DOTENV_FILE }}" ]; then
+            printf "%s" "${{ secrets.DOTENV_FILE }}" > .env
+            echo ".env created from DOTENV_FILE secret"
+          elif [ -f .env.example ]; then
+            cp .env.example .env
+            echo ".env created from .env.example"
+          else
+            echo "CI=true" > .env
+            echo "Fallback .env created"
+          fi
+
+      - name: Provide GoogleService-Info.plist for iOS
+        shell: bash
+        run: |
+          if [ -f ios/Runner/GoogleService-Info.plist ]; then
+            echo "GoogleService-Info.plist already exists"
+          elif [ -n "${{ secrets.GOOGLE_SERVICE_INFO_PLIST_B64 }}" ]; then
+            printf "%s" "${{ secrets.GOOGLE_SERVICE_INFO_PLIST_B64 }}" | base64 --decode > ios/Runner/GoogleService-Info.plist
+            echo "GoogleService-Info.plist created from GOOGLE_SERVICE_INFO_PLIST_B64"
+          elif [ -n "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" ]; then
+            printf "%s" "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" > ios/Runner/GoogleService-Info.plist
+            echo "GoogleService-Info.plist created from GOOGLE_SERVICE_INFO_PLIST"
+          else
+            echo "No iOS Firebase plist secret provided; continuing"
+          fi
+
       - name: Install dependencies
         run: flutter pub get
 

@@ -20,8 +20,7 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables
-  await dotenv.load(fileName: ".env");
+  await _loadEnv();
 
   // Initialize Supabase
   await Supabase.initialize(
@@ -52,6 +51,21 @@ void main() async {
   // We recommend removing this method after testing and instead use In-App Messages to prompt for notification permission.
   OneSignal.Notifications.requestPermission(false);
   runApp(const MyApp());
+}
+
+Future<void> _loadEnv() async {
+  try {
+    await dotenv.load(fileName: '.env');
+    return;
+  } catch (_) {
+    // Fall back to .env.example in CI/dev environments where .env is not present.
+  }
+
+  try {
+    await dotenv.load(fileName: '.env.example');
+  } catch (_) {
+    // Continue without dotenv file to avoid hard crash on startup.
+  }
 }
 
 class MyApp extends StatefulWidget {

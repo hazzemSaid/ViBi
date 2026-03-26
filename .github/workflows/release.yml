@@ -131,6 +131,21 @@ jobs:
             echo "Fallback .env created"
           fi
 
+      - name: Provide GoogleService-Info.plist for CI
+        shell: bash
+        run: |
+          if [ -f ios/Runner/GoogleService-Info.plist ]; then
+            echo "GoogleService-Info.plist already exists"
+          elif [ -n "${{ secrets.GOOGLE_SERVICE_INFO_PLIST_B64 }}" ]; then
+            printf "%s" "${{ secrets.GOOGLE_SERVICE_INFO_PLIST_B64 }}" | base64 --decode > ios/Runner/GoogleService-Info.plist
+            echo "GoogleService-Info.plist created from GOOGLE_SERVICE_INFO_PLIST_B64"
+          elif [ -n "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" ]; then
+            printf "%s" "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" > ios/Runner/GoogleService-Info.plist
+            echo "GoogleService-Info.plist created from GOOGLE_SERVICE_INFO_PLIST"
+          else
+            echo "No iOS Firebase plist secret provided; continuing"
+          fi
+
       - name: Get dependencies
         run: flutter pub get
 

@@ -31,6 +31,35 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Prepare .env for PR head
+        shell: bash
+        run: |
+          if [ -f .env ]; then
+            echo ".env already exists"
+          elif [ -n "${{ secrets.DOTENV_FILE }}" ]; then
+            printf "%s" "${{ secrets.DOTENV_FILE }}" > .env
+            echo ".env created from DOTENV_FILE secret"
+          elif [ -f .env.example ]; then
+            cp .env.example .env
+            echo ".env created from .env.example"
+          else
+            echo "CI=true" > .env
+            echo "Fallback .env created"
+          fi
+
+      - name: Provide google-services.json for PR head
+        shell: bash
+        run: |
+          if [ -f android/app/google-services.json ]; then
+            echo "google-services.json already exists"
+          elif [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
+            printf "%s" "${{ secrets.GOOGLE_SERVICES_JSON }}" > android/app/google-services.json
+            echo "google-services.json created from secret"
+          else
+            echo "Missing GOOGLE_SERVICES_JSON secret" >&2
+            exit 1
+          fi
+
       - name: Build Android APK (new)
         run: |
           flutter pub get
@@ -46,6 +75,29 @@ jobs:
       - name: Build Android APK (old)
         working-directory: base
         run: |
+          if [ -f .env ]; then
+            echo ".env already exists"
+          elif [ -n "${{ secrets.DOTENV_FILE }}" ]; then
+            printf "%s" "${{ secrets.DOTENV_FILE }}" > .env
+            echo ".env created from DOTENV_FILE secret"
+          elif [ -f .env.example ]; then
+            cp .env.example .env
+            echo ".env created from .env.example"
+          else
+            echo "CI=true" > .env
+            echo "Fallback .env created"
+          fi
+
+          if [ -f android/app/google-services.json ]; then
+            echo "google-services.json already exists"
+          elif [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
+            printf "%s" "${{ secrets.GOOGLE_SERVICES_JSON }}" > android/app/google-services.json
+            echo "google-services.json created from secret"
+          else
+            echo "Missing GOOGLE_SERVICES_JSON secret"
+            exit 1
+          fi
+
           flutter pub get
           flutter build apk --release
 
@@ -169,12 +221,12 @@ jobs:
           pod repo update
           pod install --repo-update
 
-      - name: Build iOS Simulator (release)
-        run: flutter build ios --simulator --release
+      - name: Build iOS Simulator (debug)
+        run: flutter build ios --simulator --debug --no-codesign
 
       - name: Upload iOS build artifact
         uses: actions/upload-artifact@v4
         with:
           name: pr-ios-simulator-${{ github.event.pull_request.number }}
-          path: build/ios/Release-iphonesimulator/
+          path: build/ios/Debug-iphonesimulator/
           retention-days: 7

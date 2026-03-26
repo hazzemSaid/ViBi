@@ -63,6 +63,19 @@ jobs:
             echo "Fallback .env created"
           fi
 
+      - name: Provide google-services.json for CI
+        shell: bash
+        run: |
+          if [ -f android/app/google-services.json ]; then
+            echo "google-services.json already exists"
+          elif [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
+            printf "%s" "${{ secrets.GOOGLE_SERVICES_JSON }}" > android/app/google-services.json
+            echo "google-services.json created from secret"
+          else
+            echo "Missing GOOGLE_SERVICES_JSON secret" >&2
+            exit 1
+          fi
+
       - name: Get dependencies
         run: flutter pub get
 
@@ -116,13 +129,13 @@ jobs:
         run: flutter pub get
 
       - name: Build iOS Simulator
-        run: flutter build ios --simulator --release --no-codesign
+        run: flutter build ios --simulator --debug --no-codesign
 
       - name: Upload iOS artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ios-simulator-build
-          path: build/ios/Release-iphonesimulator/
+          path: build/ios/Debug-iphonesimulator/
           retention-days: 7
 
   create-release:

@@ -63,9 +63,13 @@ Future<void> _loadEnv() async {
 
   try {
     await dotenv.load(fileName: '.env.example');
+    return;
   } catch (_) {
-    // Continue without dotenv file to avoid hard crash on startup.
+    // Neither file found — initialize with an empty map to prevent NotInitializedError.
   }
+
+  // Final fallback: load with isOptional so dotenv initializes even without a file.
+  await dotenv.load(isOptional: true);
 }
 
 class MyApp extends StatefulWidget {

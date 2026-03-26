@@ -1,0 +1,180 @@
+name: PR Build and App Size
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  android-size-and-build:
+    name: Android Build + Size Diff
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Build Android APK (new)
+        run: |
+          flutter pub get
+          flutter build apk --release
+
+      - name: Checkout PR base
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+          fetch-depth: 1
+
+      - name: Build Android APK (old)
+        working-directory: base
+        run: |
+          flutter pub get
+          flutter build apk --release
+
+      - name: Collect APK sizes
+        id: sizes
+        shell: bash
+        run: |
+          set -euo pipefail
+          OLD_APK="base/build/app/outputs/flutter-apk/app-release.apk"
+          NEW_APK="build/app/outputs/flutter-apk/app-release.apk"
+
+          if [ ! -f "$OLD_APK" ]; then
+            echo "Old APK not found: $OLD_APK"
+            exit 1
+          fi
+
+          if [ ! -f "$NEW_APK" ]; then
+            echo "New APK not found: $NEW_APK"
+            exit 1
+          fi
+
+          OLD_BYTES=$(stat -c%s "$OLD_APK")
+          NEW_BYTES=$(stat -c%s "$NEW_APK")
+          DIFF_BYTES=$((NEW_BYTES - OLD_BYTES))
+
+          echo "old_bytes=$OLD_BYTES" >> "$GITHUB_OUTPUT"
+          echo "new_bytes=$NEW_BYTES" >> "$GITHUB_OUTPUT"
+          echo "diff_bytes=$DIFF_BYTES" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Android APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-android-apks-${{ github.event.pull_request.number }}
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            base/build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 7
+
+      - name: Comment app size diff on PR
+        continue-on-error: true
+        uses: actions/github-script@v7
+        env:
+          OLD_BYTES: ${{ steps.sizes.outputs.old_bytes }}
+          NEW_BYTES: ${{ steps.sizes.outputs.new_bytes }}
+          DIFF_BYTES: ${{ steps.sizes.outputs.diff_bytes }}
+        with:
+          script: |
+            const marker = '<!-- app-size-comment -->';
+            const prNumber = context.payload.pull_request.number;
+            const oldBytes = Number(process.env.OLD_BYTES || 0);
+            const newBytes = Number(process.env.NEW_BYTES || 0);
+            const diffBytes = Number(process.env.DIFF_BYTES || 0);
+
+            function formatBytes(bytes) {
+              const abs = Math.abs(bytes);
+              if (abs < 1024) return `${bytes} B`;
+              if (abs < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+              return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+            }
+
+            const pct = oldBytes === 0 ? 0 : (diffBytes / oldBytes) * 100;
+            const diffSign = diffBytes > 0 ? '+' : '';
+            const pctSign = pct > 0 ? '+' : '';
+
+            const body = [
+              marker,
+              '## App size report',
+              '',
+              '| Old size | New size | Diff |',
+              '| --- | --- | --- |',
+              `| ${formatBytes(oldBytes)} | ${formatBytes(newBytes)} | ${diffSign}${formatBytes(diffBytes)} (${pctSign}${pct.toFixed(2)}%) |`,
+              '',
+              `Source: Android release APK (${context.payload.pull_request.base.ref} -> ${context.payload.pull_request.head.ref})`,
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              per_page: 100,
+            });
+
+            const existing = comments.find((c) => c.user.type === 'Bot' && c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                body,
+              });
+            }
+
+  ios-build:
+    name: iOS Build Check
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Install CocoaPods
+        working-directory: ios
+        run: |
+          pod repo update
+          pod install --repo-update
+
+      - name: Build iOS Simulator (release)
+        run: flutter build ios --simulator --release
+
+      - name: Upload iOS build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-ios-simulator-${{ github.event.pull_request.number }}
+          path: build/ios/Release-iphonesimulator/
+          retention-days: 7

@@ -6,14 +6,30 @@ on:
       - 'v*'
   workflow_dispatch:
     inputs:
+      build_android:
+        description: 'Run Android build'
+        required: false
+        default: true
+        type: boolean
+      build_ios:
+        description: 'Run iOS build'
+        required: false
+        default: true
+        type: boolean
+      create_release:
+        description: 'Create GitHub Release (manual runs)'
+        required: false
+        default: false
+        type: boolean
       release_tag:
-        description: 'Release tag to create (example: v1.0.1)'
-        required: true
-        default: 'v1.0.1'
+        description: 'Optional release tag (example: v1.0.1). Used only when create_release=true'
+        required: false
+        default: ''
 
 jobs:
   build-android:
     name: Build Android APK & AAB
+    if: ${{ github.event_name == 'push' || github.event.inputs.build_android == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +46,22 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+
+      - name: Prepare .env for CI
+        shell: bash
+        run: |
+          if [ -f .env ]; then
+            echo ".env already exists"
+          elif [ -n "${{ secrets.DOTENV_FILE }}" ]; then
+            printf "%s" "${{ secrets.DOTENV_FILE }}" > .env
+            echo ".env created from DOTENV_FILE secret"
+          elif [ -f .env.example ]; then
+            cp .env.example .env
+            echo ".env created from .env.example"
+          else
+            echo "CI=true" > .env
+            echo "Fallback .env created"
+          fi
 
       - name: Get dependencies
         run: flutter pub get
@@ -52,6 +84,7 @@ jobs:
 
   build-ios:
     name: Build iOS Simulator
+    if: ${{ github.event_name == 'push' || github.event.inputs.build_ios == 'true' }}
     runs-on: macos-latest
 
     steps:
@@ -63,20 +96,27 @@ jobs:
         with:
           channel: 'stable'
 
+      - name: Prepare .env for CI
+        shell: bash
+        run: |
+          if [ -f .env ]; then
+            echo ".env already exists"
+          elif [ -n "${{ secrets.DOTENV_FILE }}" ]; then
+            printf "%s" "${{ secrets.DOTENV_FILE }}" > .env
+            echo ".env created from DOTENV_FILE secret"
+          elif [ -f .env.example ]; then
+            cp .env.example .env
+            echo ".env created from .env.example"
+          else
+            echo "CI=true" > .env
+            echo "Fallback .env created"
+          fi
+
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Setup iOS
-        run: |
-          cd ios
-          # Ensure minimum iOS deployment target is 12.0
-          sed -i "s/platform :ios, '.*/platform :ios, '12.0'/" Podfile || echo "platform :ios, '12.0'" >> Podfile
-          pod repo update
-          pod install --repo-update
-          cd ..
-
       - name: Build iOS Simulator
-        run: flutter build ios --simulator --release
+        run: flutter build ios --simulator --release --no-codesign
 
       - name: Upload iOS artifacts
         uses: actions/upload-artifact@v4
@@ -87,6 +127,7 @@ jobs:
 
   create-release:
     name: Create GitHub Release
+    if: ${{ github.event_name == 'push' || (github.event.inputs.create_release == 'true' && github.event.inputs.build_android == 'true' && github.event.inputs.build_ios == 'true') }}
     needs: [build-android, build-ios]
     runs-on: ubuntu-latest
 
@@ -111,6 +152,9 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             TAG="${{ github.event.inputs.release_tag }}"
+            if [ -z "$TAG" ]; then
+              TAG="manual-${{ github.run_number }}"
+            fi
           else
             TAG="${GITHUB_REF#refs/tags/}"
           fi

@@ -28,8 +28,8 @@ void main() async {
     anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
   );
 
-  // Initialize Firebase
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Initialize Firebase — gracefully handles missing config (Appetizer / CI without secrets).
+  await _initFirebase();
 
   // Initialize Push Notifications
   final pushNotificationService = PushNotificationService();
@@ -70,6 +70,31 @@ Future<void> _loadEnv() async {
 
   // Final fallback: load with isOptional so dotenv initializes even without a file.
   await dotenv.load(isOptional: true);
+}
+
+/// Initializes Firebase with a graceful multi-tier fallback:
+///   1. No-options init — Firebase SDK reads GoogleService-Info.plist / google-services.json natively.
+///   2. Dotenv options — if the native file is absent, try building options from .env vars.
+///   3. Silent catch — if all else fails, continue without Firebase (Appetizer / CI without secrets).
+Future<void> _initFirebase() async {
+  // Tier 1: let Firebase find the native config file automatically.
+  try {
+    await Firebase.initializeApp();
+    return;
+  } catch (_) {
+    // Native file missing or invalid — try dotenv options.
+  }
+
+  // Tier 2: use env-var-driven options (requires .env to be loaded with Firebase keys).
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    return;
+  } catch (_) {
+    // Dotenv vars missing — continue without Firebase.
+  }
+
+  // Tier 3: Firebase is not available in this environment (e.g. Appetizer preview without secrets).
+  debugPrint('[Firebase] Skipping Firebase init — no config available.');
 }
 
 class MyApp extends StatefulWidget {

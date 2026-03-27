@@ -26,6 +26,22 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Prepare .env for CI tests
+        shell: bash
+        run: |
+          mkdir -p assets
+          if [ -n "${{ secrets.DOTENV_FILE }}" ]; then
+            printf "%s" "${{ secrets.DOTENV_FILE }}" > .env
+            cp .env assets/app_config.txt
+            echo "Environment variables saved to assets/app_config.txt"
+          elif [ -f .env.example ]; then
+            cp .env.example .env
+            cp .env assets/app_config.txt
+          else
+            echo "CI=true" > .env
+            cp .env assets/app_config.txt
+          fi
+
       - name: Flutter pub get
         run: flutter pub get
 

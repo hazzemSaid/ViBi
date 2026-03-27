@@ -19,10 +19,18 @@ class ProfileQueries {
             public_profile_enabled
             public_theme_key
             public_cta_text
-            followers_count
-            following_count
-            questions_count
-            answers_count
+            followersCount: followsByFollowingId {
+              totalCount
+            }
+            followingCount: followsByFollowerId {
+              totalCount
+            }
+            questionsCount: questionsCollection {
+              totalCount
+            }
+            answersCount: answersCollection {
+              totalCount
+            }
             created_at
             updated_at
             
@@ -116,7 +124,9 @@ class ProfileQueries {
             username
             full_name
             avatar_url
-            followers_count
+            followersCount: followsByFollowingId {
+              totalCount
+            }
             
             # Followers (people who follow this user)
             followers: followsCollection(
@@ -140,7 +150,9 @@ class ProfileQueries {
                         full_name
                         avatar_url
                         bio
-                        followers_count
+                        followersCount: followsByFollowingId {
+                          totalCount
+                        }
                       }
                     }
                   }
@@ -163,7 +175,9 @@ class ProfileQueries {
             username
             full_name
             avatar_url
-            following_count
+            followingCount: followsByFollowerId {
+              totalCount
+            }
             
             # Following (people this user follows)
             following: followsCollection(
@@ -187,7 +201,9 @@ class ProfileQueries {
                         full_name
                         avatar_url
                         bio
-                        followers_count
+                        followersCount: followsByFollowingId {
+                          totalCount
+                        }
                       }
                     }
                   }
@@ -368,8 +384,12 @@ class ProfileQueries {
             avatar_url
             bio
             is_private
-            followers_count
-            answers_count
+            followersCount: followsByFollowingId {
+              totalCount
+            }
+            answersCount: answersCollection {
+              totalCount
+            }
           }
         }
         pageInfo {

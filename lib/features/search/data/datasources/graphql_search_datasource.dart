@@ -30,8 +30,12 @@ class GraphQLSearchDataSource {
             username
             bio
             avatar_url
-            followers_count
-            answers_count
+            followersCount: followsByFollowingId {
+              totalCount
+            }
+            answersCount: answersCollection {
+              totalCount
+            }
             is_private
           }
         }
@@ -129,7 +133,7 @@ class GraphQLSearchDataSource {
       final searchPattern = '%${query.trim()}%';
       final response = await _client
           .from('profiles')
-          .select()
+          .select('id,full_name,username,bio,avatar_url,is_private')
           .or('username.ilike.$searchPattern,full_name.ilike.$searchPattern')
           .limit(50);
 

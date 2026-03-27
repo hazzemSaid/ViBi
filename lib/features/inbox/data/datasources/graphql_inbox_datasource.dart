@@ -134,41 +134,14 @@ class GraphQLInboxDataSource {
   }
 
   Future<void> _updateAnswerCount(String userId) async {
-    try {
-      final profile = await _client
-          .from('profiles')
-          .select('answers_count')
-          .eq('id', userId)
-          .maybeSingle();
-
-      if (profile != null) {
-        final currentCount = profile['answers_count'] as int? ?? 0;
-        await _client
-            .from('profiles')
-            .update({'answers_count': currentCount + 1})
-            .eq('id', userId);
-      }
-    } catch (e) {
-      print('Update answer count error: $e');
-    }
+    // The profiles table no longer stores denormalized answer counters.
+    // Counts are derived from relations in GraphQL queries.
+    final _ = userId;
   }
 
   Future<void> _updateQuestionCount(String userId) async {
-    try {
-      // Count pending questions
-      final pendingCount = await _client
-          .from('questions')
-          .select('id')
-          .eq('recipient_id', userId)
-          .eq('status', 'pending')
-          .count();
-
-      await _client
-          .from('profiles')
-          .update({'questions_count': pendingCount.count})
-          .eq('id', userId);
-    } catch (e) {
-      print('Update question count error: $e');
-    }
+    // The profiles table no longer stores denormalized question counters.
+    // Counts are derived from relations in GraphQL queries.
+    final _ = userId;
   }
 }

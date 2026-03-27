@@ -50,18 +50,21 @@ jobs:
       - name: Prepare .env for CI
         shell: bash
         run: |
-          if [ -f .env ]; then
-            echo ".env already exists"
-          elif [ -n "${{ secrets.DOTENV_FILE }}" ]; then
+          mkdir -p assets
+          if [ -n "${{ secrets.DOTENV_FILE }}" ]; then
             printf "%s" "${{ secrets.DOTENV_FILE }}" > .env
-            echo ".env created from DOTENV_FILE secret"
+            cp .env assets/app_config.txt
+            echo "Environment variables saved to assets/app_config.txt"
           elif [ -f .env.example ]; then
             cp .env.example .env
-            echo ".env created from .env.example"
+            cp .env assets/app_config.txt
           else
             echo "CI=true" > .env
-            echo "Fallback .env created"
+            cp .env assets/app_config.txt
           fi
+          echo "--- DEBUG INFO ---"
+          echo "Variables successfully loaded into env:"
+          awk -F '=' '{if(NF>1) print "- "$1": [Length: "length($2)" characters]"}' assets/app_config.txt
 
       - name: Provide google-services.json for CI
         shell: bash
@@ -81,6 +84,9 @@ jobs:
 
           python3 -c "import json; json.load(open('android/app/google-services.json', 'r', encoding='utf-8'))"
           echo "google-services.json is valid JSON"
+          echo "--- DEBUG INFO ---"
+          echo "Project ID inside Google Services JSON:"
+          grep -o '"project_id": *"[^"]*"' android/app/google-services.json || echo "project_id not found"
 
       - name: Get dependencies
         run: flutter pub get
@@ -118,18 +124,21 @@ jobs:
       - name: Prepare .env for CI
         shell: bash
         run: |
-          if [ -f .env ]; then
-            echo ".env already exists"
-          elif [ -n "${{ secrets.DOTENV_FILE }}" ]; then
+          mkdir -p assets
+          if [ -n "${{ secrets.DOTENV_FILE }}" ]; then
             printf "%s" "${{ secrets.DOTENV_FILE }}" > .env
-            echo ".env created from DOTENV_FILE secret"
+            cp .env assets/app_config.txt
+            echo "Environment variables saved to assets/app_config.txt"
           elif [ -f .env.example ]; then
             cp .env.example .env
-            echo ".env created from .env.example"
+            cp .env assets/app_config.txt
           else
             echo "CI=true" > .env
-            echo "Fallback .env created"
+            cp .env assets/app_config.txt
           fi
+          echo "--- DEBUG INFO ---"
+          echo "Variables successfully loaded into env:"
+          awk -F '=' '{if(NF>1) print "- "$1": [Length: "length($2)" characters]"}' assets/app_config.txt
 
       - name: Provide GoogleService-Info.plist for CI
         shell: bash
@@ -144,6 +153,12 @@ jobs:
             echo "GoogleService-Info.plist created from GOOGLE_SERVICE_INFO_PLIST"
           else
             echo "No iOS Firebase plist secret provided; continuing"
+          fi
+          
+          if [ -f ios/Runner/GoogleService-Info.plist ]; then
+            echo "--- DEBUG INFO ---"
+            echo "Client ID inside Plist:"
+            grep -A 1 '<key>CLIENT_ID</key>' ios/Runner/GoogleService-Info.plist | grep '<string>' || echo "CLIENT_ID not found"
           fi
 
       - name: Get dependencies

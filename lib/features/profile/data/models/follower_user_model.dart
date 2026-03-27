@@ -21,8 +21,24 @@ class FollowerUserModel extends FollowerUser {
       fullName: profileNode['full_name'] as String?,
       avatarUrl: profileNode['avatar_url'] as String?,
       bio: profileNode['bio'] as String?,
-      followersCount: profileNode['followers_count'] as int? ?? 0,
+      followersCount: _extractCount(
+        profileNode['followersCount'],
+        fallback: profileNode['followers_count'],
+      ),
       followedAt: DateTime.parse(node['created_at'] as String),
     );
+  }
+
+  static int _extractCount(dynamic value, {dynamic fallback}) {
+    if (value is int) return value;
+    if (value is Map<String, dynamic>) {
+      final total = value['totalCount'];
+      if (total is int) return total;
+      final edges = value['edges'];
+      if (edges is List) return edges.length;
+      return 0;
+    }
+    if (fallback is int) return fallback;
+    return 0;
   }
 }

@@ -30,23 +30,8 @@ class GraphQLQuestionDataSource {
   }
 
   Future<void> _updateQuestionCount(String userId) async {
-    try {
-      // Fetch current count
-      final profile = await _client
-          .from('profiles')
-          .select('questions_count')
-          .eq('id', userId)
-          .maybeSingle();
-
-      if (profile != null) {
-        final currentCount = profile['questions_count'] as int? ?? 0;
-        await _client
-            .from('profiles')
-            .update({'questions_count': currentCount + 1})
-            .eq('id', userId);
-      }
-    } catch (e) {
-      print('Update question count error: $e');
-    }
+    // The profiles table no longer stores denormalized question counters.
+    // Counts are derived from relations in GraphQL queries.
+    final _ = userId;
   }
 }

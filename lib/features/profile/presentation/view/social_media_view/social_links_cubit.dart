@@ -140,6 +140,48 @@ class SocialLinksCubit extends Cubit<SocialLinksState> {
     await _loadLinks();
   }
 
+  /// Swaps two adjacent items in the list (for move-up / move-down actions).
+  /// Unlike [reorderLinks], this does NOT apply the ReorderableListView
+  /// index adjustment, so `oldIndex` and `newIndex` are used as-is.
+  Future<void> swapLinks(
+    List<SocialLink> links,
+    int oldIndex,
+    int newIndex,
+  ) async {
+    if (links.isEmpty) return;
+    if (oldIndex < 0 || oldIndex >= links.length) return;
+    if (newIndex < 0 || newIndex >= links.length) return;
+
+    final items = List<SocialLink>.from(links);
+    final moved = items.removeAt(oldIndex);
+    items.insert(newIndex, moved);
+
+    emit(SocialLinksLoading(previousLinks: currentLinks));
+
+    for (var index = 0; index < items.length; index++) {
+      final link = items[index];
+      if (link.displayOrder == index) continue;
+
+      final result = await _updateSocialLinkUseCase(
+        linkId: link.id,
+        platform: link.platform,
+        url: link.url,
+        title: link.title,
+        displayLabel: link.displayLabel,
+        displayOrder: index,
+        isActive: link.isActive,
+      );
+
+      final failed = result.fold((error) => error, (_) => null);
+      if (failed != null) {
+        _emitError(failed);
+        throw Exception(failed);
+      }
+    }
+
+    await _loadLinks();
+  }
+
   Future<void> _loadLinks() async {
     emit(SocialLinksLoading(previousLinks: currentLinks));
     final result = await _fetchSocialLinksUseCase(userId);

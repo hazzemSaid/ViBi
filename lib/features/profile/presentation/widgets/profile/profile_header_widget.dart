@@ -26,7 +26,7 @@ class ProfileHeaderWidget extends StatelessWidget {
       children: [
         const SizedBox(height: AppSizes.s8),
         ProfileImageStrip(
-          fav_color: AppColors.fromHex(profile?.favColor),
+          favColor: AppColors.fromHex(profile?.favColor),
           imageUrls: imageUrls,
           fallbackImageUrl: fallbackImageUrl,
           placeholderInitial: name.isNotEmpty ? name[0].toUpperCase() : '?',

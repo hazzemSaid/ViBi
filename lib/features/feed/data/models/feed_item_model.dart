@@ -30,9 +30,9 @@ class FeedItemModel extends FeedItem {
       sharesCount: map['shares_count'] as int? ?? 0,
       createdAt: DateTime.parse(map['created_at'] as String),
       username: map['username'] as String?,
-      avatarUrl: avatarUrls.firstOrNull,
+      avatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first : null,
       answerAuthorUsername: map['answer_author_username'] as String?,
-      answerAuthorAvatarUrl: authorAvatarUrls.firstOrNull,
+      answerAuthorAvatarUrl: authorAvatarUrls.isNotEmpty ? authorAvatarUrls.first : null,
       questionText: map['question_text'] as String?,
       isAnonymous: map['is_anonymous'] as bool? ?? false,
     );
@@ -83,7 +83,7 @@ class FeedItemModel extends FeedItem {
     final questionerAvatarUrls = _parseAvatarUrls(questionerProfile['avatar_urls']);
     final displayAvatar = isAnon
         ? null
-        : questionerAvatarUrls.firstOrNull;
+        : (questionerAvatarUrls.isNotEmpty ? questionerAvatarUrls.first : null);
 
     final authorAvatarUrls = _parseAvatarUrls(answerAuthorProfile?['avatar_urls']);
 
@@ -98,7 +98,7 @@ class FeedItemModel extends FeedItem {
       username: displayName,
       avatarUrl: displayAvatar,
       answerAuthorUsername: answerAuthorProfile?['username'] as String?,
-      answerAuthorAvatarUrl: authorAvatarUrls.firstOrNull,
+      answerAuthorAvatarUrl: authorAvatarUrls.isNotEmpty ? authorAvatarUrls.first : null,
       questionText: question['question_text'] as String?,
       isAnonymous: isAnon,
     );

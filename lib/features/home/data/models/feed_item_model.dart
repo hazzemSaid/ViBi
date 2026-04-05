@@ -26,7 +26,7 @@ class FeedItemModel extends FeedItem {
       id: map['id'] as String,
       userId: map['user_id'] as String,
       username: profile?['username'] as String? ?? 'unknown',
-      avatarUrl: avatarUrls.firstOrNull,
+      avatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first : null,
       answerAuthorUsername: 'unknown',
       answerAuthorAvatarUrl: null,
       questionText: question?['question_text'] as String? ?? '',
@@ -71,7 +71,7 @@ class FeedItemModel extends FeedItem {
     final questionerAvatarUrls = _parseAvatarUrls(questionerProfile?['avatar_urls']);
     final displayAvatar = isAnon
         ? null
-        : questionerAvatarUrls.firstOrNull;
+        : (questionerAvatarUrls.isNotEmpty ? questionerAvatarUrls.first : null);
 
     final authorAvatarUrls = _parseAvatarUrls(answerAuthorProfile?['avatar_urls']);
 
@@ -82,7 +82,7 @@ class FeedItemModel extends FeedItem {
       avatarUrl: displayAvatar,
       answerAuthorUsername:
           answerAuthorProfile?['username'] as String? ?? 'unknown',
-      answerAuthorAvatarUrl: authorAvatarUrls.firstOrNull,
+      answerAuthorAvatarUrl: authorAvatarUrls.isNotEmpty ? authorAvatarUrls.first : null,
       questionText: question?['question_text'] as String? ?? '',
       answerText:
           answersData?['answer_text'] as String? ??

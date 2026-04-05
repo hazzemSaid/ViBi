@@ -14,20 +14,19 @@ class ProfileImageStrip extends StatelessWidget {
     this.fallbackImageUrl,
     this.placeholderInitial = '?',
     this.height = 300,
-    this.fav_color,
+    this.favColor,
   });
 
-  final List<String?> imageUrls;
+  final List<String> imageUrls;
   final String? fallbackImageUrl;
   final String placeholderInitial;
   final double height;
-  final Color? fav_color;
+  final Color? favColor;
 
   @override
   Widget build(BuildContext context) {
     final mediaSize = MediaQuery.sizeOf(context);
     final cleaned = imageUrls
-        .whereType<String>()
         .map((e) => e.trim())
         .where((e) => e.isNotEmpty)
         .take(3)
@@ -40,7 +39,7 @@ class ProfileImageStrip extends StatelessWidget {
     }
 
     final itemCount = cleaned.isEmpty ? 1 : cleaned.length;
-    final borderColor = fav_color ?? const Color(0xFF3FB4FF);
+    final borderColor = favColor ?? const Color(0xFF3FB4FF);
     final stripHeight = height
         .clamp(mediaSize.height * 0.28, mediaSize.height * 0.4)
         .toDouble();

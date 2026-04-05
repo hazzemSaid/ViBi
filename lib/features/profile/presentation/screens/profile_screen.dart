@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
@@ -87,7 +88,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   return;
                 }
 
-                final shareUrl = 'https://vibi.social/u/$username';
+                final shareBaseUrl =
+                    dotenv.env['SHARE_BASE_URL'] ?? 'https://vibi.social';
+                final shareUrl = '$shareBaseUrl/u/$username';
 
                 await Clipboard.setData(ClipboardData(text: shareUrl));
                 if (context.mounted) {

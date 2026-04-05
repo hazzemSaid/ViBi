@@ -65,6 +65,8 @@ class ReactionsRepositoryImpl implements ReactionsRepository {
         ? profile.first as Map<String, dynamic>
         : <String, dynamic>{};
 
+    final avatarUrls = _parseAvatarUrls(profileMap['avatar_urls']);
+
     return CommentItem(
       id: row['id'] as String,
       answerId: row['answer_id'] as String,
@@ -74,7 +76,7 @@ class ReactionsRepositoryImpl implements ReactionsRepository {
           DateTime.tryParse(row['created_at']?.toString() ?? '') ??
           DateTime.now(),
       username: profileMap['username'] as String?,
-      avatarUrl: _parseAvatarUrls(profileMap['avatar_urls']).firstOrNull,
+      avatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first : null,
     );
   }
 

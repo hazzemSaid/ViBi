@@ -23,7 +23,7 @@ class InboxQuestionModel extends InboxQuestion {
       recipientId: map['recipient_id'] as String,
       senderId: map['sender_id'] as String?,
       senderUsername: senderData?['username'] as String?,
-      senderAvatarUrl: avatarUrls.firstOrNull,
+      senderAvatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first : null,
       questionText: map['question_text'] as String,
       isAnonymous: map['is_anonymous'] as bool? ?? false,
       status: map['status'] as String? ?? 'pending',

@@ -20,7 +20,7 @@ class FollowerUserModel extends FollowerUser {
       id: node['follower_id'] as String? ?? '',
       username: profileNode['username'] as String?,
       fullName: profileNode['full_name'] as String?,
-      avatarUrl: avatarUrls.firstOrNull,
+      avatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first : null,
       bio: profileNode['bio'] as String?,
       followersCount: _extractCount(
         profileNode['followersCount'],

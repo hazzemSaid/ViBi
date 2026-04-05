@@ -155,7 +155,7 @@ class SocialLinkTile extends StatelessWidget {
       final swapIndex = moveUp ? index - 1 : index + 1;
       if (swapIndex < 0 || swapIndex >= links.length) return;
 
-      await cubit.reorderLinks(links, index, swapIndex);
+      await cubit.swapLinks(links, index, swapIndex);
 
       if (onChanged != null) {
         await onChanged!();

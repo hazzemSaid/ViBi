@@ -109,6 +109,8 @@ class _EditProfilePublicWebScreenState extends State<EditProfilePublicWebScreen>
                                         onRemoveAvatar: removeAvatar,
                                         nameController: nameController,
                                         usernameController: usernameController,
+                                        usernameErrorText: usernameErrorText,
+                                        onUsernameChanged: onUsernameChanged,
                                         bioController: bioController,
                                         statusController: statusController,
                                         ctaController: ctaController,

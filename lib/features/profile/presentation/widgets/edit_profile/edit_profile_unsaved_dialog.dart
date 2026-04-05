@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vibi/core/constants/app_constants.dart';
 import 'package:vibi/features/profile/presentation/widgets/edit_profile/edit_profile_widgets.dart';
 
 class UnsavedChangesDialog extends StatelessWidget {
@@ -8,10 +7,11 @@ class UnsavedChangesDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      clipBehavior: Clip.antiAlias,
       insetPadding: const EdgeInsets.symmetric(horizontal: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: Colors.white,
@@ -38,10 +38,10 @@ class UnsavedChangesDialog extends StatelessWidget {
                 const SizedBox(width: 12),
                 const Expanded(
                   child: Text(
-                    'Save your changes?',
+                    'Unsaved changes',
                     style: TextStyle(
                       color: ProfileEditorPalette.primaryText,
-                      fontSize: 17,
+                      fontSize: 18,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -50,58 +50,116 @@ class UnsavedChangesDialog extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             const Text(
-              'You have unsaved edits on your profile. Save now before leaving this screen?',
+              'You edited your profile but those changes are not saved yet.',
               style: TextStyle(
                 color: ProfileEditorPalette.secondaryText,
                 fontSize: 13,
                 height: 1.5,
               ),
             ),
-            const SizedBox(height: 18),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                SizedBox(
-                  width: 170,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(UnsavedExitAction.discard);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(
-                        color: ProfileEditorPalette.primaryText,
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF4E8),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFFDD5A3)),
+              ),
+              child: const Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    size: 18,
+                    color: Color(0xFFB45309),
+                  ),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'If you discard, all new edits will be lost.',
+                      style: TextStyle(
+                        color: Color(0xFF92400E),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        height: 1.4,
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: const Text(
-                      'Discard',
-                      style: TextStyle(color: ProfileEditorPalette.primaryText),
                     ),
                   ),
-                ),
-                SizedBox(
-                  width: 170,
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).pop(UnsavedExitAction.save);
-                    },
-                    style: FilledButton.styleFrom(
-                      backgroundColor: ProfileEditorPalette.accent,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    icon: const Icon(Icons.check_rounded, size: 16),
-                    label: const Text('Save & Exit'),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 8),
-            Center(
+            const SizedBox(height: 18),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final compact = constraints.maxWidth < 360;
+
+                final saveButton = FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop(UnsavedExitAction.save);
+                  },
+                  style: FilledButton.styleFrom(
+                    backgroundColor: ProfileEditorPalette.accent,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(Icons.check_rounded, size: 16),
+                  label: const Text('Save and Exit'),
+                );
+
+                final discardButton = OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop(UnsavedExitAction.discard);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Color(0xFFFCA5A5)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(
+                    Icons.delete_outline_rounded,
+                    size: 16,
+                    color: Color(0xFFB91C1C),
+                  ),
+                  label: const Text(
+                    'Discard Changes',
+                    style: TextStyle(color: Color(0xFFB91C1C)),
+                  ),
+                );
+
+                if (compact) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      saveButton,
+                      const SizedBox(height: 10),
+                      discardButton,
+                    ],
+                  );
+                }
+
+                return Row(
+                  children: [
+                    Expanded(child: discardButton),
+                    const SizedBox(width: 10),
+                    Expanded(child: saveButton),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 4),
+            SizedBox(
+              width: double.infinity,
               child: TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(UnsavedExitAction.stay);
                 },
+                style: TextButton.styleFrom(
+                  foregroundColor: ProfileEditorPalette.secondaryText,
+                ),
                 child: const Text('Keep Editing'),
               ),
             ),

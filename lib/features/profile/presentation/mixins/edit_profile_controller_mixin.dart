@@ -41,6 +41,7 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
   int? avatarLoadingSlot;
   bool allowRoutePop = false;
   EditorTab activeTab = EditorTab.links;
+  String? usernameErrorText;
 
   void initController() {
     profileCubit = getIt<ProfileCubit>();
@@ -177,6 +178,10 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
     if (!formKey.currentState!.validate()) return false;
     if (loadedProfile == null || userId == null) return false;
 
+    if (usernameErrorText != null && mounted) {
+      setState(() => usernameErrorText = null);
+    }
+
     try {
       final mergedAvatarUrls = List<String?>.from(avatarUrls);
 
@@ -223,10 +228,20 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
         final errorMessage = state is ProfileFailure
             ? state.message
             : 'Could not save profile.';
+
+        final usernameConflictMessage = _mapUsernameConflictMessage(
+          errorMessage,
+        );
+        if (usernameConflictMessage != null) {
+          setState(() => usernameErrorText = usernameConflictMessage);
+          return false;
+        }
+
         showSnackBar(errorMessage);
         return false;
       }
       setState(() {
+        usernameErrorText = null;
         loadedProfile = updated;
         for (var index = 0; index < 3; index++) {
           avatarUrls[index] = index < compactAvatarUrls.length
@@ -239,9 +254,21 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
       return true;
     } catch (e) {
       if (!mounted) return false;
+
+      final usernameConflictMessage = _mapUsernameConflictMessage(e.toString());
+      if (usernameConflictMessage != null) {
+        setState(() => usernameErrorText = usernameConflictMessage);
+        return false;
+      }
+
       showSnackBar('Failed to save profile: $e');
       return false;
     }
+  }
+
+  void onUsernameChanged(String _) {
+    if (usernameErrorText == null || !mounted) return;
+    setState(() => usernameErrorText = null);
   }
 
   String _normalizedValue(String? value) => value?.trim() ?? '';
@@ -448,6 +475,34 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
   String? _trimToNull(String value) {
     final trimmed = value.trim();
     return trimmed.isEmpty ? null : trimmed;
+  }
+
+  String? _mapUsernameConflictMessage(String rawMessage) {
+    final message = rawMessage.toLowerCase();
+
+    final hasDuplicateSignal =
+        message.contains('duplicate key value') ||
+        message.contains('unique constraint') ||
+        message.contains('already exists') ||
+        message.contains('already taken') ||
+        message.contains('23505');
+
+    final hasUsernameSignal =
+        message.contains('username') ||
+        message.contains('profiles_username_key');
+
+    final genericDuplicate = message.contains('this record already exists');
+    final usernameChanged =
+        loadedProfile != null &&
+        usernameController.text.trim() !=
+            _normalizedValue(loadedProfile?.username);
+
+    if ((hasDuplicateSignal && hasUsernameSignal) ||
+        (genericDuplicate && usernameChanged)) {
+      return 'This username is already taken. Please choose another one.';
+    }
+
+    return null;
   }
 
   String? fontFamilyFor(String key) {

@@ -10,6 +10,8 @@ class EditorInputBlock extends StatelessWidget {
     this.validator,
     this.maxLines = 1,
     this.prefixText,
+    this.errorText,
+    this.onChanged,
   });
 
   final String label;
@@ -18,6 +20,8 @@ class EditorInputBlock extends StatelessWidget {
   final String? Function(String?)? validator;
   final int maxLines;
   final String? prefixText;
+  final String? errorText;
+  final ValueChanged<String>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +40,9 @@ class EditorInputBlock extends StatelessWidget {
         TextFormField(
           controller: controller,
           validator: validator,
+          forceErrorText: errorText,
           maxLines: maxLines,
+          onChanged: onChanged,
           style: const TextStyle(color: ProfileEditorPalette.primaryText),
           decoration: InputDecoration(
             hintText: hintText,

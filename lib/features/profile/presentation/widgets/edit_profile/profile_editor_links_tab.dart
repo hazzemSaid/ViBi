@@ -35,6 +35,8 @@ class ProfileEditorLinksTab extends StatefulWidget {
     required this.onReorderLinks,
     required this.socialAccountLinksFor,
     required this.customLinksFor,
+    this.usernameErrorText,
+    this.onUsernameChanged,
   });
 
   final List<String?> avatarUrls;
@@ -66,6 +68,8 @@ class ProfileEditorLinksTab extends StatefulWidget {
   final Future<void> Function(List<SocialLink>, int, int) onReorderLinks;
   final List<SocialLink> Function(List<SocialLink>) socialAccountLinksFor;
   final List<SocialLink> Function(List<SocialLink>) customLinksFor;
+  final String? usernameErrorText;
+  final ValueChanged<String>? onUsernameChanged;
 
   @override
   State<ProfileEditorLinksTab> createState() => _ProfileEditorLinksTabState();
@@ -279,6 +283,8 @@ class _ProfileEditorLinksTabState extends State<ProfileEditorLinksTab> {
                 controller: widget.usernameController,
                 hintText: 'username',
                 prefixText: '@',
+                errorText: widget.usernameErrorText,
+                onChanged: widget.onUsernameChanged,
                 validator: (value) {
                   final trimmed = value?.trim() ?? '';
                   if (trimmed.isEmpty) return 'Username is required';

@@ -84,3 +84,5 @@ supabase/supabase_test_data.sql
 supabase/supabase_test_data_real.sql
 .v
 vibi_share_web
+.tracker/
+tracked.txt

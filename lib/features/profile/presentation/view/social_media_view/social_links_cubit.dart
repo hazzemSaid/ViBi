@@ -140,9 +140,11 @@ class SocialLinksCubit extends Cubit<SocialLinksState> {
     await _loadLinks();
   }
 
-  /// Swaps two adjacent items in the list (for move-up / move-down actions).
+  /// Swaps two items in the list by index (for move-up / move-down actions).
   /// Unlike [reorderLinks], this does NOT apply the ReorderableListView
-  /// index adjustment, so `oldIndex` and `newIndex` are used as-is.
+  /// index adjustment, so [oldIndex] and [newIndex] are used as-is.
+  /// Typically called with adjacent indices for move-up/move-down, but
+  /// any valid index pair is accepted.
   Future<void> swapLinks(
     List<SocialLink> links,
     int oldIndex,

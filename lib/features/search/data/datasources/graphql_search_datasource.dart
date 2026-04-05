@@ -29,7 +29,7 @@ class GraphQLSearchDataSource {
             full_name
             username
             bio
-            avatar_url
+            avatar_urls
             followersCount: followsByFollowingId {
               totalCount
             }
@@ -67,7 +67,7 @@ class GraphQLSearchDataSource {
             }
             profiles {
               username
-              avatar_url
+              avatar_urls
             }
           }
         }
@@ -133,7 +133,7 @@ class GraphQLSearchDataSource {
       final searchPattern = '%${query.trim()}%';
       final response = await _client
           .from('profiles')
-          .select('id,full_name,username,bio,avatar_url,is_private')
+          .select('id,full_name,username,bio,avatar_urls,is_private')
           .or('username.ilike.$searchPattern,full_name.ilike.$searchPattern')
           .limit(50);
 
@@ -187,7 +187,7 @@ class GraphQLSearchDataSource {
       final searchPattern = '%${query.trim()}%';
       final response = await _client
           .from('answers')
-          .select('*, questions(*), profiles(username, avatar_url)')
+          .select('*, questions(*), profiles(username, avatar_urls)')
           .ilike('answer_text', searchPattern)
           .order('created_at', ascending: false)
           .limit(50);

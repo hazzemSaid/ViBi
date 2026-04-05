@@ -74,7 +74,16 @@ class ReactionsRepositoryImpl implements ReactionsRepository {
           DateTime.tryParse(row['created_at']?.toString() ?? '') ??
           DateTime.now(),
       username: profileMap['username'] as String?,
-      avatarUrl: profileMap['avatar_url'] as String?,
+      avatarUrl: _parseAvatarUrls(profileMap['avatar_urls']).firstOrNull,
     );
+  }
+
+  List<String> _parseAvatarUrls(dynamic value) {
+    if (value == null) return const [];
+    if (value is List) {
+      return value.map((e) => e.toString()).toList();
+    }
+    if (value is String) return [value];
+    return const [];
   }
 }

@@ -30,6 +30,7 @@ class FeedItem {
   });
 
   factory FeedItem.fromMap(Map<String, dynamic> map) {
+    final avatarUrls = map['avatar_urls'] as List? ?? [];
     return FeedItem(
       id: map['id'] as String,
       answerText: map['answer_text'] as String? ?? '',
@@ -39,7 +40,7 @@ class FeedItem {
       sharesCount: map['shares_count'] as int? ?? 0,
       createdAt: DateTime.parse(map['created_at'] as String),
       username: map['username'] as String?,
-      avatarUrl: map['avatar_url'] as String?,
+      avatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first.toString() : map['avatar_url'] as String?,
       questionText: map['question_text'] as String?,
       isAnonymous: map['is_anonymous'] as bool? ?? false,
     );
@@ -55,7 +56,7 @@ class FeedItem {
       'shares_count': sharesCount,
       'created_at': createdAt.toIso8601String(),
       'username': username,
-      'avatar_url': avatarUrl,
+      'avatar_urls': avatarUrl != null ? [avatarUrl] : [],
       'question_text': questionText,
       'is_anonymous': isAnonymous,
     };

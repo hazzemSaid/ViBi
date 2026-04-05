@@ -85,7 +85,7 @@ class ReactionsRemoteDataSource {
       final inFilter = '(${userIds.map((id) => '"$id"').join(',')})';
       final profileRows = await _db
           .from('profiles')
-          .select('id, username, avatar_url')
+          .select('id, username, avatar_urls')
           .filter('id', 'in', inFilter);
 
       for (final profile in profileRows) {

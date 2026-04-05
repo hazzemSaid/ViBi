@@ -3,7 +3,7 @@ class UserSearchResult {
   final String? name;
   final String? username;
   final String? bio;
-  final String? profileImageUrl;
+  final List<String> avatarUrls;
   final int followersCount;
   final int answersCount;
   final bool isPrivate;
@@ -13,7 +13,7 @@ class UserSearchResult {
     this.name,
     this.username,
     this.bio,
-    this.profileImageUrl,
+    this.avatarUrls = const [],
     required this.followersCount,
     required this.answersCount,
     required this.isPrivate,

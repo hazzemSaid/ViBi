@@ -20,12 +20,13 @@ class FeedItemModel extends FeedItem {
   factory FeedItemModel.fromMap(Map<String, dynamic> map) {
     final profile = map['profiles'] as Map<String, dynamic>?;
     final question = map['questions'] as Map<String, dynamic>?;
+    final avatarUrls = _parseAvatarUrls(profile?['avatar_urls'] ?? profile?['avatar_url']);
 
     return FeedItemModel(
       id: map['id'] as String,
       userId: map['user_id'] as String,
       username: profile?['username'] as String? ?? 'unknown',
-      avatarUrl: profile?['avatar_url'] as String?,
+      avatarUrl: avatarUrls.firstOrNull,
       answerAuthorUsername: 'unknown',
       answerAuthorAvatarUrl: null,
       questionText: question?['question_text'] as String? ?? '',
@@ -62,13 +63,17 @@ class FeedItemModel extends FeedItem {
     final questionerProfile = question?['profiles'] as Map<String, dynamic>?;
 
     // Use questioner's profile for display, not the answerer's profile
-    final displayName = question?['is_anonymous'] as bool? ?? false
+    final isAnon = question?['is_anonymous'] as bool? ?? false;
+    final displayName = isAnon
         ? 'Anonymous User'
         : (questionerProfile?['username'] as String? ?? 'unknown');
 
-    final displayAvatar = question?['is_anonymous'] as bool? ?? false
+    final questionerAvatarUrls = _parseAvatarUrls(questionerProfile?['avatar_urls']);
+    final displayAvatar = isAnon
         ? null
-        : (questionerProfile?['avatar_url'] as String?);
+        : questionerAvatarUrls.firstOrNull;
+
+    final authorAvatarUrls = _parseAvatarUrls(answerAuthorProfile?['avatar_urls']);
 
     return FeedItemModel(
       id: answerId,
@@ -77,7 +82,7 @@ class FeedItemModel extends FeedItem {
       avatarUrl: displayAvatar,
       answerAuthorUsername:
           answerAuthorProfile?['username'] as String? ?? 'unknown',
-      answerAuthorAvatarUrl: answerAuthorProfile?['avatar_url'] as String?,
+      answerAuthorAvatarUrl: authorAvatarUrls.firstOrNull,
       questionText: question?['question_text'] as String? ?? '',
       answerText:
           answersData?['answer_text'] as String? ??
@@ -100,8 +105,17 @@ class FeedItemModel extends FeedItem {
               (answersData?['created_at'] ?? node['created_at']) as String,
             )
           : DateTime.now(),
-      isAnonymous: question?['is_anonymous'] as bool? ?? false,
+      isAnonymous: isAnon,
     );
+  }
+
+  static List<String> _parseAvatarUrls(dynamic value) {
+    if (value == null) return const [];
+    if (value is List) {
+      return value.map((e) => e.toString()).toList();
+    }
+    if (value is String) return [value];
+    return const [];
   }
 
   Map<String, dynamic> toMap() {
@@ -113,6 +127,7 @@ class FeedItemModel extends FeedItem {
       'comments_count': commentsCount,
       'shares_count': sharesCount,
       'created_at': createdAt.toIso8601String(),
+      'avatar_urls': avatarUrl != null ? [avatarUrl!] : [],
     };
   }
 }

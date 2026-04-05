@@ -26,7 +26,7 @@ class GraphQLFeedDataSource {
             profiles {
               id
               username
-              avatar_url
+              avatar_urls
             }
             questions {
               question_text
@@ -58,7 +58,7 @@ class GraphQLFeedDataSource {
             profiles {
               id
               username
-              avatar_url
+              avatar_urls
             }
             questions {
               question_text
@@ -152,7 +152,7 @@ class GraphQLFeedDataSource {
             profiles {
               id
               username
-              avatar_url
+              avatar_urls
             }
             questions {
               question_text

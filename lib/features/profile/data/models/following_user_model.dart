@@ -15,12 +15,13 @@ class FollowingUserModel extends FollowingUser {
     final profileNode =
         node['following_profile'] as Map<String, dynamic>? ??
         <String, dynamic>{};
+    final avatarUrls = _parseAvatarUrls(profileNode['avatar_urls']);
 
     return FollowingUserModel(
       id: node['following_id'] as String? ?? '',
       username: profileNode['username'] as String?,
       fullName: profileNode['full_name'] as String?,
-      avatarUrl: profileNode['avatar_url'] as String?,
+      avatarUrl: avatarUrls.firstOrNull,
       bio: profileNode['bio'] as String?,
       followersCount: _extractCount(
         profileNode['followersCount'],
@@ -28,6 +29,15 @@ class FollowingUserModel extends FollowingUser {
       ),
       followedAt: DateTime.parse(node['created_at'] as String),
     );
+  }
+
+  static List<String> _parseAvatarUrls(dynamic value) {
+    if (value == null) return const [];
+    if (value is List) {
+      return value.map((e) => e.toString()).toList();
+    }
+    if (value is String) return [value];
+    return const [];
   }
 
   static int _extractCount(dynamic value, {dynamic fallback}) {

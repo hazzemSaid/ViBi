@@ -1,301 +1,301 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image_cropper/image_cropper.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/theme/app_colors.dart';
-import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
-import 'package:vibi/features/profile/domain/entities/user_profile.dart';
-import 'package:vibi/features/profile/domain/repositories/profile_repository.dart';
-import 'package:vibi/features/profile/presentation/providers/profile_providers.dart';
-import 'package:vibi/features/profile/presentation/widgets/edit_profile_basic_info_section.dart';
-import 'package:vibi/features/profile/presentation/widgets/edit_profile_public_web_section.dart';
-import 'package:vibi/features/profile/presentation/widgets/profile_avatar_picker.dart';
 
-class EditProfileScreen extends StatefulWidget {
+class EditProfileScreen extends StatelessWidget {
   const EditProfileScreen({super.key});
 
   @override
-  State<EditProfileScreen> createState() => _EditProfileScreenState();
-}
-
-class _EditProfileScreenState extends State<EditProfileScreen> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _nameController;
-  late TextEditingController _usernameController;
-  late TextEditingController _bioController;
-  late TextEditingController _ctaController;
-  late final ProfileUpdateCubit _profileUpdateCubit;
-  File? _imageFile;
-  String? _currentImageUrl;
-  bool _isPrivate = false;
-  bool _allowAnonymousQuestions = true;
-  bool _publicProfileEnabled = true;
-  String _publicThemeKey = _publicThemeOptions.first;
-
-  static const List<String> _publicThemeOptions = [
-    'tellonym_dark',
-    'minimal_dark',
-    'clean_light',
-  ];
-
-  static const Map<String, String> _publicThemeLabels = {
-    'tellonym_dark': 'Tellonym Dark',
-    'minimal_dark': 'Minimal Dark',
-    'clean_light': 'Clean Light',
-  };
-
-  static const Map<String, String> _publicThemeDescriptions = {
-    'tellonym_dark': 'Bold gradient card style with colorful social buttons.',
-    'minimal_dark':
-        'Low-noise dark layout with clean contrast and subtle accents.',
-    'clean_light':
-        'Bright, airy card style with soft borders and light backgrounds.',
-  };
-
-  @override
-  void initState() {
-    super.initState();
-    _profileUpdateCubit = getIt<ProfileUpdateCubit>();
-    _nameController = TextEditingController();
-    _usernameController = TextEditingController();
-    _bioController = TextEditingController();
-    _ctaController = TextEditingController();
-
-    Future.microtask(() {
-      if (!mounted) return;
-      final user = context.read<AuthCubit>().currentUser;
-      if (user != null) {
-        getIt<ProfileRepository>().fetchProfile(user.id).then((profile) {
-          if (!mounted || profile == null) return;
-
-          setState(() {
-            _nameController.text = profile.name ?? '';
-            _usernameController.text = profile.username ?? '';
-            _bioController.text = profile.bio ?? '';
-            _currentImageUrl = profile.profileImageUrl;
-            _isPrivate = profile.isPrivate;
-            _allowAnonymousQuestions = profile.allowAnonymousQuestions;
-            _publicProfileEnabled = profile.publicProfileEnabled;
-            _publicThemeKey = profile.publicThemeKey;
-            _ctaController.text =
-                profile.publicCtaText ?? 'SEND ME AN ANONYMOUS MESSAGE!';
-          });
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _usernameController.dispose();
-    _bioController.dispose();
-    _ctaController.dispose();
-    _profileUpdateCubit.close();
-    super.dispose();
-  }
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      final croppedFile = await ImageCropper().cropImage(
-        sourcePath: pickedFile.path,
-        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
-        uiSettings: [
-          AndroidUiSettings(
-            toolbarTitle: 'Crop Image',
-            toolbarColor: AppColors.background,
-            toolbarWidgetColor: Colors.white,
-            initAspectRatio: CropAspectRatioPreset.square,
-            lockAspectRatio: true,
-          ),
-          IOSUiSettings(title: 'Crop Image', aspectRatioLockEnabled: true),
-        ],
-      );
-      if (croppedFile != null) {
-        setState(() => _imageFile = File(croppedFile.path));
-      }
-    }
-  }
-
-  Future<void> _saveProfile() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final user = context.read<AuthCubit>().currentUser;
-    if (user == null) return;
-
-    final repository = getIt<ProfileRepository>();
-
-    String? imageUrl = _currentImageUrl;
-
-    try {
-      if (_imageFile != null) {
-        imageUrl = await repository.uploadProfileImage(user.id, _imageFile!);
-      }
-
-      final profile = UserProfile(
-        uid: user.id,
-        name: _nameController.text,
-        username: _usernameController.text,
-        bio: _bioController.text,
-        profileImageUrl: imageUrl,
-        isPrivate: _isPrivate,
-        allowAnonymousQuestions: _allowAnonymousQuestions,
-        publicProfileEnabled: _publicProfileEnabled,
-        publicThemeKey: _publicThemeKey,
-        publicCtaText: _ctaController.text.trim().isEmpty
-            ? null
-            : _ctaController.text.trim(),
-      );
-
-      await _profileUpdateCubit.updateProfile(profile);
-      if (mounted) context.pop();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return BlocProvider<ProfileUpdateCubit>.value(
-      value: _profileUpdateCubit,
-      child: Builder(
-        builder: (context) {
-          final isLoading = context.watch<ProfileUpdateCubit>().state.isLoading;
-          return Scaffold(
-            backgroundColor: AppColors.background,
-            appBar: AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              title: const Text(
-                'Edit Profile',
-                style: TextStyle(color: AppColors.textPrimary),
-              ),
-              leading: IconButton(
-                icon: const Icon(Icons.close, color: AppColors.textPrimary),
-                onPressed: () => context.pop(),
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.refresh, color: AppColors.textPrimary),
-                  onPressed: () {
-                    final user = context.read<AuthCubit>().currentUser;
-                    if (user != null) {
-                      getIt<ProfileRepository>().fetchProfile(user.id).then((
-                        profile,
-                      ) {
-                        if (profile != null && mounted) {
-                          setState(() {
-                            _nameController.text = profile.name ?? '';
-                            _usernameController.text = profile.username ?? '';
-                            _bioController.text = profile.bio ?? '';
-                            _currentImageUrl = profile.profileImageUrl;
-                            _imageFile = null;
-                            _isPrivate = profile.isPrivate;
-                            _allowAnonymousQuestions =
-                                profile.allowAnonymousQuestions;
-                            _publicProfileEnabled =
-                                profile.publicProfileEnabled;
-                            _publicThemeKey = profile.publicThemeKey;
-                            _ctaController.text =
-                                profile.publicCtaText ??
-                                'SEND ME AN ANONYMOUS MESSAGE!';
-                          });
-                        }
-                      });
-                    }
-                  },
-                  tooltip: 'Reload profile',
+    const settingsSections = <_SettingsSection>[
+      _SettingsSection(
+        title: 'Account',
+        items: [
+          _SettingsItem(
+            title: 'Account Information',
+            subtitle: 'Email, phone, password',
+            icon: Icons.person_outline_rounded,
+          ),
+          _SettingsItem(
+            title: 'Privacy & Safety',
+            subtitle: 'Control who can see your content',
+            icon: Icons.shield_outlined,
+          ),
+          _SettingsItem(
+            title: 'Blocked Users',
+            subtitle: 'Manage blocked accounts',
+            icon: Icons.block_outlined,
+          ),
+        ],
+      ),
+      _SettingsSection(
+        title: 'Preferences',
+        items: [
+          _SettingsItem(
+            title: 'Notifications',
+            subtitle: 'Push, email, in-app',
+            icon: Icons.notifications_none_rounded,
+          ),
+          _SettingsItem(
+            title: 'Appearance',
+            subtitle: 'Theme, colors, display',
+            icon: Icons.palette_outlined,
+            routeName: 'edit-profile-public-web',
+          ),
+          _SettingsItem(
+            title: 'Language',
+            subtitle: 'English',
+            icon: Icons.language_rounded,
+          ),
+        ],
+      ),
+      _SettingsSection(
+        title: 'Support',
+        items: [
+          _SettingsItem(
+            title: 'Help Center',
+            subtitle: 'FAQs and support',
+            icon: Icons.help_outline_rounded,
+          ),
+        ],
+      ),
+    ];
+
+    return Scaffold(
+      backgroundColor: _SettingsPalette.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              height: 56,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.06),
+                  ),
                 ),
-                if (isLoading)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Center(
-                      child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => context.pop(),
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: Colors.white,
+                      size: 18,
                     ),
-                  )
-                else
-                  TextButton(
-                    onPressed: _saveProfile,
-                    child: const Text(
-                      'Save',
+                  ),
+                  const Expanded(
+                    child: Text(
+                      'Settings',
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.blueAccent,
-                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
-              ],
+                  const SizedBox(width: 40),
+                ],
+              ),
             ),
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSizes.s20),
-              child: Form(
-                key: _formKey,
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 32),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ProfileAvatarPicker(
-                      imageFile: _imageFile,
-                      currentImageUrl: _currentImageUrl,
-                      onTap: _pickImage,
-                    ),
-                    const SizedBox(height: AppSizes.s32),
-                    EditProfileBasicInfoSection(
-                      nameController: _nameController,
-                      usernameController: _usernameController,
-                      bioController: _bioController,
-                      isPrivate: _isPrivate,
-                      onPrivateChanged: (value) {
-                        setState(() {
-                          _isPrivate = value;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: AppSizes.s20),
-                    EditProfilePublicWebSection(
-                      publicProfileEnabled: _publicProfileEnabled,
-                      allowAnonymousQuestions: _allowAnonymousQuestions,
-                      ctaController: _ctaController,
-                      publicThemeKey: _publicThemeKey,
-                      publicThemeOptions: _publicThemeOptions,
-                      publicThemeLabels: _publicThemeLabels,
-                      publicThemeDescriptions: _publicThemeDescriptions,
-                      onPublicProfileEnabledChanged: (value) {
-                        setState(() {
-                          _publicProfileEnabled = value;
-                        });
-                      },
-                      onAnonymousChanged: (value) {
-                        setState(() {
-                          _allowAnonymousQuestions = value;
-                        });
-                      },
-                      onThemeChanged: (value) {
-                        setState(() {
-                          _publicThemeKey = value;
-                        });
-                      },
+                    for (final section in settingsSections) ...[
+                      _SettingsSectionCard(section: section),
+                      const SizedBox(height: 20),
+                    ],
+                    GestureDetector(
+                      onTap: () {},
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        height: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0x4DEF4444)),
+                        ),
+                        alignment: Alignment.center,
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.logout_rounded,
+                              color: Color(0xFFEF4444),
+                              size: 18,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Sign Out',
+                              style: TextStyle(
+                                color: Color(0xFFEF4444),
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }
+}
+
+class _SettingsSectionCard extends StatelessWidget {
+  const _SettingsSectionCard({required this.section});
+
+  final _SettingsSection section;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 2, bottom: 8),
+          child: Text(
+            section.title.toUpperCase(),
+            style: const TextStyle(
+              color: _SettingsPalette.label,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.6,
+            ),
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: _SettingsPalette.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _SettingsPalette.border),
+          ),
+          child: Column(
+            children: [
+              for (var index = 0; index < section.items.length; index++)
+                _SettingsRow(
+                  item: section.items[index],
+                  showDivider: index > 0,
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SettingsRow extends StatelessWidget {
+  const _SettingsRow({required this.item, required this.showDivider});
+
+  final _SettingsItem item;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    final child = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.03),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Icon(item.icon, color: _SettingsPalette.icon, size: 18),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  item.subtitle,
+                  style: const TextStyle(
+                    color: _SettingsPalette.subtle,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(
+            Icons.chevron_right_rounded,
+            color: _SettingsPalette.chevron,
+            size: 20,
+          ),
+        ],
+      ),
+    );
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: showDivider
+            ? Border(
+                top: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+              )
+            : null,
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: item.routeName == null
+            ? () {}
+            : () => context.pushNamed(item.routeName!),
+        child: child,
+      ),
+    );
+  }
+}
+
+class _SettingsSection {
+  const _SettingsSection({required this.title, required this.items});
+
+  final String title;
+  final List<_SettingsItem> items;
+}
+
+class _SettingsItem {
+  const _SettingsItem({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    this.routeName,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final String? routeName;
+}
+
+class _SettingsPalette {
+  static const background = Color(0xFF0B0F14);
+  static const surface = Color(0xFF0F1724);
+  static const border = Color(0xFF333333);
+  static const label = Color(0xFF9AA6B2);
+  static const subtle = Color(0xFF7A8692);
+  static const icon = Color(0xFF9AA6B2);
+  static const chevron = Color(0xFF4A5568);
 }

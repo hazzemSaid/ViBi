@@ -15,6 +15,7 @@ import 'package:vibi/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:vibi/features/home/presentation/screens/home_screen.dart';
 import 'package:vibi/features/inbox/presentation/screens/inbox_screen.dart';
 import 'package:vibi/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:vibi/features/profile/presentation/screens/edit_profile_public_web_screen.dart';
 import 'package:vibi/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:vibi/features/profile/presentation/screens/followers_list_screen.dart';
 import 'package:vibi/features/profile/presentation/screens/following_list_screen.dart';
@@ -69,6 +70,16 @@ GoRouter createAppRouter(AuthCubit authCubit) {
         path: '/edit-profile',
         name: 'edit-profile',
         builder: (context, state) => const EditProfileScreen(),
+      ),
+      // GoRoute(
+      //   path: '/edit-profile/basic',
+      //   name: 'edit-profile-basic',
+      //   // builder: (context, state) => const EditProfileBasicInfoSection(),
+      // ),
+      GoRoute(
+        path: '/edit-profile/public-web',
+        name: 'edit-profile-public-web',
+        builder: (context, state) => const EditProfilePublicWebScreen(),
       ),
       // Public profile route with user ID parameter
       GoRoute(

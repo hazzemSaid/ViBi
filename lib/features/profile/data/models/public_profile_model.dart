@@ -6,7 +6,7 @@ class PublicProfileModel extends PublicProfile {
     super.name,
     super.username,
     super.bio,
-    super.profileImageUrl,
+    super.avatarUrls = const [],
     required super.followersCount,
     required super.followingCount,
     required super.answersCount,
@@ -19,6 +19,13 @@ class PublicProfileModel extends PublicProfile {
     super.publicThemeKey,
     super.publicCtaText,
     super.updatedAt,
+    super.linkButtonStyle,
+    super.favColor,
+    super.questionPlaceholder,
+    super.showSocialIcons,
+    super.statusText,
+    super.publicFontFamily,
+    super.isVerified,
   });
 
   factory PublicProfileModel.fromGraphQL(
@@ -34,7 +41,7 @@ class PublicProfileModel extends PublicProfile {
       name: node['full_name'] as String?,
       username: node['username'] as String?,
       bio: node['bio'] as String?,
-      profileImageUrl: node['avatar_url'] as String?,
+      avatarUrls: _parseAvatarUrls(node['avatar_urls']),
       followersCount: _extractCount(
         node['followersCount'],
         fallback: node['followers_count'],
@@ -59,6 +66,13 @@ class PublicProfileModel extends PublicProfile {
       updatedAt: node['updated_at'] != null
           ? DateTime.parse(node['updated_at'] as String)
           : null,
+      linkButtonStyle: node['link_button_style'] as String? ?? 'pill',
+      favColor: node['fav_color'] as String?,
+      questionPlaceholder: node['question_placeholder'] as String?,
+      showSocialIcons: node['show_social_icons'] as bool? ?? true,
+      statusText: node['status_text'] as String?,
+      publicFontFamily: node['public_font_family'] as String? ?? 'inter',
+      isVerified: node['is_verified'] as bool? ?? false,
     );
   }
 
@@ -75,7 +89,7 @@ class PublicProfileModel extends PublicProfile {
       name: map['full_name'] as String?,
       username: map['username'] as String?,
       bio: map['bio'] as String?,
-      profileImageUrl: map['avatar_url'] as String?,
+      avatarUrls: _parseAvatarUrls(map['avatar_urls']),
       followersCount: _extractCount(map['followers_count']),
       followingCount: _extractCount(map['following_count']),
       answersCount: _extractCount(map['answers_count']),
@@ -91,7 +105,23 @@ class PublicProfileModel extends PublicProfile {
       updatedAt: map['updated_at'] != null
           ? DateTime.parse(map['updated_at'] as String)
           : null,
+      linkButtonStyle: map['link_button_style'] as String? ?? 'pill',
+      favColor: map['fav_color'] as String?,
+      questionPlaceholder: map['question_placeholder'] as String?,
+      showSocialIcons: map['show_social_icons'] as bool? ?? true,
+      statusText: map['status_text'] as String?,
+      publicFontFamily: map['public_font_family'] as String? ?? 'inter',
+      isVerified: map['is_verified'] as bool? ?? false,
     );
+  }
+
+  static List<String> _parseAvatarUrls(dynamic value) {
+    if (value == null) return const [];
+    if (value is List) {
+      return value.map((e) => e.toString()).toList();
+    }
+    if (value is String) return [value];
+    return const [];
   }
 
   static int _extractCount(dynamic value, {dynamic fallback}) {

@@ -14,12 +14,20 @@ import 'package:vibi/features/inbox/data/datasources/graphql_inbox_datasource.da
 import 'package:vibi/features/inbox/presentation/providers/inbox_providers.dart';
 import 'package:vibi/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:vibi/features/profile/data/repositories/public_profile_repository_impl.dart';
+import 'package:vibi/features/profile/data/repositories/social_links_repository_impl.dart';
 import 'package:vibi/features/profile/data/sources/graphql_profile_datasource.dart';
 import 'package:vibi/features/profile/data/sources/graphql_social_links_datasource.dart';
 import 'package:vibi/features/profile/domain/repositories/profile_repository.dart';
 import 'package:vibi/features/profile/domain/repositories/public_profile_repository.dart';
-import 'package:vibi/features/profile/presentation/providers/profile_providers.dart';
-import 'package:vibi/features/profile/presentation/providers/social_links_provider.dart';
+import 'package:vibi/features/profile/domain/repositories/social_links_repository.dart';
+import 'package:vibi/features/profile/domain/usecases/add_social_link_usecase.dart';
+import 'package:vibi/features/profile/domain/usecases/delete_social_link_usecase.dart';
+import 'package:vibi/features/profile/domain/usecases/fetch_social_links_usecase.dart';
+import 'package:vibi/features/profile/domain/usecases/fetch_user_profile_usecase.dart';
+import 'package:vibi/features/profile/domain/usecases/update_social_link_usecase.dart';
+import 'package:vibi/features/profile/domain/usecases/update_user_profile_usecase.dart';
+import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
+import 'package:vibi/features/profile/presentation/view/social_media_view/social_links_cubit.dart';
 import 'package:vibi/features/questions/data/datasources/graphql_question_datasource.dart';
 import 'package:vibi/features/questions/data/repositories/question_repository_impl.dart';
 import 'package:vibi/features/questions/domain/repositories/question_repository.dart';
@@ -75,11 +83,18 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   getIt.registerLazySingleton<ProfileRepository>(
     () => ProfileRepositoryImpl(getIt<GraphQLProfileDataSource>()),
   );
-  getIt.registerFactory<UserProfileCubit>(
-    () => UserProfileCubit(getIt<ProfileRepository>()),
+  getIt.registerLazySingleton<FetchUserProfileUseCase>(
+    () => FetchUserProfileUseCase(getIt<ProfileRepository>()),
   );
-  getIt.registerFactory<ProfileUpdateCubit>(
-    () => ProfileUpdateCubit(getIt<ProfileRepository>()),
+  getIt.registerLazySingleton<UpdateUserProfileUseCase>(
+    () => UpdateUserProfileUseCase(getIt<ProfileRepository>()),
+  );
+  getIt.registerFactory<ProfileCubit>(
+    () => ProfileCubit(
+      getIt<FetchUserProfileUseCase>(),
+      getIt<UpdateUserProfileUseCase>(),
+      getIt<ProfileRepository>(),
+    ),
   );
   getIt.registerLazySingleton<PublicProfileRepository>(
     () => PublicProfileRepositoryImpl(getIt<GraphQLProfileDataSource>()),
@@ -99,10 +114,28 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   getIt.registerLazySingleton<GraphQLSocialLinksDataSource>(
     GraphQLSocialLinksDataSource.new,
   );
+  getIt.registerLazySingleton<SocialLinksRepository>(
+    () => SocialLinksRepositoryImpl(getIt<GraphQLSocialLinksDataSource>()),
+  );
+  getIt.registerLazySingleton<FetchSocialLinksUseCase>(
+    () => FetchSocialLinksUseCase(getIt<SocialLinksRepository>()),
+  );
+  getIt.registerLazySingleton<AddSocialLinkUseCase>(
+    () => AddSocialLinkUseCase(getIt<SocialLinksRepository>()),
+  );
+  getIt.registerLazySingleton<UpdateSocialLinkUseCase>(
+    () => UpdateSocialLinkUseCase(getIt<SocialLinksRepository>()),
+  );
+  getIt.registerLazySingleton<DeleteSocialLinkUseCase>(
+    () => DeleteSocialLinkUseCase(getIt<SocialLinksRepository>()),
+  );
   getIt.registerFactoryParam<SocialLinksCubit, String, dynamic>(
     (userId, _) => SocialLinksCubit(
       userId: userId,
-      dataSource: getIt<GraphQLSocialLinksDataSource>(),
+      fetchSocialLinksUseCase: getIt<FetchSocialLinksUseCase>(),
+      addSocialLinkUseCase: getIt<AddSocialLinkUseCase>(),
+      updateSocialLinkUseCase: getIt<UpdateSocialLinkUseCase>(),
+      deleteSocialLinkUseCase: getIt<DeleteSocialLinkUseCase>(),
     ),
   );
 

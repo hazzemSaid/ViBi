@@ -6,13 +6,9 @@ import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/answered_question.dart';
 import 'package:vibi/features/profile/domain/entities/public_profile.dart';
-import 'package:vibi/features/profile/presentation/providers/profile_providers.dart';
-import 'package:vibi/features/profile/presentation/widgets/profile_stats_card.dart';
-import 'package:vibi/features/profile/presentation/widgets/public_profile_actions_row.dart';
-import 'package:vibi/features/profile/presentation/widgets/public_profile_answers_section.dart';
-import 'package:vibi/features/profile/presentation/widgets/public_profile_header_widget.dart';
-import 'package:vibi/features/profile/presentation/widgets/public_profile_private_content.dart';
-import 'package:vibi/features/profile/presentation/widgets/public_profile_social_links_section.dart';
+import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
+import 'package:vibi/features/profile/presentation/widgets/profile/profile_stats_card.dart';
+import 'package:vibi/features/profile/presentation/widgets/public_profile/public_profile_widgets.dart';
 import 'package:vibi/features/social/presentation/providers/follow_providers.dart';
 
 class PublicProfileScreen extends StatefulWidget {
@@ -170,48 +166,56 @@ class _PublicProfileBody extends StatelessWidget {
                   ],
                 ),
                 SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: padding),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        PublicProfileHeaderWidget(profile: profile),
-                        const SizedBox(height: AppSizes.s24),
-                        ProfileStatsCard(
-                          followersCount: '${profile.followersCount}',
-                          followingCount: '${profile.followingCount}',
-                          answersCount: '${profile.answersCount}',
-                          userId: profile.id,
-                          isCurrentUser: false,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      PublicProfileHeaderWidget(profile: profile),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: padding),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: AppSizes.s24),
+                            ProfileStatsCard(
+                              followersCount: '${profile.followersCount}',
+                              followingCount: '${profile.followingCount}',
+                              answersCount: '${profile.answersCount}',
+                              userId: profile.id,
+                              isCurrentUser: false,
+                            ),
+                            const SizedBox(height: AppSizes.s24),
+                            PublicProfileActionsRow(profile: profile),
+                            const SizedBox(height: AppSizes.s32),
+                            if (profile.showSocialIcons) ...[
+                              PublicProfileSocialLinksSection(
+                                userId: profile.id,
+                              ),
+                              const SizedBox(height: AppSizes.s32),
+                            ],
+                            if (!profile.canViewContent)
+                              PublicProfilePrivateContent(
+                                isFollowing: profile.isFollowing,
+                              )
+                            else
+                              BlocProvider(
+                                create: (_) =>
+                                    getIt<UserAnswersCubit>()..load(profile.id),
+                                child:
+                                    BlocBuilder<
+                                      UserAnswersCubit,
+                                      ViewState<List<AnsweredQuestion>>
+                                    >(
+                                      builder: (context, answersAsync) {
+                                        return PublicProfileAnswersSection(
+                                          answersAsync: answersAsync,
+                                          compactActions: true,
+                                        );
+                                      },
+                                    ),
+                              ),
+                          ],
                         ),
-                        const SizedBox(height: AppSizes.s24),
-                        PublicProfileActionsRow(profile: profile),
-                        const SizedBox(height: AppSizes.s32),
-                        PublicProfileSocialLinksSection(userId: profile.id),
-                        const SizedBox(height: AppSizes.s32),
-                        if (!profile.canViewContent)
-                          PublicProfilePrivateContent(
-                            isFollowing: profile.isFollowing,
-                          )
-                        else
-                          BlocProvider(
-                            create: (_) =>
-                                getIt<UserAnswersCubit>()..load(profile.id),
-                            child:
-                                BlocBuilder<
-                                  UserAnswersCubit,
-                                  ViewState<List<AnsweredQuestion>>
-                                >(
-                                  builder: (context, answersAsync) {
-                                    return PublicProfileAnswersSection(
-                                      answersAsync: answersAsync,
-                                      compactActions: true,
-                                    );
-                                  },
-                                ),
-                          ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ],

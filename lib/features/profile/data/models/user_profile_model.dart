@@ -3,35 +3,42 @@ import 'package:vibi/features/profile/domain/entities/user_profile.dart';
 class UserProfileModel extends UserProfile {
   UserProfileModel({
     required super.uid,
-    super.name,
-    super.username,
+    required super.name,
+    required super.username,
     super.bio,
-    super.profileImageUrl,
+    super.avatarUrls = const [],
     super.updatedAt,
-    super.followers_count,
-    super.following_count,
-    super.answers_count,
+    required super.followers_count,
+    required super.following_count,
+    required super.answers_count,
     super.isPrivate,
     super.allowAnonymousQuestions,
     super.publicProfileEnabled,
     super.publicThemeKey,
     super.publicCtaText,
     super.fcmToken,
+    super.linkButtonStyle,
+    super.favColor,
+    super.questionPlaceholder,
+    super.showSocialIcons,
+    super.statusText,
+    super.publicFontFamily,
+    super.isVerified,
   });
 
   factory UserProfileModel.fromMap(Map<String, dynamic> map) {
     return UserProfileModel(
       uid: map['id'] as String,
-      name: map['full_name'] as String?,
-      username: map['username'] as String?,
+      name: map['full_name'] as String? ?? '',
+      username: map['username'] as String? ?? '',
       bio: map['bio'] as String?,
-      profileImageUrl: map['avatar_url'] as String?,
+      avatarUrls: _parseAvatarUrls(map['avatar_urls']),
       updatedAt: map['updated_at'] != null
           ? DateTime.parse(map['updated_at'] as String)
           : null,
-      followers_count: map['followers_count'],
-      following_count: map['following_count'],
-      answers_count: map['answers_count'],
+      followers_count: _extractCount(map['followers_count']),
+      following_count: _extractCount(map['following_count']),
+      answers_count: _extractCount(map['answers_count']),
       isPrivate: map['is_private'] as bool? ?? false,
       allowAnonymousQuestions:
           map['allow_anonymous_questions'] as bool? ?? true,
@@ -39,6 +46,13 @@ class UserProfileModel extends UserProfile {
       publicThemeKey: map['public_theme_key'] as String? ?? 'tellonym_dark',
       publicCtaText: map['public_cta_text'] as String?,
       fcmToken: map['fcm_token'] as String?,
+      linkButtonStyle: map['link_button_style'] as String? ?? 'pill',
+      favColor: map['fav_color'] as String?,
+      questionPlaceholder: map['question_placeholder'] as String?,
+      showSocialIcons: map['show_social_icons'] as bool? ?? true,
+      statusText: map['status_text'] as String?,
+      publicFontFamily: map['public_font_family'] as String? ?? 'inter',
+      isVerified: map['is_verified'] as bool? ?? false,
     );
   }
 
@@ -47,10 +61,10 @@ class UserProfileModel extends UserProfile {
   factory UserProfileModel.fromGraphQL(Map<String, dynamic> node) {
     return UserProfileModel(
       uid: node['id'] as String,
-      name: node['full_name'] as String?,
-      username: node['username'] as String?,
+      name: node['full_name'] as String,
+      username: node['username'] as String,
       bio: node['bio'] as String?,
-      profileImageUrl: node['avatar_url'] as String?,
+      avatarUrls: _parseAvatarUrls(node['avatar_urls']),
       updatedAt: node['updated_at'] != null
           ? DateTime.parse(node['updated_at'] as String)
           : null,
@@ -73,7 +87,24 @@ class UserProfileModel extends UserProfile {
       publicThemeKey: node['public_theme_key'] as String? ?? 'tellonym_dark',
       publicCtaText: node['public_cta_text'] as String?,
       fcmToken: node['fcm_token'] as String?,
+      linkButtonStyle: node['link_button_style'] as String? ?? 'pill',
+      favColor: node['fav_color'] as String?,
+      questionPlaceholder: node['question_placeholder'] as String?,
+      showSocialIcons: node['show_social_icons'] as bool? ?? true,
+      statusText: node['status_text'] as String?,
+      publicFontFamily: node['public_font_family'] as String? ?? 'inter',
+      isVerified: node['is_verified'] as bool? ?? false,
     );
+  }
+
+  static List<String> _parseAvatarUrls(dynamic value) {
+    if (value == null) return const [];
+    if (value is List) {
+      return value.map((e) => e.toString()).toList();
+    }
+    // Fallback for single string (backward compatibility if needed, though user said it's changed)
+    if (value is String) return [value];
+    return const [];
   }
 
   static int _extractCount(dynamic value, {dynamic fallback}) {
@@ -95,7 +126,7 @@ class UserProfileModel extends UserProfile {
       'full_name': name,
       'username': username,
       'bio': bio,
-      'avatar_url': profileImageUrl,
+      'avatar_urls': avatarUrls,
       'updated_at': updatedAt?.toIso8601String(),
       'is_private': isPrivate,
       'allow_anonymous_questions': allowAnonymousQuestions,
@@ -103,6 +134,13 @@ class UserProfileModel extends UserProfile {
       'public_theme_key': publicThemeKey,
       'public_cta_text': publicCtaText,
       'fcm_token': fcmToken,
+      'link_button_style': linkButtonStyle,
+      'fav_color': favColor,
+      'question_placeholder': questionPlaceholder,
+      'show_social_icons': showSocialIcons,
+      'status_text': statusText,
+      'public_font_family': publicFontFamily,
+      'is_verified': isVerified,
     };
   }
 }

@@ -99,7 +99,7 @@ class GraphQLMutations {
           created_at
           profiles {
             username
-            avatar_url
+            avatar_urls
           }
         }
       }
@@ -249,12 +249,18 @@ class GraphQLMutations {
       $username: String
       $fullName: String
       $bio: String
-      $avatarUrl: String
+      $avatarUrls: [String]
       $isPrivate: Boolean
       $allowAnonymousQuestions: Boolean
       $publicProfileEnabled: Boolean
       $publicThemeKey: String
       $publicCtaText: String
+      $linkButtonStyle: String
+      $favColor: String
+      $questionPlaceholder: String
+      $showSocialIcons: Boolean
+      $statusText: String
+      $publicFontFamily: String
     ) {
       updateprofilesCollection(
         filter: { id: { eq: $userId } }
@@ -262,12 +268,18 @@ class GraphQLMutations {
           username: $username
           full_name: $fullName
           bio: $bio
-          avatar_url: $avatarUrl
+          avatar_urls: $avatarUrls
           is_private: $isPrivate
           allow_anonymous_questions: $allowAnonymousQuestions
           public_profile_enabled: $publicProfileEnabled
           public_theme_key: $publicThemeKey
           public_cta_text: $publicCtaText
+          link_button_style: $linkButtonStyle
+          fav_color: $favColor
+          question_placeholder: $questionPlaceholder
+          show_social_icons: $showSocialIcons
+          status_text: $statusText
+          public_font_family: $publicFontFamily
         }
       ) {
         records {
@@ -275,12 +287,19 @@ class GraphQLMutations {
           username
           full_name
           bio
-          avatar_url
+          avatar_urls
           is_private
           allow_anonymous_questions
           public_profile_enabled
           public_theme_key
           public_cta_text
+          link_button_style
+          fav_color
+          question_placeholder
+          show_social_icons
+          status_text
+          public_font_family
+          is_verified
           updated_at
         }
       }

@@ -5,7 +5,7 @@ import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/follower_user.dart';
-import 'package:vibi/features/profile/presentation/providers/profile_providers.dart';
+import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
 import 'package:vibi/features/social/domain/repositories/follow_repository.dart';
 
 class FollowersListScreen extends StatefulWidget {

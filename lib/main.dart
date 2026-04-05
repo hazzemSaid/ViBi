@@ -87,7 +87,9 @@ Future<void> _initFirebase() async {
 
   // Tier 2: use env-var-driven options (requires .env to be loaded with Firebase keys).
   try {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     return;
   } catch (_) {
     // Dotenv vars missing — continue without Firebase.

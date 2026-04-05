@@ -3,7 +3,7 @@ class PublicProfile {
   final String? name;
   final String? username;
   final String? bio;
-  final String? profileImageUrl;
+  final List<String> avatarUrls;
   final int followersCount;
   final int followingCount;
   final int answersCount;
@@ -16,13 +16,20 @@ class PublicProfile {
   final String publicThemeKey;
   final String? publicCtaText;
   final DateTime? updatedAt;
+  final String linkButtonStyle;
+  final String? favColor;
+  final String? questionPlaceholder;
+  final bool showSocialIcons;
+  final String? statusText;
+  final String publicFontFamily;
+  final bool isVerified;
 
   PublicProfile({
     required this.id,
     this.name,
     this.username,
     this.bio,
-    this.profileImageUrl,
+    this.avatarUrls = const [],
     required this.followersCount,
     required this.followingCount,
     required this.answersCount,
@@ -35,6 +42,13 @@ class PublicProfile {
     this.publicThemeKey = 'tellonym_dark',
     this.publicCtaText,
     this.updatedAt,
+    this.linkButtonStyle = 'pill',
+    this.favColor,
+    this.questionPlaceholder,
+    this.showSocialIcons = true,
+    this.statusText,
+    this.publicFontFamily = 'inter',
+    this.isVerified = false,
   });
 
   PublicProfile copyWith({
@@ -42,7 +56,7 @@ class PublicProfile {
     String? name,
     String? username,
     String? bio,
-    String? profileImageUrl,
+    List<String>? avatarUrls,
     int? followersCount,
     int? followingCount,
     int? answersCount,
@@ -55,13 +69,20 @@ class PublicProfile {
     String? publicThemeKey,
     String? publicCtaText,
     DateTime? updatedAt,
+    String? linkButtonStyle,
+    String? favColor,
+    String? questionPlaceholder,
+    bool? showSocialIcons,
+    String? statusText,
+    String? publicFontFamily,
+    bool? isVerified,
   }) {
     return PublicProfile(
       id: id ?? this.id,
       name: name ?? this.name,
       username: username ?? this.username,
       bio: bio ?? this.bio,
-      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      avatarUrls: avatarUrls ?? this.avatarUrls,
       followersCount: followersCount ?? this.followersCount,
       followingCount: followingCount ?? this.followingCount,
       answersCount: answersCount ?? this.answersCount,
@@ -75,6 +96,13 @@ class PublicProfile {
       publicThemeKey: publicThemeKey ?? this.publicThemeKey,
       publicCtaText: publicCtaText ?? this.publicCtaText,
       updatedAt: updatedAt ?? this.updatedAt,
+      linkButtonStyle: linkButtonStyle ?? this.linkButtonStyle,
+      favColor: favColor ?? this.favColor,
+      questionPlaceholder: questionPlaceholder ?? this.questionPlaceholder,
+      showSocialIcons: showSocialIcons ?? this.showSocialIcons,
+      statusText: statusText ?? this.statusText,
+      publicFontFamily: publicFontFamily ?? this.publicFontFamily,
+      isVerified: isVerified ?? this.isVerified,
     );
   }
 }

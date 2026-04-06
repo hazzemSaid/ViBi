@@ -30,18 +30,19 @@ class GraphQLInboxDataSource {
           try {
             final senderProfile = await _client
                 .from('profiles')
-                .select('username, avatar_url')
+                .select('username, avatar_urls')
                 .eq('id', questions[i].senderId!)
                 .maybeSingle();
 
             if (senderProfile != null) {
+              final avatarUrls = _parseAvatarUrls(senderProfile['avatar_urls']);
               // Create updated question with sender info
               questions[i] = InboxQuestionModel(
                 id: questions[i].id,
                 recipientId: questions[i].recipientId,
                 senderId: questions[i].senderId,
                 senderUsername: senderProfile['username'] as String?,
-                senderAvatarUrl: senderProfile['avatar_url'] as String?,
+                senderAvatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first : null,
                 questionText: questions[i].questionText,
                 isAnonymous: questions[i].isAnonymous,
                 status: questions[i].status,
@@ -139,9 +140,18 @@ class GraphQLInboxDataSource {
     final _ = userId;
   }
 
-  Future<void> _updateQuestionCount(String userId) async {
+  Future<void> _updateQuestionCount(String userId) {
     // The profiles table no longer stores denormalized question counters.
     // Counts are derived from relations in GraphQL queries.
-    final _ = userId;
+    return Future.value();
+  }
+
+  static List<String> _parseAvatarUrls(dynamic value) {
+    if (value == null) return const [];
+    if (value is List) {
+      return value.map((e) => e.toString()).toList();
+    }
+    if (value is String) return [value];
+    return const [];
   }
 }

@@ -12,7 +12,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
 
   @override
   Future<UserProfile?> fetchProfile(String uid) async {
-    return await _dataSource.fetchProfile(uid);
+    final result = await _dataSource.fetchProfile(uid);
+    return result.fold((_) => null, (profile) => profile);
   }
 
   @override
@@ -22,7 +23,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       name: profile.name,
       username: profile.username,
       bio: profile.bio,
-      profileImageUrl: profile.profileImageUrl,
+      avatarUrls: profile.avatarUrls,
       updatedAt: DateTime.now(),
       followers_count: profile.followers_count,
       following_count: profile.following_count,
@@ -32,6 +33,13 @@ class ProfileRepositoryImpl implements ProfileRepository {
       publicProfileEnabled: profile.publicProfileEnabled,
       publicThemeKey: profile.publicThemeKey,
       publicCtaText: profile.publicCtaText,
+      linkButtonStyle: profile.linkButtonStyle,
+      favColor: profile.favColor,
+      questionPlaceholder: profile.questionPlaceholder,
+      showSocialIcons: profile.showSocialIcons,
+      statusText: profile.statusText,
+      publicFontFamily: profile.publicFontFamily,
+      isVerified: profile.isVerified,
     );
     await _dataSource.updateProfile(model);
   }
@@ -39,5 +47,23 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<String> uploadProfileImage(String uid, File image) async {
     return await _dataSource.uploadProfileImage(uid, image);
+  }
+
+  @override
+  Future<List<String>> uploadAndSaveAvatar(
+    String uid,
+    File image,
+    List<String> currentAvatarUrls,
+  ) async {
+    return await _dataSource.uploadAndSaveAvatar(uid, image, currentAvatarUrls);
+  }
+
+  @override
+  Future<String> uploadPublicProfileImage(
+    String uid,
+    File image,
+    int slot,
+  ) async {
+    return await _dataSource.uploadPublicProfileImage(uid, image, slot);
   }
 }

@@ -18,6 +18,9 @@ class FeedItemModel extends FeedItem {
   });
 
   factory FeedItemModel.fromMap(Map<String, dynamic> map) {
+    final avatarUrls = _parseAvatarUrls(map['avatar_urls'] ?? map['avatar_url']);
+    final authorAvatarUrls = _parseAvatarUrls(map['answer_author_avatar_urls'] ?? map['answer_author_avatar_url']);
+
     return FeedItemModel(
       id: map['id'] as String,
       answerText: map['answer_text'] as String? ?? '',
@@ -27,9 +30,9 @@ class FeedItemModel extends FeedItem {
       sharesCount: map['shares_count'] as int? ?? 0,
       createdAt: DateTime.parse(map['created_at'] as String),
       username: map['username'] as String?,
-      avatarUrl: map['avatar_url'] as String?,
+      avatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first : null,
       answerAuthorUsername: map['answer_author_username'] as String?,
-      answerAuthorAvatarUrl: map['answer_author_avatar_url'] as String?,
+      answerAuthorAvatarUrl: authorAvatarUrls.isNotEmpty ? authorAvatarUrls.first : null,
       questionText: map['question_text'] as String?,
       isAnonymous: map['is_anonymous'] as bool? ?? false,
     );
@@ -76,9 +79,13 @@ class FeedItemModel extends FeedItem {
     final displayName = isAnon
         ? 'Anonymous User'
         : (questionerProfile['username'] as String?);
+    
+    final questionerAvatarUrls = _parseAvatarUrls(questionerProfile['avatar_urls']);
     final displayAvatar = isAnon
         ? null
-        : (questionerProfile['avatar_url'] as String?);
+        : (questionerAvatarUrls.isNotEmpty ? questionerAvatarUrls.first : null);
+
+    final authorAvatarUrls = _parseAvatarUrls(answerAuthorProfile?['avatar_urls']);
 
     return FeedItemModel(
       id: node['id'] as String,
@@ -91,10 +98,19 @@ class FeedItemModel extends FeedItem {
       username: displayName,
       avatarUrl: displayAvatar,
       answerAuthorUsername: answerAuthorProfile?['username'] as String?,
-      answerAuthorAvatarUrl: answerAuthorProfile?['avatar_url'] as String?,
+      answerAuthorAvatarUrl: authorAvatarUrls.isNotEmpty ? authorAvatarUrls.first : null,
       questionText: question['question_text'] as String?,
       isAnonymous: isAnon,
     );
+  }
+
+  static List<String> _parseAvatarUrls(dynamic value) {
+    if (value == null) return const [];
+    if (value is List) {
+      return value.map((e) => e.toString()).toList();
+    }
+    if (value is String) return [value];
+    return const [];
   }
 
   @override
@@ -108,7 +124,7 @@ class FeedItemModel extends FeedItem {
       'shares_count': sharesCount,
       'created_at': createdAt.toIso8601String(),
       'username': username,
-      'avatar_url': avatarUrl,
+      'avatar_urls': avatarUrl != null ? [avatarUrl!] : [],
       'question_text': questionText,
       'is_anonymous': isAnonymous,
     };

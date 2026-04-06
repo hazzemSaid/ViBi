@@ -12,4 +12,18 @@ class AppColors {
 
   static const Color error = Colors.redAccent;
   static const Color success = Colors.greenAccent;
+
+  static Color fromHex(String? hexString, {Color defaultColor = Colors.white}) {
+    if (hexString == null || hexString.isEmpty) return defaultColor;
+    final buffer = StringBuffer();
+    // Ensure 8-digit hex (ARGB)
+    // If input is 6 hex chars (#FFFFFF) or 7 chars with #, add full opacity (ff)
+    if (hexString.replaceFirst('#', '').length == 6) buffer.write('ff');
+    buffer.write(hexString.replaceFirst('#', ''));
+    try {
+      return Color(int.parse(buffer.toString(), radix: 16));
+    } catch (_) {
+      return defaultColor;
+    }
+  }
 }

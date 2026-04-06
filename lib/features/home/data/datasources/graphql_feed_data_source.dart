@@ -34,7 +34,7 @@ class GraphQLFeedDataSource implements FeedDataSource {
               profiles {
                 id
                 username
-                avatar_url
+                avatar_urls
               }
               questions {
                 question_text
@@ -43,7 +43,7 @@ class GraphQLFeedDataSource implements FeedDataSource {
                 profiles {
                   id
                   username
-                  avatar_url
+                  avatar_urls
                 }
               }
             }
@@ -79,7 +79,7 @@ class GraphQLFeedDataSource implements FeedDataSource {
             profiles {
               id
               username
-              avatar_url
+              avatar_urls
             }
             questions {
               question_text

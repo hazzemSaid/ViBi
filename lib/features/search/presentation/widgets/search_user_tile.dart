@@ -45,10 +45,10 @@ class SearchUserTile extends StatelessWidget {
       leading: CircleAvatar(
         radius: 28,
         backgroundColor: Colors.white10,
-        backgroundImage: user.profileImageUrl != null
-            ? CachedNetworkImageProvider(user.profileImageUrl!)
+        backgroundImage: user.avatarUrls.isNotEmpty
+            ? CachedNetworkImageProvider(user.avatarUrls.first)
             : null,
-        child: user.profileImageUrl == null
+        child: user.avatarUrls.isEmpty
             ? const Icon(Icons.person, color: AppColors.textSecondary)
             : null,
       ),

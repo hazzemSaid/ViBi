@@ -16,13 +16,14 @@ class InboxQuestionModel extends InboxQuestion {
   factory InboxQuestionModel.fromMap(Map<String, dynamic> map) {
     // Extract sender details from nested profile data if available
     final senderData = map['sender'] as Map<String, dynamic>?;
+    final avatarUrls = _parseAvatarUrls(senderData?['avatar_urls'] ?? senderData?['avatar_url']);
 
     return InboxQuestionModel(
       id: map['id'] as String,
       recipientId: map['recipient_id'] as String,
       senderId: map['sender_id'] as String?,
       senderUsername: senderData?['username'] as String?,
-      senderAvatarUrl: senderData?['avatar_url'] as String?,
+      senderAvatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first : null,
       questionText: map['question_text'] as String,
       isAnonymous: map['is_anonymous'] as bool? ?? false,
       status: map['status'] as String? ?? 'pending',
@@ -30,6 +31,15 @@ class InboxQuestionModel extends InboxQuestion {
           ? DateTime.parse(map['created_at'] as String)
           : DateTime.now(),
     );
+  }
+
+  static List<String> _parseAvatarUrls(dynamic value) {
+    if (value == null) return const [];
+    if (value is List) {
+      return value.map((e) => e.toString()).toList();
+    }
+    if (value is String) return [value];
+    return const [];
   }
 
   Map<String, dynamic> toMap() {

@@ -5,16 +5,14 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
-import 'package:vibi/features/profile/domain/entities/user_profile.dart';
-import 'package:vibi/features/profile/presentation/providers/profile_providers.dart';
-import 'package:vibi/features/profile/presentation/widgets/profile_completion_widget.dart';
-import 'package:vibi/features/profile/presentation/widgets/profile_header_widget.dart';
-import 'package:vibi/features/profile/presentation/widgets/profile_latest_answers_section.dart';
-import 'package:vibi/features/profile/presentation/widgets/profile_social_links_section.dart';
-import 'package:vibi/features/profile/presentation/widgets/profile_stats_card.dart';
+import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
+import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit_state.dart';
+import 'package:vibi/features/profile/presentation/widgets/answers/answers_widgets.dart';
+import 'package:vibi/features/profile/presentation/widgets/common/common_widgets.dart';
+import 'package:vibi/features/profile/presentation/widgets/profile/profile_widgets.dart';
+import 'package:vibi/features/profile/presentation/widgets/social/social_widgets.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -24,29 +22,29 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  late final UserProfileCubit _userProfileCubit;
+  late final ProfileCubit _profileCubit;
   String? _loadedUserId;
 
   @override
   void initState() {
     super.initState();
-    _userProfileCubit = getIt<UserProfileCubit>();
+    _profileCubit = getIt<ProfileCubit>();
   }
 
   @override
   void dispose() {
-    _userProfileCubit.close();
+    _profileCubit.close();
     super.dispose();
   }
 
   void _loadProfileIfNeeded(String userId) {
     if (_loadedUserId == userId) return;
     _loadedUserId = userId;
-    _userProfileCubit.load(userId);
+    _profileCubit.load(userId);
   }
 
   Future<void> _reloadProfile(String userId) async {
-    _userProfileCubit.load(userId);
+    await _profileCubit.load(userId);
   }
 
   @override
@@ -62,21 +60,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     _loadProfileIfNeeded(user.id);
 
-    return BlocProvider<UserProfileCubit>.value(
-      value: _userProfileCubit,
+    return BlocProvider<ProfileCubit>.value(
+      value: _profileCubit,
       child: Scaffold(
         backgroundColor: AppColors.background,
-        body: BlocBuilder<UserProfileCubit, ViewState<UserProfile?>>(
-          builder: (context, profileAsync) {
-            if (profileAsync.status == ViewStatus.success) {
-              final profile = profileAsync.data;
-              if (profile == null) {
-                return const Center(child: Text('Profile not found'));
-              }
+        body: BlocBuilder<ProfileCubit, ProfileState>(
+          builder: (context, profileState) {
+            final profile = switch (profileState) {
+              ProfileLoaded loaded => loaded.profile,
+              ProfileSaving saving => saving.profile,
+              ProfileFailure failure when failure.profile != null =>
+                failure.profile!,
+              _ => null,
+            };
 
+            if (profile != null) {
               Future<void> copyShareLink() async {
-                final username = profile.username?.trim();
-                if (username == null || username.isEmpty) {
+                final username = profile.username.trim();
+                if (username.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
@@ -87,14 +88,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   return;
                 }
 
-                final baseUrl =
-                    dotenv.env['PUBLIC_WEB_BASE_URL']?.trim().isNotEmpty == true
-                    ? dotenv.env['PUBLIC_WEB_BASE_URL']!.trim()
-                    : 'https://vibi.social';
-                final normalizedBase = baseUrl.endsWith('/')
-                    ? baseUrl.substring(0, baseUrl.length - 1)
-                    : baseUrl;
-                final shareUrl = '$normalizedBase/u/$username';
+                final shareBaseUrl =
+                    dotenv.env['SHARE_BASE_URL'] ?? 'https://vibi.social';
+                final shareUrl = '$shareBaseUrl/u/$username';
 
                 await Clipboard.setData(ClipboardData(text: shareUrl));
                 if (context.mounted) {
@@ -148,7 +144,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             shape: const CircleBorder(),
                           ),
-                          onPressed: () => context.pushNamed('edit-profile'),
+                          onPressed: () =>
+                              context.pushNamed('edit-profile-public-web'),
                         ),
                         IconButton(
                           icon: const Icon(
@@ -167,68 +164,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ],
                     ),
                     SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: padding),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            ProfileHeaderWidget(profile: profile),
-                            ProfileCompletionWidget(profile: profile),
-                            const SizedBox(height: AppSizes.s24),
-                            ProfileStatsCard(
-                              followersCount: profile.followers_count
-                                  .toString(),
-                              followingCount: (profile.following_count)
-                                  .toString(),
-                              answersCount: (profile.answers_count).toString(),
-                              userId: user.id,
-                              isCurrentUser: true,
-                            ),
-                            const SizedBox(height: AppSizes.s24),
-                            ProfileSocialLinksSection(userId: user.id),
-                            const SizedBox(height: AppSizes.s24),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 56,
-                              child: ElevatedButton.icon(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: Colors.black,
-                                  shape: const StadiumBorder(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ProfileHeaderWidget(profile: profile),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: padding),
+                            child: Column(
+                              children: [
+                                ProfileCompletionWidget(profile: profile),
+                                const SizedBox(height: AppSizes.s24),
+                                ProfileStatsCard(
+                                  followersCount: profile.followers_count
+                                      .toString(),
+                                  followingCount: (profile.following_count)
+                                      .toString(),
+                                  answersCount: (profile.answers_count)
+                                      .toString(),
+                                  userId: user.id,
+                                  isCurrentUser: true,
                                 ),
-                                onPressed: copyShareLink,
-                                icon: const Icon(Icons.send_outlined, size: 20),
-                                label: const Text(
-                                  'Share Profile Link',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                                const SizedBox(height: AppSizes.s24),
+                                ProfileSocialLinksSection(userId: user.id),
+                                const SizedBox(height: AppSizes.s24),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 56,
+                                  child: ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.white,
+                                      foregroundColor: Colors.black,
+                                      shape: const StadiumBorder(),
+                                    ),
+                                    onPressed: copyShareLink,
+                                    icon: const Icon(
+                                      Icons.send_outlined,
+                                      size: 20,
+                                    ),
+                                    label: const Text(
+                                      'Share Profile Link',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
+                                const SizedBox(height: AppSizes.s32),
+                                ProfileLatestAnswersSection(
+                                  userId: user.id,
+                                  compactActions: true,
+                                ),
+                                const SizedBox(height: AppSizes.s40),
+                              ],
                             ),
-                            const SizedBox(height: AppSizes.s32),
-                            ProfileLatestAnswersSection(
-                              userId: user.id,
-                              compactActions: true,
-                            ),
-                            const SizedBox(height: AppSizes.s40),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               );
             }
-            if (profileAsync.status == ViewStatus.loading) {
+
+            if (profileState is ProfileLoading ||
+                profileState is ProfileInitial) {
               return const Center(child: CircularProgressIndicator());
             }
+
+            final errorMessage = profileState is ProfileFailure
+                ? profileState.message
+                : 'Unknown profile error';
+
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Error: ${profileAsync.errorMessage}'),
+                  Text('Error: $errorMessage'),
                   const SizedBox(height: AppSizes.s16),
                   ElevatedButton(
                     onPressed: () => _reloadProfile(user.id),

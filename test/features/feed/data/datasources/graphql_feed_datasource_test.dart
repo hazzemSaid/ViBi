@@ -123,7 +123,7 @@ const _globalFeedPayload = {
           'profiles': {
             'id': 'user-1',
             'username': 'alice',
-            'avatar_url': 'https://cdn.test/alice.png',
+            'avatar_urls': ['https://cdn.test/alice.png'],
           },
           'questions': {
             'question_text': 'Question text',

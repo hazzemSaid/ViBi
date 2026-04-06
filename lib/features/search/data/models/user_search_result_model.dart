@@ -6,7 +6,7 @@ class UserSearchResultModel extends UserSearchResult {
     super.name,
     super.username,
     super.bio,
-    super.profileImageUrl,
+    super.avatarUrls = const [],
     required super.followersCount,
     required super.answersCount,
     required super.isPrivate,
@@ -18,7 +18,7 @@ class UserSearchResultModel extends UserSearchResult {
       name: node['full_name'] as String?,
       username: node['username'] as String?,
       bio: node['bio'] as String?,
-      profileImageUrl: node['avatar_url'] as String?,
+      avatarUrls: _parseAvatarUrls(node['avatar_urls']),
       followersCount: _extractCount(
         node['followersCount'],
         fallback: node['followers_count'],
@@ -37,11 +37,20 @@ class UserSearchResultModel extends UserSearchResult {
       name: map['full_name'] as String?,
       username: map['username'] as String?,
       bio: map['bio'] as String?,
-      profileImageUrl: map['avatar_url'] as String?,
+      avatarUrls: _parseAvatarUrls(map['avatar_urls']),
       followersCount: _extractCount(map['followers_count']),
       answersCount: _extractCount(map['answers_count']),
       isPrivate: map['is_private'] as bool? ?? false,
     );
+  }
+
+  static List<String> _parseAvatarUrls(dynamic value) {
+    if (value == null) return const [];
+    if (value is List) {
+      return value.map((e) => e.toString()).toList();
+    }
+    if (value is String) return [value];
+    return const [];
   }
 
   static int _extractCount(dynamic value, {dynamic fallback}) {

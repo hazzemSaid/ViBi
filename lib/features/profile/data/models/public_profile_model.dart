@@ -16,16 +16,15 @@ class PublicProfileModel extends PublicProfile {
     required super.canViewContent,
     super.allowAnonymousQuestions,
     super.publicProfileEnabled,
-    super.publicThemeKey,
     super.publicCtaText,
     super.updatedAt,
-    super.linkButtonStyle,
     super.favColor,
     super.questionPlaceholder,
     super.showSocialIcons,
     super.statusText,
     super.publicFontFamily,
     super.isVerified,
+    super.backgroundcolor,
   });
 
   factory PublicProfileModel.fromGraphQL(
@@ -61,18 +60,17 @@ class PublicProfileModel extends PublicProfile {
       allowAnonymousQuestions:
           node['allow_anonymous_questions'] as bool? ?? true,
       publicProfileEnabled: node['public_profile_enabled'] as bool? ?? true,
-      publicThemeKey: node['public_theme_key'] as String? ?? 'tellonym_dark',
       publicCtaText: node['public_cta_text'] as String?,
       updatedAt: node['updated_at'] != null
           ? DateTime.parse(node['updated_at'] as String)
           : null,
-      linkButtonStyle: node['link_button_style'] as String? ?? 'pill',
       favColor: node['fav_color'] as String?,
       questionPlaceholder: node['question_placeholder'] as String?,
       showSocialIcons: node['show_social_icons'] as bool? ?? true,
       statusText: node['status_text'] as String?,
       publicFontFamily: node['public_font_family'] as String? ?? 'inter',
       isVerified: node['is_verified'] as bool? ?? false,
+      backgroundcolor: node['backgroundcolor'] as String?,
     );
   }
 
@@ -100,18 +98,17 @@ class PublicProfileModel extends PublicProfile {
       allowAnonymousQuestions:
           map['allow_anonymous_questions'] as bool? ?? true,
       publicProfileEnabled: map['public_profile_enabled'] as bool? ?? true,
-      publicThemeKey: map['public_theme_key'] as String? ?? 'tellonym_dark',
       publicCtaText: map['public_cta_text'] as String?,
       updatedAt: map['updated_at'] != null
           ? DateTime.parse(map['updated_at'] as String)
           : null,
-      linkButtonStyle: map['link_button_style'] as String? ?? 'pill',
       favColor: map['fav_color'] as String?,
       questionPlaceholder: map['question_placeholder'] as String?,
       showSocialIcons: map['show_social_icons'] as bool? ?? true,
       statusText: map['status_text'] as String?,
       publicFontFamily: map['public_font_family'] as String? ?? 'inter',
       isVerified: map['is_verified'] as bool? ?? false,
+      backgroundcolor: map['backgroundcolor'] as String?,
     );
   }
 

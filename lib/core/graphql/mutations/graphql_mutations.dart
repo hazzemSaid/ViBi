@@ -253,14 +253,13 @@ class GraphQLMutations {
       $isPrivate: Boolean
       $allowAnonymousQuestions: Boolean
       $publicProfileEnabled: Boolean
-      $publicThemeKey: String
       $publicCtaText: String
-      $linkButtonStyle: String
       $favColor: String
       $questionPlaceholder: String
       $showSocialIcons: Boolean
       $statusText: String
       $publicFontFamily: String
+      $backgroundcolor: String
     ) {
       updateprofilesCollection(
         filter: { id: { eq: $userId } }
@@ -272,14 +271,13 @@ class GraphQLMutations {
           is_private: $isPrivate
           allow_anonymous_questions: $allowAnonymousQuestions
           public_profile_enabled: $publicProfileEnabled
-          public_theme_key: $publicThemeKey
           public_cta_text: $publicCtaText
-          link_button_style: $linkButtonStyle
           fav_color: $favColor
           question_placeholder: $questionPlaceholder
           show_social_icons: $showSocialIcons
           status_text: $statusText
           public_font_family: $publicFontFamily
+          backgroundcolor: $backgroundcolor
         }
       ) {
         records {
@@ -291,14 +289,13 @@ class GraphQLMutations {
           is_private
           allow_anonymous_questions
           public_profile_enabled
-          public_theme_key
           public_cta_text
-          link_button_style
           fav_color
           question_placeholder
           show_social_icons
           status_text
           public_font_family
+          backgroundcolor
           is_verified
           updated_at
         }

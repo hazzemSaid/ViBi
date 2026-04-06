@@ -14,16 +14,15 @@ class UserProfileModel extends UserProfile {
     super.isPrivate,
     super.allowAnonymousQuestions,
     super.publicProfileEnabled,
-    super.publicThemeKey,
     super.publicCtaText,
     super.fcmToken,
-    super.linkButtonStyle,
     super.favColor,
     super.questionPlaceholder,
     super.showSocialIcons,
     super.statusText,
     super.publicFontFamily,
     super.isVerified,
+    super.backgroundcolor,
   });
 
   factory UserProfileModel.fromMap(Map<String, dynamic> map) {
@@ -43,16 +42,15 @@ class UserProfileModel extends UserProfile {
       allowAnonymousQuestions:
           map['allow_anonymous_questions'] as bool? ?? true,
       publicProfileEnabled: map['public_profile_enabled'] as bool? ?? true,
-      publicThemeKey: map['public_theme_key'] as String? ?? 'tellonym_dark',
       publicCtaText: map['public_cta_text'] as String?,
       fcmToken: map['fcm_token'] as String?,
-      linkButtonStyle: map['link_button_style'] as String? ?? 'pill',
       favColor: map['fav_color'] as String?,
       questionPlaceholder: map['question_placeholder'] as String?,
       showSocialIcons: map['show_social_icons'] as bool? ?? true,
       statusText: map['status_text'] as String?,
       publicFontFamily: map['public_font_family'] as String? ?? 'inter',
       isVerified: map['is_verified'] as bool? ?? false,
+      backgroundcolor: map['backgroundcolor'] as String?,
     );
   }
 
@@ -84,16 +82,15 @@ class UserProfileModel extends UserProfile {
       allowAnonymousQuestions:
           node['allow_anonymous_questions'] as bool? ?? true,
       publicProfileEnabled: node['public_profile_enabled'] as bool? ?? true,
-      publicThemeKey: node['public_theme_key'] as String? ?? 'tellonym_dark',
       publicCtaText: node['public_cta_text'] as String?,
       fcmToken: node['fcm_token'] as String?,
-      linkButtonStyle: node['link_button_style'] as String? ?? 'pill',
       favColor: node['fav_color'] as String?,
       questionPlaceholder: node['question_placeholder'] as String?,
       showSocialIcons: node['show_social_icons'] as bool? ?? true,
       statusText: node['status_text'] as String?,
       publicFontFamily: node['public_font_family'] as String? ?? 'inter',
       isVerified: node['is_verified'] as bool? ?? false,
+      backgroundcolor: node['backgroundcolor'] as String?,
     );
   }
 
@@ -131,16 +128,15 @@ class UserProfileModel extends UserProfile {
       'is_private': isPrivate,
       'allow_anonymous_questions': allowAnonymousQuestions,
       'public_profile_enabled': publicProfileEnabled,
-      'public_theme_key': publicThemeKey,
       'public_cta_text': publicCtaText,
       'fcm_token': fcmToken,
-      'link_button_style': linkButtonStyle,
       'fav_color': favColor,
       'question_placeholder': questionPlaceholder,
       'show_social_icons': showSocialIcons,
       'status_text': statusText,
       'public_font_family': publicFontFamily,
       'is_verified': isVerified,
+      'backgroundcolor': backgroundcolor,
     };
   }
 }

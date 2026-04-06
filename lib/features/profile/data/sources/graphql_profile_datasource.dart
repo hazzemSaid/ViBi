@@ -21,18 +21,6 @@ import 'package:vibi/features/profile/data/models/user_profile_model.dart';
 class GraphQLProfileDataSource {
   final SupabaseClient _client;
 
-  static const Set<String> _allowedPublicThemeKeys = {
-    'tellonym_dark',
-    'minimal_dark',
-    'clean_light',
-    'noir_dark',
-    'ocean_dark',
-    'forest_dark',
-    'sunset_dark',
-    'violet_dark',
-    'amber_dark',
-  };
-
   GraphQLProfileDataSource({SupabaseClient? client})
     : _client = client ?? Supabase.instance.client;
 
@@ -46,16 +34,6 @@ class GraphQLProfileDataSource {
     }
     if (value is String) return right(<String>[value]);
     return left('Invalid avatar URLs format received from server.');
-  }
-
-  String _normalizePublicThemeKey(String? themeKey) {
-    if (themeKey == null || themeKey.isEmpty) {
-      return 'tellonym_dark';
-    }
-    if (_allowedPublicThemeKeys.contains(themeKey)) {
-      return themeKey;
-    }
-    return 'tellonym_dark';
   }
 
   /// Fetch user profile using GraphQL query
@@ -73,15 +51,14 @@ class GraphQLProfileDataSource {
               is_private
               allow_anonymous_questions
               public_profile_enabled
-              public_theme_key
               public_cta_text
-              link_button_style
               fav_color
               question_placeholder
               show_social_icons
               status_text
               public_font_family
               is_verified
+              backgroundcolor
               followersCount: followsByFollowingId(first: 1000) {
                 edges {
                   node {
@@ -142,14 +119,13 @@ class GraphQLProfileDataSource {
           'isPrivate': profile.isPrivate,
           'allowAnonymousQuestions': profile.allowAnonymousQuestions,
           'publicProfileEnabled': profile.publicProfileEnabled,
-          'publicThemeKey': _normalizePublicThemeKey(profile.publicThemeKey),
           'publicCtaText': profile.publicCtaText,
-          'linkButtonStyle': profile.linkButtonStyle,
           'favColor': profile.favColor,
           'questionPlaceholder': profile.questionPlaceholder,
           'showSocialIcons': profile.showSocialIcons,
           'statusText': profile.statusText,
           'publicFontFamily': profile.publicFontFamily,
+          'backgroundcolor': profile.backgroundcolor,
         },
       ),
     );
@@ -277,15 +253,14 @@ class GraphQLProfileDataSource {
               is_private
               allow_anonymous_questions
               public_profile_enabled
-              public_theme_key
               public_cta_text
-              link_button_style
               fav_color
               question_placeholder
               show_social_icons
               status_text
               public_font_family
               is_verified
+              backgroundcolor
               followersCount: followsByFollowingId(first: 1000) {
                 edges {
                   node {
@@ -354,15 +329,14 @@ class GraphQLProfileDataSource {
               is_private
               allow_anonymous_questions
               public_profile_enabled
-              public_theme_key
               public_cta_text
-              link_button_style
               fav_color
               question_placeholder
               show_social_icons
               status_text
               public_font_family
               is_verified
+              backgroundcolor
               followersCount: followsByFollowingId(first: 1000) {
                 edges {
                   node {

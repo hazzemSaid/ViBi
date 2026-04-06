@@ -141,21 +141,18 @@ class _EditProfilePublicWebScreenState extends State<EditProfilePublicWebScreen>
                                         customLinksFor: customLinks,
                                       )
                                     : ProfileEditorAppearanceTab(
-                                        publicThemeKey: publicThemeKey,
-                                        linkButtonStyle: linkButtonStyle,
                                         favColor: favColor,
                                         publicFontFamily: publicFontFamily,
                                         parseHexColor: parseHexColor,
                                         fontFamilyFor: fontFamilyFor,
-                                        onThemeChanged: (v) =>
-                                            setState(() => publicThemeKey = v),
-                                        onButtonStyleChanged: (v) =>
-                                            setState(() => linkButtonStyle = v),
                                         onFavColorChanged: (v) =>
                                             setState(() => favColor = v),
                                         onFontFamilyChanged: (v) => setState(
                                           () => publicFontFamily = v,
                                         ),
+                                        backgroundColor: '',
+                                        onBackgroundColorChanged:
+                                            (String value) {},
                                       ),
                               ),
                             ),

@@ -13,16 +13,15 @@ class PublicProfile {
   final bool canViewContent;
   final bool allowAnonymousQuestions;
   final bool publicProfileEnabled;
-  final String publicThemeKey;
   final String? publicCtaText;
   final DateTime? updatedAt;
-  final String linkButtonStyle;
   final String? favColor;
   final String? questionPlaceholder;
   final bool showSocialIcons;
   final String? statusText;
   final String publicFontFamily;
   final bool isVerified;
+  final String? backgroundcolor;
 
   PublicProfile({
     required this.id,
@@ -39,16 +38,15 @@ class PublicProfile {
     required this.canViewContent,
     this.allowAnonymousQuestions = true,
     this.publicProfileEnabled = true,
-    this.publicThemeKey = 'tellonym_dark',
     this.publicCtaText,
     this.updatedAt,
-    this.linkButtonStyle = 'pill',
     this.favColor,
     this.questionPlaceholder,
     this.showSocialIcons = true,
     this.statusText,
     this.publicFontFamily = 'inter',
     this.isVerified = false,
+    this.backgroundcolor,
   });
 
   PublicProfile copyWith({
@@ -66,16 +64,15 @@ class PublicProfile {
     bool? canViewContent,
     bool? allowAnonymousQuestions,
     bool? publicProfileEnabled,
-    String? publicThemeKey,
     String? publicCtaText,
     DateTime? updatedAt,
-    String? linkButtonStyle,
     String? favColor,
     String? questionPlaceholder,
     bool? showSocialIcons,
     String? statusText,
     String? publicFontFamily,
     bool? isVerified,
+    String? backgroundcolor,
   }) {
     return PublicProfile(
       id: id ?? this.id,
@@ -93,16 +90,12 @@ class PublicProfile {
       allowAnonymousQuestions:
           allowAnonymousQuestions ?? this.allowAnonymousQuestions,
       publicProfileEnabled: publicProfileEnabled ?? this.publicProfileEnabled,
-      publicThemeKey: publicThemeKey ?? this.publicThemeKey,
       publicCtaText: publicCtaText ?? this.publicCtaText,
-      updatedAt: updatedAt ?? this.updatedAt,
-      linkButtonStyle: linkButtonStyle ?? this.linkButtonStyle,
-      favColor: favColor ?? this.favColor,
-      questionPlaceholder: questionPlaceholder ?? this.questionPlaceholder,
       showSocialIcons: showSocialIcons ?? this.showSocialIcons,
       statusText: statusText ?? this.statusText,
       publicFontFamily: publicFontFamily ?? this.publicFontFamily,
       isVerified: isVerified ?? this.isVerified,
+      backgroundcolor: backgroundcolor ?? this.backgroundcolor,
     );
   }
 }

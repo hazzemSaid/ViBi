@@ -36,7 +36,9 @@ class ContentSearchResultModel extends ContentSearchResult {
   factory ContentSearchResultModel.fromMap(Map<String, dynamic> map) {
     final question = map['questions'] as Map<String, dynamic>?;
     final profile = map['profiles'] as Map<String, dynamic>?;
-    final avatarUrls = _parseAvatarUrls(profile?['avatar_urls'] ?? profile?['avatar_url']);
+    final avatarUrls = _parseAvatarUrls(
+      profile?['avatar_urls'] ?? profile?['avatar_url'],
+    );
 
     return ContentSearchResultModel(
       id: map['id'] as String,

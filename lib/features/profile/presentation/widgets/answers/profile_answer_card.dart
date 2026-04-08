@@ -22,7 +22,7 @@ class ProfileAnswerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final isTablet = screenWidth >= 600;
     final bodyFontSize = isTablet ? 17.0 : 15.0;
     final questionFontSize = isTablet ? 20.0 : 18.0;

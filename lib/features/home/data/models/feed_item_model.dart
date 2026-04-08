@@ -20,7 +20,9 @@ class FeedItemModel extends FeedItem {
   factory FeedItemModel.fromMap(Map<String, dynamic> map) {
     final profile = map['profiles'] as Map<String, dynamic>?;
     final question = map['questions'] as Map<String, dynamic>?;
-    final avatarUrls = _parseAvatarUrls(profile?['avatar_urls'] ?? profile?['avatar_url']);
+    final avatarUrls = _parseAvatarUrls(
+      profile?['avatar_urls'] ?? profile?['avatar_url'],
+    );
 
     return FeedItemModel(
       id: map['id'] as String,
@@ -68,12 +70,16 @@ class FeedItemModel extends FeedItem {
         ? 'Anonymous User'
         : (questionerProfile?['username'] as String? ?? 'unknown');
 
-    final questionerAvatarUrls = _parseAvatarUrls(questionerProfile?['avatar_urls']);
+    final questionerAvatarUrls = _parseAvatarUrls(
+      questionerProfile?['avatar_urls'],
+    );
     final displayAvatar = isAnon
         ? null
         : (questionerAvatarUrls.isNotEmpty ? questionerAvatarUrls.first : null);
 
-    final authorAvatarUrls = _parseAvatarUrls(answerAuthorProfile?['avatar_urls']);
+    final authorAvatarUrls = _parseAvatarUrls(
+      answerAuthorProfile?['avatar_urls'],
+    );
 
     return FeedItemModel(
       id: answerId,
@@ -82,7 +88,9 @@ class FeedItemModel extends FeedItem {
       avatarUrl: displayAvatar,
       answerAuthorUsername:
           answerAuthorProfile?['username'] as String? ?? 'unknown',
-      answerAuthorAvatarUrl: authorAvatarUrls.isNotEmpty ? authorAvatarUrls.first : null,
+      answerAuthorAvatarUrl: authorAvatarUrls.isNotEmpty
+          ? authorAvatarUrls.first
+          : null,
       questionText: question?['question_text'] as String? ?? '',
       answerText:
           answersData?['answer_text'] as String? ??

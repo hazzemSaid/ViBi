@@ -24,9 +24,11 @@ class ReactionCubit extends Cubit<ViewState<ReactionSummary>> {
         answerId: answerId,
         userId: userId,
       );
+      if (isClosed) return;
       emit(ViewState(status: ViewStatus.success, data: summary));
     } catch (e) {
       debugPrint('[ReactionCubit] load failed for answerId=$answerId: $e');
+      if (isClosed) return;
       emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
     }
   }
@@ -55,10 +57,12 @@ class ReactionCubit extends Cubit<ViewState<ReactionSummary>> {
           answerId: answerId,
           userId: userId,
         );
+        if (isClosed) return;
         emit(ViewState(status: ViewStatus.success, data: currentSummary));
       } catch (e) {
         debugPrint('[ReactionCubit] pre-toggle summary fetch failed: $e');
-        emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
+        if (!isClosed)
+          emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
         _isToggling = false;
         return;
       }
@@ -104,12 +108,14 @@ class ReactionCubit extends Cubit<ViewState<ReactionSummary>> {
         userId: userId,
       );
 
+      if (isClosed) return;
       emit(ViewState(status: ViewStatus.success, data: fresh));
       debugPrint(
         '[ReactionCubit][confirmed] answerId=$answerId, myReaction=${fresh.myReaction}, total=${fresh.total}',
       );
     } catch (e) {
       debugPrint('[ReactionCubit][rollback] answerId=$answerId: $e');
+      if (isClosed) return;
       emit(
         ViewState(
           status: ViewStatus.failure,

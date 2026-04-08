@@ -6,7 +6,7 @@ class SuggestedSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final cardWidth = (screenWidth * 0.35).clamp(120.0, 160.0);
     // Height: card content + padding
     final listHeight = (cardWidth * 1.4).clamp(160.0, 210.0);

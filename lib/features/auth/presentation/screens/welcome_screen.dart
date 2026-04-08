@@ -14,7 +14,7 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authState = context.watch<AuthController>().state;
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final padding = size.width * 0.08;
     final isShort = size.height < 700;
 
@@ -100,7 +100,8 @@ class WelcomeScreen extends StatelessWidget {
                         ),
                         elevation: 0,
                       ),
-                      onPressed: () => context.read<AuthController>().signInWithGoogle(),
+                      onPressed: () =>
+                          context.read<AuthController>().signInWithGoogle(),
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

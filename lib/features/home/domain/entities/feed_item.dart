@@ -1,4 +1,6 @@
-class FeedItem {
+import 'package:equatable/equatable.dart';
+
+class FeedItem extends Equatable {
   final String id;
   final String userId;
   final String username;
@@ -63,10 +65,19 @@ class FeedItem {
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is FeedItem && runtimeType == other.runtimeType && id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
+  List<Object?> get props => [
+    id,
+    userId,
+    username,
+    avatarUrl,
+    answerAuthorUsername,
+    answerAuthorAvatarUrl,
+    questionText,
+    answerText,
+    likesCount,
+    commentsCount,
+    sharesCount,
+    createdAt,
+    isAnonymous,
+  ];
 }

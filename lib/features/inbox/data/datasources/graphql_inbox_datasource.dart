@@ -42,7 +42,9 @@ class GraphQLInboxDataSource {
                 recipientId: questions[i].recipientId,
                 senderId: questions[i].senderId,
                 senderUsername: senderProfile['username'] as String?,
-                senderAvatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first : null,
+                senderAvatarUrl: avatarUrls.isNotEmpty
+                    ? avatarUrls.first
+                    : null,
                 questionText: questions[i].questionText,
                 isAnonymous: questions[i].isAnonymous,
                 status: questions[i].status,

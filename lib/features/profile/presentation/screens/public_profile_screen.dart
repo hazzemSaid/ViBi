@@ -80,7 +80,7 @@ class _PublicProfileBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final padding = size.width * 0.05;
 
     return Scaffold(

@@ -40,7 +40,9 @@ class FeedItem {
       sharesCount: map['shares_count'] as int? ?? 0,
       createdAt: DateTime.parse(map['created_at'] as String),
       username: map['username'] as String?,
-      avatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first.toString() : map['avatar_url'] as String?,
+      avatarUrl: avatarUrls.isNotEmpty
+          ? avatarUrls.first.toString()
+          : map['avatar_url'] as String?,
       questionText: map['question_text'] as String?,
       isAnonymous: map['is_anonymous'] as bool? ?? false,
     );

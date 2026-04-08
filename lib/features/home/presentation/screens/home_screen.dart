@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/state/view_state.dart';
-import 'package:vibi/features/home/domain/entities/feed_item.dart';
 import 'package:vibi/features/home/presentation/providers/feed_providers.dart';
+import 'package:vibi/features/home/presentation/providers/feed_state.dart';
 import 'package:vibi/features/home/presentation/widgets/feed_empty_state.dart';
+import 'package:vibi/features/home/presentation/widgets/feed_error_state.dart';
+import 'package:vibi/features/home/presentation/widgets/feed_load_more_indicator.dart';
+import 'package:vibi/features/home/presentation/widgets/feed_loading_state.dart';
 import 'package:vibi/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:vibi/features/home/presentation/widgets/post_item.dart';
 import 'package:vibi/features/home/presentation/widgets/stories_section.dart';
@@ -34,9 +36,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onScroll() {
     final direction = _scrollController.position.userScrollDirection;
     if (direction == ScrollDirection.reverse && _isBottomBarVisible) {
-      setState(() => _isBottomBarVisible = false);
+      _isBottomBarVisible = false;
     } else if (direction == ScrollDirection.forward && !_isBottomBarVisible) {
-      setState(() => _isBottomBarVisible = true);
+      _isBottomBarVisible = true;
     }
 
     if (_scrollController.position.pixels >=
@@ -64,83 +66,80 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: const Color(0xFF1C212A),
           child: CustomScrollView(
             controller: _scrollController,
+            cacheExtent: 1500,
             slivers: [
               const HomeAppBar(),
               SliverList(
-                delegate: SliverChildListDelegate([
-                  const SizedBox(height: 8),
-                  const StoriesSection(),
-                  Divider(
-                    color: Colors.white.withValues(alpha: 0.05),
-                    height: 1,
-                  ),
+                delegate: SliverChildListDelegate(const [
+                  SizedBox(height: 8),
+                  StoriesSection(),
+                  Divider(color: Color(0x0DFFFFFF), height: 1),
                 ]),
               ),
-              BlocBuilder<GlobalFeedCubit, ViewState<List<FeedItem>>>(
-                builder: (context, feedAsync) {
-                  if (feedAsync.status == ViewStatus.success) {
-                    final items = feedAsync.data ?? [];
+              BlocBuilder<GlobalFeedCubit, FeedState>(
+                buildWhen: (previous, current) {
+                  if (previous is FeedLoaded && current is FeedLoaded) {
+                    return previous.items.length != current.items.length ||
+                        previous.hasMore != current.hasMore;
+                  }
+                  return previous != current;
+                },
+                builder: (context, feedState) {
+                  if (feedState is FeedLoaded) {
+                    final items = feedState.items;
                     if (items.isEmpty) return const FeedEmptyState();
-                    final hasMore = _globalFeedCubit.hasMore;
+                    final hasMore = feedState.hasMore;
+                    final itemIndexById = <String, int>{
+                      for (var i = 0; i < items.length; i++) items[i].id: i,
+                    };
 
                     return SliverList(
-                      delegate: SliverChildBuilderDelegate((context, index) {
-                        if (index == items.length) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 24.0),
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xFF5A4FCF),
-                              ),
-                            ),
-                          );
-                        }
+                      delegate: SliverChildBuilderDelegate(
+                        (context, index) {
+                          if (index == items.length) {
+                            return const FeedLoadMoreIndicator();
+                          }
 
-                        return Column(
-                          children: [
-                            PostItem(
-                              item: items[index],
-                              onCountsChanged:
-                                  (answerId, reactionsCount, commentsCount) {
-                                    _globalFeedCubit.patchAnswerCounts(
-                                      answerId: answerId,
-                                      reactionsCount: reactionsCount,
-                                      commentsCount: commentsCount,
-                                    );
-                                  },
-                            ),
-                            Divider(
-                              color: Colors.white.withValues(alpha: 0.05),
-                              height: 1,
-                            ),
-                            if (index == 0) ...[
-                              const SuggestedSection(),
-                              Divider(
-                                color: Colors.white.withValues(alpha: 0.05),
+                          final item = items[index];
+                          return Column(
+                            key: ValueKey('column_${item.id}'),
+                            children: [
+                              RepaintBoundary(
+                                child: PostItem(
+                                  key: ValueKey('post_${item.id}'),
+                                  item: item,
+                                ),
+                              ),
+                              const Divider(
+                                color: Color(0x0DFFFFFF),
                                 height: 1,
                               ),
+                              if (index == 0) ...const [
+                                SuggestedSection(
+                                  key: ValueKey('suggested_section'),
+                                ),
+                                Divider(color: Color(0x0DFFFFFF), height: 1),
+                              ],
                             ],
-                          ],
-                        );
-                      }, childCount: items.length + (hasMore ? 1 : 0)),
-                    );
-                  }
-                  if (feedAsync.status == ViewStatus.loading) {
-                    return const SliverFillRemaining(
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF5A4FCF),
-                        ),
+                          );
+                        },
+                        childCount: items.length + (hasMore ? 1 : 0),
+                        findChildIndexCallback: (Key key) {
+                          if (key is ValueKey<String> &&
+                              key.value.startsWith('column_')) {
+                            final id = key.value.substring(7);
+                            return itemIndexById[id];
+                          }
+                          return null;
+                        },
                       ),
                     );
                   }
-                  return SliverFillRemaining(
-                    child: Center(
-                      child: Text(
-                        'Error: ${feedAsync.errorMessage}',
-                        style: const TextStyle(color: Colors.redAccent),
-                      ),
-                    ),
+                  if (feedState is FeedLoading || feedState is FeedInitial) {
+                    return const FeedLoadingState();
+                  }
+                  return FeedErrorState(
+                    message: (feedState as FeedFailure).message,
                   );
                 },
               ),

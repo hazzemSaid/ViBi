@@ -19,6 +19,7 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  _configureImageMemoryCache();
 
   await _loadEnv();
 
@@ -51,6 +52,12 @@ void main() async {
   // We recommend removing this method after testing and instead use In-App Messages to prompt for notification permission.
   OneSignal.Notifications.requestPermission(false);
   runApp(const MyApp());
+}
+
+void _configureImageMemoryCache() {
+  final imageCache = PaintingBinding.instance.imageCache;
+  imageCache.maximumSize = 120;
+  imageCache.maximumSizeBytes = 80 << 20; // 80 MB
 }
 
 Future<void> _loadEnv() async {
@@ -106,7 +113,7 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late final AuthCubit _authCubit;
   late final AuthController _authController;
   late final PendingQuestionsCubit _pendingQuestionsCubit;
@@ -115,6 +122,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _authCubit = getIt<AuthCubit>();
     _authController = getIt<AuthController>();
     _pendingQuestionsCubit = getIt<PendingQuestionsCubit>();
@@ -122,7 +130,15 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
+  void didHaveMemoryPressure() {
+    final imageCache = PaintingBinding.instance.imageCache;
+    imageCache.clear();
+    imageCache.clearLiveImages();
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _routerHolder.router.dispose();
     _authCubit.close();
     _authController.close();

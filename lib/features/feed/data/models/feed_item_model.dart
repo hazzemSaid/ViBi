@@ -18,8 +18,12 @@ class FeedItemModel extends FeedItem {
   });
 
   factory FeedItemModel.fromMap(Map<String, dynamic> map) {
-    final avatarUrls = _parseAvatarUrls(map['avatar_urls'] ?? map['avatar_url']);
-    final authorAvatarUrls = _parseAvatarUrls(map['answer_author_avatar_urls'] ?? map['answer_author_avatar_url']);
+    final avatarUrls = _parseAvatarUrls(
+      map['avatar_urls'] ?? map['avatar_url'],
+    );
+    final authorAvatarUrls = _parseAvatarUrls(
+      map['answer_author_avatar_urls'] ?? map['answer_author_avatar_url'],
+    );
 
     return FeedItemModel(
       id: map['id'] as String,
@@ -32,7 +36,9 @@ class FeedItemModel extends FeedItem {
       username: map['username'] as String?,
       avatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first : null,
       answerAuthorUsername: map['answer_author_username'] as String?,
-      answerAuthorAvatarUrl: authorAvatarUrls.isNotEmpty ? authorAvatarUrls.first : null,
+      answerAuthorAvatarUrl: authorAvatarUrls.isNotEmpty
+          ? authorAvatarUrls.first
+          : null,
       questionText: map['question_text'] as String?,
       isAnonymous: map['is_anonymous'] as bool? ?? false,
     );
@@ -58,34 +64,38 @@ class FeedItemModel extends FeedItem {
 
     // Answer data can come from root level or from nested answers object
     final answerText =
-      (node['answer_text'] as String?) ??
-      (answersData?['answer_text'] as String?) ??
-      '';
+        (node['answer_text'] as String?) ??
+        (answersData?['answer_text'] as String?) ??
+        '';
     final likesCount =
-      (node['likes_count'] as int?) ??
-      (answersData?['likes_count'] as int?) ??
-      0;
+        (node['likes_count'] as int?) ??
+        (answersData?['likes_count'] as int?) ??
+        0;
     final commentsCount =
-      (node['comments_count'] as int?) ??
-      (answersData?['comments_count'] as int?) ??
-      0;
+        (node['comments_count'] as int?) ??
+        (answersData?['comments_count'] as int?) ??
+        0;
     final sharesCount =
-      (node['shares_count'] as int?) ??
-      (answersData?['shares_count'] as int?) ??
-      0;
+        (node['shares_count'] as int?) ??
+        (answersData?['shares_count'] as int?) ??
+        0;
 
     // Use questioner's profile, handle anonymous questions
     final isAnon = question['is_anonymous'] as bool? ?? false;
     final displayName = isAnon
         ? 'Anonymous User'
         : (questionerProfile['username'] as String?);
-    
-    final questionerAvatarUrls = _parseAvatarUrls(questionerProfile['avatar_urls']);
+
+    final questionerAvatarUrls = _parseAvatarUrls(
+      questionerProfile['avatar_urls'],
+    );
     final displayAvatar = isAnon
         ? null
         : (questionerAvatarUrls.isNotEmpty ? questionerAvatarUrls.first : null);
 
-    final authorAvatarUrls = _parseAvatarUrls(answerAuthorProfile?['avatar_urls']);
+    final authorAvatarUrls = _parseAvatarUrls(
+      answerAuthorProfile?['avatar_urls'],
+    );
 
     return FeedItemModel(
       id: node['id'] as String,
@@ -98,7 +108,9 @@ class FeedItemModel extends FeedItem {
       username: displayName,
       avatarUrl: displayAvatar,
       answerAuthorUsername: answerAuthorProfile?['username'] as String?,
-      answerAuthorAvatarUrl: authorAvatarUrls.isNotEmpty ? authorAvatarUrls.first : null,
+      answerAuthorAvatarUrl: authorAvatarUrls.isNotEmpty
+          ? authorAvatarUrls.first
+          : null,
       questionText: question['question_text'] as String?,
       isAnonymous: isAnon,
     );

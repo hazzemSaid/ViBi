@@ -46,7 +46,11 @@ class SearchUserTile extends StatelessWidget {
         radius: 28,
         backgroundColor: Colors.white10,
         backgroundImage: user.avatarUrls.isNotEmpty
-            ? CachedNetworkImageProvider(user.avatarUrls.first)
+            ? ResizeImage(
+                CachedNetworkImageProvider(user.avatarUrls.first),
+                width: 168,
+                height: 168,
+              )
             : null,
         child: user.avatarUrls.isEmpty
             ? const Icon(Icons.person, color: AppColors.textSecondary)

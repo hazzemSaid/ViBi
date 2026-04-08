@@ -1,12 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:vibi/features/home/domain/entities/feed_item.dart';
 import 'package:vibi/features/home/presentation/widgets/story_card.dart';
 
 class AnswerAuthorRow extends StatelessWidget {
-  const AnswerAuthorRow({super.key, required this.item});
+  const AnswerAuthorRow({
+    super.key,
+    required this.answerAuthorUsername,
+    this.answerAuthorAvatarUrl,
+  });
 
-  final FeedItem item;
+  final String answerAuthorUsername;
+  final String? answerAuthorAvatarUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -14,14 +18,18 @@ class AnswerAuthorRow extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 20,
-          backgroundImage: item.answerAuthorAvatarUrl != null
-              ? CachedNetworkImageProvider(
-                  item.answerAuthorAvatarUrl!,
-                  cacheManager: customCacheManager,
+          backgroundImage: answerAuthorAvatarUrl != null
+              ? ResizeImage(
+                  CachedNetworkImageProvider(
+                    answerAuthorAvatarUrl!,
+                    cacheManager: customCacheManager,
+                  ),
+                  width: 120,
+                  height: 120,
                 )
               : null,
-          backgroundColor: Colors.grey.withOpacity(0.3),
-          child: item.answerAuthorAvatarUrl == null
+          backgroundColor: Colors.grey.withValues(alpha: 0.3),
+          child: answerAuthorAvatarUrl == null
               ? const Icon(Icons.person, color: Colors.white24)
               : null,
         ),
@@ -31,7 +39,7 @@ class AnswerAuthorRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                item.answerAuthorUsername,
+                answerAuthorUsername,
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,

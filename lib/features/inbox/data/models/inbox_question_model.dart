@@ -16,7 +16,9 @@ class InboxQuestionModel extends InboxQuestion {
   factory InboxQuestionModel.fromMap(Map<String, dynamic> map) {
     // Extract sender details from nested profile data if available
     final senderData = map['sender'] as Map<String, dynamic>?;
-    final avatarUrls = _parseAvatarUrls(senderData?['avatar_urls'] ?? senderData?['avatar_url']);
+    final avatarUrls = _parseAvatarUrls(
+      senderData?['avatar_urls'] ?? senderData?['avatar_url'],
+    );
 
     return InboxQuestionModel(
       id: map['id'] as String,

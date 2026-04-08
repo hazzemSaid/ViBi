@@ -21,7 +21,10 @@ class PublicProfileRepositoryImpl implements PublicProfileRepository {
     String username,
     String? currentUserId,
   ) async {
-    return await _dataSource.getPublicProfileByUsername(username, currentUserId);
+    return await _dataSource.getPublicProfileByUsername(
+      username,
+      currentUserId,
+    );
   }
 
   @override

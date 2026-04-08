@@ -47,8 +47,12 @@ class EditorAvatarPickerGroup extends StatelessWidget {
                 for (var index = 0; index < 3; index++)
                   _EditorAvatarSlot(
                     size: slotSize,
-                    imageUrl: index < imageUrls.length ? imageUrls[index] : null,
-                    imageFile: index < imageFiles.length ? imageFiles[index] : null,
+                    imageUrl: index < imageUrls.length
+                        ? imageUrls[index]
+                        : null,
+                    imageFile: index < imageFiles.length
+                        ? imageFiles[index]
+                        : null,
                     isMain: index == 0,
                     isLoading: loadingSlot == index,
                     onTap: () => onTapSlot(index),
@@ -119,14 +123,14 @@ class _EditorAvatarSlot extends StatelessWidget {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : provider == null
-                        ? const Center(
-                            child: Icon(
-                              Icons.add_a_photo_outlined,
-                              size: 20,
-                              color: ProfileEditorPalette.secondaryText,
-                            ),
-                          )
-                        : Image(image: provider, fit: BoxFit.cover),
+                    ? const Center(
+                        child: Icon(
+                          Icons.add_a_photo_outlined,
+                          size: 20,
+                          color: ProfileEditorPalette.secondaryText,
+                        ),
+                      )
+                    : Image(image: provider, fit: BoxFit.cover),
               ),
             ),
           ),

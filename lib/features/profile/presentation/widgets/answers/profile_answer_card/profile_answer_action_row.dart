@@ -143,7 +143,7 @@ class _ProfileAnswerActionRowState extends State<ProfileAnswerActionRow> {
       );
     }
 
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final spacing = screenWidth < 360 ? 12.0 : 20.0;
 
     return Row(

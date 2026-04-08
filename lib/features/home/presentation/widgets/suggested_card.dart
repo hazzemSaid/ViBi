@@ -17,7 +17,7 @@ class SuggestedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final cardWidth = (screenWidth * 0.35).clamp(120.0, 160.0);
 
     return Container(
@@ -27,14 +27,18 @@ class SuggestedCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF1C212A),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           CircleAvatar(
             radius: 32,
-            backgroundImage: CachedNetworkImageProvider(avatarUrl),
+            backgroundImage: ResizeImage(
+              CachedNetworkImageProvider(avatarUrl),
+              width: 192,
+              height: 192,
+            ),
           ),
           const SizedBox(height: 12),
           Text(

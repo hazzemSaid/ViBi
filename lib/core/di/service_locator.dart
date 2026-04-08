@@ -9,6 +9,8 @@ import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
 import 'package:vibi/features/home/data/datasources/graphql_feed_data_source.dart';
 import 'package:vibi/features/home/data/repositories/feed_repository_impl.dart';
 import 'package:vibi/features/home/domain/repositories/feed_repository.dart';
+import 'package:vibi/features/home/domain/usecases/get_global_feed_usecase.dart';
+import 'package:vibi/features/home/domain/usecases/get_following_feed_usecase.dart';
 import 'package:vibi/features/home/presentation/providers/feed_providers.dart';
 import 'package:vibi/features/inbox/data/datasources/graphql_inbox_datasource.dart';
 import 'package:vibi/features/inbox/presentation/providers/inbox_providers.dart';
@@ -70,11 +72,17 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   getIt.registerLazySingleton<FeedRepository>(
     () => FeedRepositoryImpl(getIt<GraphQLFeedDataSource>()),
   );
+  getIt.registerLazySingleton<GetGlobalFeedUseCase>(
+    () => GetGlobalFeedUseCase(getIt<FeedRepository>()),
+  );
+  getIt.registerLazySingleton<GetFollowingFeedUseCase>(
+    () => GetFollowingFeedUseCase(getIt<FeedRepository>()),
+  );
   getIt.registerFactory<GlobalFeedCubit>(
-    () => GlobalFeedCubit(getIt<FeedRepository>()),
+    () => GlobalFeedCubit(getIt<GetGlobalFeedUseCase>()),
   );
   getIt.registerFactory<FollowingFeedCubit>(
-    () => FollowingFeedCubit(getIt<FeedRepository>()),
+    () => FollowingFeedCubit(getIt<GetFollowingFeedUseCase>()),
   );
 
   getIt.registerLazySingleton<GraphQLProfileDataSource>(

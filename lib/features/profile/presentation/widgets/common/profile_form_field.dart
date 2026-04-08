@@ -55,7 +55,8 @@ class ProfileFormField extends StatelessWidget {
               fontSize: 15,
             ),
             prefixText: prefixText,
-            prefixStyle: prefixStyle ??
+            prefixStyle:
+                prefixStyle ??
                 TextStyle(
                   color: AppColors.textPrimary.withValues(alpha: 0.4),
                   fontSize: 15,
@@ -68,11 +69,15 @@ class ProfileFormField extends StatelessWidget {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSizes.r12),
-              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSizes.r12),
-              borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSizes.r12),
@@ -89,4 +94,3 @@ class ProfileFormField extends StatelessWidget {
     );
   }
 }
-

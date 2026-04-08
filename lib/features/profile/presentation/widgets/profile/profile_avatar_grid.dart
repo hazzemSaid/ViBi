@@ -74,7 +74,9 @@ class _AvatarSlot extends StatelessWidget {
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.06),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.1),
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),

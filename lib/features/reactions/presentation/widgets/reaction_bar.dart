@@ -43,7 +43,6 @@ class _ReactionBarState extends State<ReactionBar> {
   late final ReactionCubit _reactionCubit;
   late final ReactionsRepository _repository;
 
-  String? _animating;
   late int _commentCount;
 
   @override
@@ -54,7 +53,9 @@ class _ReactionBarState extends State<ReactionBar> {
     _commentCount = widget.initialCommentCount;
 
     _reactionCubit.load(widget.answerId);
-    _loadCommentCount();
+    if (widget.showCommentButton) {
+      _loadCommentCount();
+    }
   }
 
   @override
@@ -80,9 +81,6 @@ class _ReactionBarState extends State<ReactionBar> {
 
   Future<void> _pick(String reaction) async {
     HapticFeedback.selectionClick();
-    setState(() {
-      _animating = reaction;
-    });
 
     await _reactionCubit.toggleReaction(
       answerId: widget.answerId,
@@ -126,7 +124,7 @@ class _ReactionBarState extends State<ReactionBar> {
                     final count = data.counts[entry.key] ?? 0;
                     return Padding(
                       padding: const EdgeInsets.only(right: 8),
-                      child: GestureDetector(
+                      child: _BouncingReactionWidget(
                         onTap: () => _pick(entry.key),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -165,8 +163,6 @@ class _ReactionBarState extends State<ReactionBar> {
                     emoji: entry.value,
                     count: data.counts[entry.key] ?? 0,
                     active: isActive,
-                    animating: _animating == entry.key,
-                    onAnimated: () => setState(() => _animating = null),
                     onTap: () => _pick(entry.key),
                   );
                 }).toList(),
@@ -193,28 +189,70 @@ class _ReactionBarState extends State<ReactionBar> {
   }
 }
 
-class _ReactionChip extends StatefulWidget {
+class _ReactionChip extends StatelessWidget {
   const _ReactionChip({
     required this.emoji,
     required this.count,
     required this.active,
-    required this.animating,
-    required this.onAnimated,
     required this.onTap,
   });
 
   final String emoji;
   final int count;
   final bool active;
-  final bool animating;
-  final VoidCallback onAnimated;
   final VoidCallback onTap;
 
   @override
-  State<_ReactionChip> createState() => _ReactionChipState();
+  Widget build(BuildContext context) {
+    return _BouncingReactionWidget(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: const EdgeInsets.only(right: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: active
+              ? const Color(0xFF5A4FCF).withValues(alpha: 0.2)
+              : Colors.white.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: active ? const Color(0xFF5A4FCF) : Colors.transparent,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(emoji, style: const TextStyle(fontSize: 16)),
+            if (count > 0) ...[
+              const SizedBox(width: 4),
+              Text(
+                '$count',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: active ? const Color(0xFF5A4FCF) : Colors.white,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 }
 
-class _ReactionChipState extends State<_ReactionChip>
+class _BouncingReactionWidget extends StatefulWidget {
+  const _BouncingReactionWidget({required this.child, required this.onTap});
+
+  final Widget child;
+  final VoidCallback onTap;
+
+  @override
+  State<_BouncingReactionWidget> createState() =>
+      _BouncingReactionWidgetState();
+}
+
+class _BouncingReactionWidgetState extends State<_BouncingReactionWidget>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _scale;
@@ -235,62 +273,25 @@ class _ReactionChipState extends State<_ReactionChip>
   }
 
   @override
-  void didUpdateWidget(covariant _ReactionChip oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.animating && !oldWidget.animating) {
-      _controller.forward(from: 0).then((_) => widget.onAnimated());
-    }
-  }
-
-  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
+  void _handleTap() {
+    widget.onTap();
+    _controller.forward(from: 0);
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onTap,
+      onTap: _handleTap,
       child: AnimatedBuilder(
         animation: _scale,
         builder: (_, child) =>
             Transform.scale(scale: _scale.value, child: child),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          margin: const EdgeInsets.only(right: 8),
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          decoration: BoxDecoration(
-            color: widget.active
-                ? const Color(0xFF5A4FCF).withValues(alpha: 0.2)
-                : Colors.white.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: widget.active
-                  ? const Color(0xFF5A4FCF)
-                  : Colors.transparent,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(widget.emoji, style: const TextStyle(fontSize: 16)),
-              if (widget.count > 0) ...[
-                const SizedBox(width: 4),
-                Text(
-                  '${widget.count}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: widget.active
-                        ? const Color(0xFF5A4FCF)
-                        : Colors.white,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
+        child: widget.child,
       ),
     );
   }

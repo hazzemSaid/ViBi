@@ -38,7 +38,11 @@ class SearchContentTile extends StatelessWidget {
                   radius: 16,
                   backgroundColor: Colors.white10,
                   backgroundImage: content.avatarUrl != null
-                      ? CachedNetworkImageProvider(content.avatarUrl!)
+                      ? ResizeImage(
+                          CachedNetworkImageProvider(content.avatarUrl!),
+                          width: 96,
+                          height: 96,
+                        )
                       : null,
                   child: content.avatarUrl == null
                       ? const Icon(

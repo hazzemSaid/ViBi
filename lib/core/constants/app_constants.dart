@@ -16,6 +16,18 @@ class ProfileConstants {
     '#FFFFFF', // White
   ];
 
+  static const List<String> backgroundColorOptions = [
+    '#121212', // Dark Grey
+    '#000000', // Black
+    '#1A1A2E', // Deep Space
+    '#16213E', // Navy
+    '#0F3460', // Ocean
+    '#F5F5F5', // Light Grey
+    '#FFFFFF', // White
+    '#FFE0B2', // Amber Light
+    '#C8E6C9', // Green Light
+  ];
+
   static const List<String> publicThemeOptions = [
     'tellonym_dark',
     'minimal_dark',

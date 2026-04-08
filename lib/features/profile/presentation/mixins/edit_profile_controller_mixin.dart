@@ -34,8 +34,7 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
   bool publicProfileEnabled = true;
   bool allowAnonymousQuestions = true;
   bool showSocialIcons = true;
-  String publicThemeKey = ProfileConstants.publicThemeOptions.first;
-  String linkButtonStyle = 'pill';
+  String backgroundColor = ProfileConstants.backgroundColorOptions.first;
   String favColor = ProfileConstants.favColorOptions.first;
   String publicFontFamily = 'inter';
   int? avatarLoadingSlot;
@@ -91,12 +90,10 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
         showSocialIcons = profile?.showSocialIcons ?? true;
         allowAnonymousQuestions = profile?.allowAnonymousQuestions ?? true;
         publicProfileEnabled = profile?.publicProfileEnabled ?? true;
-        publicThemeKey = ProfileConstants.normalizeThemeKey(
-          profile?.publicThemeKey,
-        );
-        linkButtonStyle = ProfileConstants.normalizeButtonStyle(
-          profile?.linkButtonStyle,
-        );
+        backgroundColor = profile?.backgroundcolor?.isNotEmpty == true
+            ? profile!.backgroundcolor!
+            : ProfileConstants.backgroundColorOptions.first;
+
         publicFontFamily = ProfileConstants.normalizeFontFamily(
           profile?.publicFontFamily,
         );
@@ -210,9 +207,8 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
         avatarUrls: compactAvatarUrls,
         allowAnonymousQuestions: allowAnonymousQuestions,
         publicProfileEnabled: publicProfileEnabled,
-        publicThemeKey: publicThemeKey,
+        backgroundcolor: backgroundColor,
         publicCtaText: _trimToNull(ctaController.text),
-        linkButtonStyle: linkButtonStyle,
         favColor: favColor,
         questionPlaceholder: _trimToNull(questionPlaceholderController.text),
         showSocialIcons: showSocialIcons,
@@ -320,18 +316,11 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
     if (publicProfileEnabled != profile.publicProfileEnabled) {
       return true;
     }
-    if (publicThemeKey !=
-        ProfileConstants.normalizeThemeKey(profile.publicThemeKey)) {
-      return true;
-    }
-    if (linkButtonStyle !=
-        ProfileConstants.normalizeButtonStyle(profile.linkButtonStyle)) {
-      return true;
-    }
     if (publicFontFamily !=
         ProfileConstants.normalizeFontFamily(profile.publicFontFamily)) {
       return true;
     }
+    if (backgroundColor != profile.backgroundcolor) return true;
     if (favColor != savedFavColor) return true;
 
     return false;

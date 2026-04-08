@@ -28,12 +28,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      context
-          .read<AuthController>()
-          .signInWithEmail(
-            _emailController.text.trim(),
-            _passwordController.text.trim(),
-          );
+      context.read<AuthController>().signInWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
     }
   }
 
@@ -81,7 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: AppColors.textSecondary,
                     ),
                   ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                  SizedBox(height: MediaQuery.sizeOf(context).height * 0.1),
 
                   // Glassmorphism Form Container
                   ClipRRect(

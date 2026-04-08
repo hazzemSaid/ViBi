@@ -49,7 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final padding = size.width * 0.05;
 
     final user = context.watch<AuthCubit>().currentUser;

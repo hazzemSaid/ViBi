@@ -36,7 +36,7 @@ class StoriesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     // Responsive height: derive from card width aspect ratio
     final cardWidth = (screenWidth * 0.35).clamp(120.0, 160.0);
     final listHeight = (cardWidth * 1.45).clamp(160.0, 240.0);

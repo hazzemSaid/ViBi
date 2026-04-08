@@ -15,16 +15,12 @@ class PublicProfileHeaderWidget extends StatelessWidget {
     print(
       'Building PublicProfileHeaderWidget with profile: ${profile.avatarUrls.length} images',
     );
-    final imageUrls = profile.avatarUrls.length > 1
-        ? profile.avatarUrls.sublist(1)
-        : <String>[];
+    final imageUrls = profile.avatarUrls;
     final fallbackImageUrl = profile.avatarUrls.isNotEmpty
         ? profile.avatarUrls.first
         : AppAssets.mockProfile1;
     final name = profile.name ?? 'No name';
-    final username = profile.username != null
-        ? '@${profile.username}'
-        : '@username';
+    final username = profile.username!;
     final bio = profile.bio ?? 'No bio';
     final statusText = profile.statusText;
     final fontFamily = _fontFamilyFor(profile.publicFontFamily);

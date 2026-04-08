@@ -111,7 +111,8 @@ class VerifyEmailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton(
-                    onPressed: () => context.read<AuthController>().sendEmailVerification(),
+                    onPressed: () =>
+                        context.read<AuthController>().sendEmailVerification(),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size.fromHeight(52),
                       side: const BorderSide(color: AppColors.primary),
@@ -121,8 +122,7 @@ class VerifyEmailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   TextButton(
-                    onPressed: () =>
-                        context.read<AuthController>().signOut(),
+                    onPressed: () => context.read<AuthController>().signOut(),
                     child: const Text(
                       'Sign Out',
                       style: TextStyle(color: AppColors.textSecondary),

@@ -7,8 +7,8 @@ const customCacheKey = 'myCustomCacheKey';
 final customCacheManager = CacheManager(
   Config(
     customCacheKey,
-    stalePeriod: const Duration(minutes: 2),
-    maxNrOfCacheObjects: 100,
+    stalePeriod: const Duration(hours: 12),
+    maxNrOfCacheObjects: 60,
     repo: JsonCacheInfoRepository(databaseName: customCacheKey),
     fileService: HttpFileService(),
   ),
@@ -38,9 +38,14 @@ class StoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final devicePixelRatio = MediaQuery.of(
+      context,
+    ).devicePixelRatio.clamp(1.0, 3.0);
     // Responsive card width: 35% on phone, max 160px
     final cardWidth = (screenWidth * 0.35).clamp(120.0, 160.0);
+    final targetMemWidth = (cardWidth * devicePixelRatio).round();
+    final targetMemHeight = (cardWidth * 1.55 * devicePixelRatio).round();
 
     return GestureDetector(
       onTap: onTap,
@@ -62,6 +67,10 @@ class StoryCard extends StatelessWidget {
                 imageUrl: imageUrl,
                 cacheManager: customCacheManager,
                 useOldImageOnUrlChange: true,
+                memCacheWidth: targetMemWidth,
+                memCacheHeight: targetMemHeight,
+                maxWidthDiskCache: targetMemWidth,
+                maxHeightDiskCache: targetMemHeight,
                 fit: BoxFit.cover,
                 placeholder: (context, url) =>
                     Container(color: const Color(0xFF1C212A)),
@@ -73,7 +82,10 @@ class StoryCard extends StatelessWidget {
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withValues(alpha: 0.8),
+                    ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     stops: const [0.4, 1.0],

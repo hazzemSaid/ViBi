@@ -27,7 +27,16 @@ class GraphQLConfig {
     // Create auth link that adds bearer token to every request
     final authLink = AuthLink(
       getToken: () async {
-        final session = Supabase.instance.client.auth.currentSession;
+        var session = Supabase.instance.client.auth.currentSession;
+        if (session != null && session.isExpired) {
+          try {
+            final res = await Supabase.instance.client.auth.refreshSession();
+            session = res.session;
+          } catch (_) {
+            // Ignore, if we can't refresh we still pass the old token or null,
+            // the server will naturally reject it.
+          }
+        }
         if (session?.accessToken != null) {
           return 'Bearer ${session!.accessToken}';
         }

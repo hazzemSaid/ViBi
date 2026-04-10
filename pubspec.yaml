@@ -59,6 +59,8 @@ dependencies:
   onesignal_flutter: 5.4.5
   flutter_launcher_icons: 0.14.4
   dartz: ^0.10.1
+  url_launcher: any
+  flutter_svg: ^2.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -86,8 +88,33 @@ flutter:
   assets:
     - assets/images/
     - assets/videos/
+    - assets/icons/
     - .env
     - assets/app_config.txt
+
+  fonts:
+    - family: GoogleSans
+      fonts:
+        - asset: assets/fonts/static/GoogleSans-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/static/GoogleSans-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/static/GoogleSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/static/GoogleSans-MediumItalic.ttf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/static/GoogleSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/static/GoogleSans-SemiBoldItalic.ttf
+          weight: 600
+          style: italic
+        - asset: assets/fonts/static/GoogleSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/static/GoogleSans-BoldItalic.ttf
+          weight: 700
+          style: italic
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -55,7 +55,7 @@ class StoryCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: hasBorder || isAdd
-              ? Border.all(color: Colors.pinkAccent, width: 2.5)
+              ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2.5)
               : null,
         ),
         child: ClipRRect(
@@ -73,10 +73,10 @@ class StoryCard extends StatelessWidget {
                 maxHeightDiskCache: targetMemHeight,
                 fit: BoxFit.cover,
                 placeholder: (context, url) =>
-                    Container(color: const Color(0xFF1C212A)),
+                    Container(color: Theme.of(context).colorScheme.surface),
                 errorWidget: (context, url, error) => Container(
-                  color: const Color(0xFF1C212A),
-                  child: const Icon(Icons.error, color: Colors.white24),
+                  color: Theme.of(context).colorScheme.surface,
+                  child: Icon(Icons.error, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.35)),
                 ),
               ),
               Container(
@@ -84,7 +84,7 @@ class StoryCard extends StatelessWidget {
                   gradient: LinearGradient(
                     colors: [
                       Colors.transparent,
-                      Colors.black.withValues(alpha: 0.8),
+                      Theme.of(context).colorScheme.scrim.withValues(alpha: 0.8),
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -106,8 +106,8 @@ class StoryCard extends StatelessWidget {
                   ),
                   child: Text(
                     badgeText,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
@@ -123,19 +123,19 @@ class StoryCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: const TextStyle(
-                        color: Colors.white70,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontSize: 11,
                       ),
                       maxLines: 2,
@@ -151,3 +151,5 @@ class StoryCard extends StatelessWidget {
     );
   }
 }
+
+

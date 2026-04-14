@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_assets.dart';
 import 'package:vibi/core/providers/shared_prefs_provider.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -35,16 +34,18 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: Image.asset(
           AppAssets.appIcon,
           width: 150,
           height: 150,
           errorBuilder: (context, error, stackTrace) =>
-              const Icon(Icons.error, color: AppColors.primary, size: 50),
+              Icon(Icons.error, color: Theme.of(context).colorScheme.primary, size: 50),
         ),
       ),
     );
   }
 }
+
+

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/inbox/presentation/widgets/answer_share_card.dart';
 
 /// Captures a branded [AnswerShareCard] and opens the platform share sheet.
@@ -20,7 +19,7 @@ class InstagramShareService {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.surface,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -95,7 +94,10 @@ class _ShareSheetState extends State<_ShareSheet> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: AppColors.error),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Theme.of(context).colorScheme.error,
+      ),
     );
   }
 
@@ -113,53 +115,66 @@ class _ShareSheetState extends State<_ShareSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.white24,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 16),
-              const Text(
+              SizedBox(height: 16),
+              Text(
                 'Share your Answer',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 4),
-              const Text(
+              SizedBox(height: 4),
+              Text(
                 'Choose a style first, then share it to Instagram Stories or any app',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.white38, fontSize: 13),
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.54),
+                  fontSize: 13,
+                ),
               ),
               const SizedBox(height: 20),
 
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.06),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.06),
                   ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Choose your template',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: 6),
                     Text(
                       _selectedTemplate.subtitle,
-                      style: const TextStyle(
-                        color: Colors.white54,
+                      style: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                         fontSize: 12,
                       ),
                     ),
@@ -183,16 +198,19 @@ class _ShareSheetState extends State<_ShareSheet> {
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 180),
                               width: 132,
-                              padding: const EdgeInsets.all(8),
+                              padding: EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? AppColors.primary.withValues(alpha: 0.14)
-                                    : Colors.white.withValues(alpha: 0.04),
+                                    ? Theme.of(context).colorScheme.primary
+                                          .withValues(alpha: 0.14)
+                                    : Theme.of(context).colorScheme.onSurface
+                                          .withValues(alpha: 0.04),
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: isSelected
-                                      ? AppColors.primary
-                                      : Colors.white.withValues(alpha: 0.06),
+                                      ? Theme.of(context).colorScheme.primary
+                                      : Theme.of(context).colorScheme.onSurface
+                                            .withValues(alpha: 0.06),
                                   width: isSelected ? 1.5 : 1,
                                 ),
                               ),
@@ -203,7 +221,9 @@ class _ShareSheetState extends State<_ShareSheet> {
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(12),
                                       child: ColoredBox(
-                                        color: Colors.black,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.scrim,
                                         child: FittedBox(
                                           fit: BoxFit.cover,
                                           alignment: Alignment.topCenter,
@@ -230,8 +250,12 @@ class _ShareSheetState extends State<_ShareSheet> {
                                     template.title,
                                     style: TextStyle(
                                       color: isSelected
-                                          ? Colors.white
-                                          : Colors.white70,
+                                          ? Theme.of(
+                                              context,
+                                            ).colorScheme.onSurface
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.onSurfaceVariant,
                                       fontWeight: FontWeight.w700,
                                       fontSize: 12,
                                     ),
@@ -267,28 +291,25 @@ class _ShareSheetState extends State<_ShareSheet> {
               ElevatedButton.icon(
                 onPressed: _isSharing ? null : _share,
                 icon: _isSharing
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
+                            Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       )
-                    : const Icon(Icons.ios_share_rounded, size: 20),
+                    : Icon(Icons.ios_share_rounded, size: 20),
                 label: Text(
                   _isSharing ? 'Preparing…' : 'Share',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                 ),
                 style: ElevatedButton.styleFrom(
                   // Instagram gradient start color
-                  backgroundColor: const Color(0xFFE1306C),
-                  foregroundColor: Colors.white,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onSurface,
                   minimumSize: const Size(double.infinity, 52),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
@@ -303,11 +324,16 @@ class _ShareSheetState extends State<_ShareSheet> {
                     ? null
                     : () => Navigator.of(context).pop(),
                 style: TextButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 44),
+                  minimumSize: Size(double.infinity, 44),
                 ),
-                child: const Text(
+                child: Text(
                   'Skip',
-                  style: TextStyle(color: Colors.white54, fontSize: 15),
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+                    fontSize: 15,
+                  ),
                 ),
               ),
             ],

@@ -15,7 +15,7 @@ class FeedItem extends Equatable {
   final DateTime createdAt;
   final bool isAnonymous;
 
-  FeedItem({
+  const FeedItem({
     required this.id,
     required this.userId,
     required this.username,

@@ -39,7 +39,7 @@ class ProfileImageStrip extends StatelessWidget {
     }
 
     final itemCount = cleaned.isEmpty ? 1 : cleaned.length;
-    final borderColor = favColor ?? const Color(0xFF3FB4FF);
+    final borderColor = favColor ?? Theme.of(context).colorScheme.secondary;
     final stripHeight = height
         .clamp(mediaSize.height * 0.28, mediaSize.height * 0.4)
         .toDouble();
@@ -132,8 +132,8 @@ class ProfileImageStrip extends StatelessWidget {
         itemCount: itemCount,
         itemBuilder: (context, index) {
           final isCenter = itemCount == 3 && index == 1;
-          final itemWidth = isCenter ? centerCardWidth : sideCardWidth;
-          final itemHeight = isCenter ? centerCardHeight : sideCardHeight;
+          final itemWidth = centerCardWidth;
+          final itemHeight = centerCardHeight;
 
           return Padding(
             padding: EdgeInsets.only(
@@ -196,7 +196,9 @@ class _ProfileImageCard extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.18),
+              color: Theme.of(
+                context,
+              ).colorScheme.scrim.withValues(alpha: 0.18),
               blurRadius: 18,
               offset: const Offset(0, 10),
               spreadRadius: -4,
@@ -218,15 +220,15 @@ class _ProfileImageCard extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(AppSizes.r24),
-          child: _buildImageOrPlaceholder(),
+          child: _buildImageOrPlaceholder(context),
         ),
       ),
     );
   }
 
-  Widget _buildImageOrPlaceholder() {
+  Widget _buildImageOrPlaceholder(BuildContext context) {
     if (imageUrl == null || imageUrl!.isEmpty) {
-      return _buildPlaceholder();
+      return _buildPlaceholder(context);
     }
 
     final bool isNetwork = imageUrl!.startsWith('http');
@@ -238,14 +240,15 @@ class _ProfileImageCard extends StatelessWidget {
           CachedNetworkImage(
             imageUrl: imageUrl!,
             fit: BoxFit.cover,
-            placeholder: (context, url) => _buildPlaceholder(isLoading: true),
-            errorWidget: (context, url, error) => _buildPlaceholder(),
+            placeholder: (context, url) =>
+                _buildPlaceholder(context, isLoading: true),
+            errorWidget: (context, url, error) => _buildPlaceholder(context),
           )
         else
           Image.asset(
             imageUrl!,
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => _buildPlaceholder(),
+            errorBuilder: (context, __, ___) => _buildPlaceholder(context),
           ),
         // Subtle overlay for depth
         Positioned.fill(
@@ -254,11 +257,13 @@ class _ProfileImageCard extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                stops: const [0.0, 0.7, 1.0],
+                stops: [0.0, 0.7, 1.0],
                 colors: [
-                  Colors.white.withValues(alpha: 0.05),
+                  Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.05),
                   Colors.transparent,
-                  Colors.black.withValues(alpha: 0.15),
+                  Theme.of(context).colorScheme.scrim.withValues(alpha: 0.15),
                 ],
               ),
             ),
@@ -268,37 +273,46 @@ class _ProfileImageCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPlaceholder({bool isLoading = false}) {
+  Widget _buildPlaceholder(BuildContext context, {bool isLoading = false}) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [const Color(0xFF2D3748), const Color(0xFF1A202C)],
+          colors: [
+            Theme.of(context).colorScheme.surfaceContainerHighest,
+            Theme.of(context).colorScheme.surface,
+          ],
         ),
       ),
       alignment: Alignment.center,
       child: isLoading
-          ? const Center(
+          ? Center(
               child: SizedBox(
                 width: 24,
                 height: 24,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation(Colors.white30),
+                  valueColor: AlwaysStoppedAnimation(
+                    Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.3),
+                  ),
                 ),
               ),
             )
           : Text(
               placeholderInitial,
               style: TextStyle(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: (width * 0.25).clamp(24, 48),
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
                 shadows: [
                   Shadow(
-                    color: Colors.black.withValues(alpha: 0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.scrim.withValues(alpha: 0.3),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),

@@ -28,7 +28,7 @@ class EditorLinkTile extends StatelessWidget {
               : socialPlatformLabel(link.platform));
 
     return Material(
-      color: Colors.white,
+      color: Theme.of(context).colorScheme.onSurface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -38,9 +38,9 @@ class EditorLinkTile extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: ProfileEditorPalette.outline),
-            boxShadow: const [
+            boxShadow: [
               BoxShadow(
-                color: Color(0x11000000),
+                color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.07),
                 blurRadius: 3,
                 offset: Offset(0, 1),
               ),
@@ -66,7 +66,7 @@ class EditorLinkTile extends StatelessWidget {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: ProfileEditorPalette.primaryText,
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
@@ -77,7 +77,7 @@ class EditorLinkTile extends StatelessWidget {
                       link.url,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: ProfileEditorPalette.placeholder,
                         fontSize: 12,
                       ),
@@ -92,7 +92,7 @@ class EditorLinkTile extends StatelessWidget {
               ),
               IconButton(
                 onPressed: onDelete,
-                icon: const Icon(
+                icon: Icon(
                   Icons.delete_outline_rounded,
                   size: 18,
                   color: ProfileEditorPalette.placeholder,
@@ -105,3 +105,4 @@ class EditorLinkTile extends StatelessWidget {
     );
   }
 }
+

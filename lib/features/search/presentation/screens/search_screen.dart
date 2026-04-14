@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibi/core/constants/app_assets.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/search/domain/entities/content_search_result.dart';
 import 'package:vibi/features/search/domain/entities/user_search_result.dart';
 import 'package:vibi/features/search/presentation/providers/search_providers.dart';
@@ -50,16 +50,16 @@ class _SearchScreenState extends State<SearchScreen>
         BlocProvider<ContentSearchCubit>.value(value: _contentSearchCubit),
       ],
       child: Scaffold(
-        backgroundColor: const Color(0xFF0F1419),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: const Color(0xFF0F1419),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           elevation: 0,
-          title: const Text(
+          title: Text(
             'Search',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 24,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           bottom: PreferredSize(
@@ -74,19 +74,27 @@ class _SearchScreenState extends State<SearchScreen>
                   ),
                   child: TextField(
                     controller: _searchController,
-                    style: const TextStyle(color: AppColors.textPrimary),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                     decoration: InputDecoration(
                       hintText: 'Search users, answers...',
-                      hintStyle: const TextStyle(color: AppColors.textTertiary),
-                      prefixIcon: const Icon(
-                        Icons.search,
-                        color: AppColors.textSecondary,
+                      hintStyle: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+                      ),
+                      prefixIcon: ImageIcon(
+                        AssetImage(AppAssets.iconSearch),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       suffixIcon: _searchQuery.isNotEmpty
                           ? IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.clear,
-                                color: AppColors.textSecondary,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                               onPressed: () {
                                 _searchController.clear();
@@ -97,7 +105,9 @@ class _SearchScreenState extends State<SearchScreen>
                             )
                           : null,
                       filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.1),
+                      fillColor: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.1),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppSizes.r12),
                         borderSide: BorderSide.none,
@@ -117,10 +127,12 @@ class _SearchScreenState extends State<SearchScreen>
                 // Tab bar
                 TabBar(
                   controller: _tabController,
-                  indicatorColor: Colors.blueAccent,
-                  labelColor: Colors.white,
-                  unselectedLabelColor: AppColors.textSecondary,
-                  labelStyle: const TextStyle(
+                  indicatorColor: Theme.of(context).colorScheme.secondary,
+                  labelColor: Theme.of(context).colorScheme.onSurface,
+                  unselectedLabelColor: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant,
+                  labelStyle: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -166,13 +178,15 @@ class _SearchScreenState extends State<SearchScreen>
             onRefresh: () async {
               await _userSearchCubit.search(_searchQuery);
             },
-            color: const Color(0xFF5A4FCF),
-            backgroundColor: const Color(0xFF1C212A),
+            color: Theme.of(context).colorScheme.secondary,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             child: ListView.separated(
-              padding: const EdgeInsets.symmetric(vertical: AppSizes.s8),
+              padding: EdgeInsets.symmetric(vertical: AppSizes.s8),
               itemCount: users.length,
               separatorBuilder: (context, index) => Divider(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.05),
                 height: 1,
               ),
               itemBuilder: (context, index) {
@@ -182,23 +196,25 @@ class _SearchScreenState extends State<SearchScreen>
           );
         }
         if (usersAsync.status == ViewStatus.loading) {
-          return const Center(
-            child: CircularProgressIndicator(color: Color(0xFF5A4FCF)),
+          return Center(
+            child: CircularProgressIndicator(
+              color: Theme.of(context).colorScheme.secondary,
+            ),
           );
         }
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.error_outline,
                 size: 48,
-                color: Colors.redAccent,
+                color: Theme.of(context).colorScheme.error,
               ),
-              const SizedBox(height: AppSizes.s16),
+              SizedBox(height: AppSizes.s16),
               Text(
                 'Error: ${usersAsync.errorMessage}',
-                style: const TextStyle(color: Colors.redAccent),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSizes.s16),
@@ -206,7 +222,7 @@ class _SearchScreenState extends State<SearchScreen>
                 onPressed: () {
                   _userSearchCubit.search(_searchQuery);
                 },
-                child: const Text('Retry'),
+                child: Text('Retry'),
               ),
             ],
           ),
@@ -243,8 +259,8 @@ class _SearchScreenState extends State<SearchScreen>
             onRefresh: () async {
               await _contentSearchCubit.search(_searchQuery);
             },
-            color: const Color(0xFF5A4FCF),
-            backgroundColor: const Color(0xFF1C212A),
+            color: Theme.of(context).colorScheme.secondary,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: AppSizes.s8),
               itemCount: content.length,
@@ -255,23 +271,25 @@ class _SearchScreenState extends State<SearchScreen>
           );
         }
         if (contentAsync.status == ViewStatus.loading) {
-          return const Center(
-            child: CircularProgressIndicator(color: Color(0xFF5A4FCF)),
+          return Center(
+            child: CircularProgressIndicator(
+              color: Theme.of(context).colorScheme.secondary,
+            ),
           );
         }
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.error_outline,
                 size: 48,
-                color: Colors.redAccent,
+                color: Theme.of(context).colorScheme.error,
               ),
-              const SizedBox(height: AppSizes.s16),
+              SizedBox(height: AppSizes.s16),
               Text(
                 'Error: ${contentAsync.errorMessage}',
-                style: const TextStyle(color: Colors.redAccent),
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSizes.s16),
@@ -279,7 +297,7 @@ class _SearchScreenState extends State<SearchScreen>
                 onPressed: () {
                   context.read<ContentSearchCubit>().search(_searchQuery);
                 },
-                child: const Text('Retry'),
+                child: Text('Retry'),
               ),
             ],
           ),
@@ -298,27 +316,35 @@ class _SearchScreenState extends State<SearchScreen>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.white.withValues(alpha: 0.05),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.05),
             ),
-            child: Icon(icon, size: 56, color: AppColors.textTertiary),
+            child: Icon(
+              icon,
+              size: 56,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+            ),
           ),
-          const SizedBox(height: AppSizes.s24),
+          SizedBox(height: AppSizes.s24),
           Text(
             title,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: AppSizes.s8),
+          SizedBox(height: AppSizes.s8),
           Text(
             subtitle,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 14,
             ),
           ),

@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
 import 'package:vibi/features/profile/presentation/widgets/common/social_link_platform.dart';
 
 class PublicSocialMediaCard extends StatelessWidget {
   final SocialLink link;
 
-  const PublicSocialMediaCard({required this.link});
+  const PublicSocialMediaCard({super.key, required this.link});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppSizes.s12),
+      margin: EdgeInsets.only(bottom: AppSizes.s12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: link.isActive ? 0.06 : 0.03),
+        color: Theme.of(
+          context,
+        ).colorScheme.onSurface.withValues(alpha: link.isActive ? 0.06 : 0.03),
         borderRadius: BorderRadius.circular(AppSizes.r24),
         border: Border.all(
-          color: link.isActive ? Colors.white24 : Colors.white10,
+          color: link.isActive
+              ? Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withValues(alpha: 0.35)
+              : Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withValues(alpha: 0.18),
         ),
       ),
       child: Material(
@@ -42,19 +49,21 @@ class PublicSocialMediaCard extends StatelessWidget {
                     children: [
                       Text(
                         link.platform.capitalizeFirst,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       if (link.displayLabel != null)
                         Padding(
-                          padding: const EdgeInsets.only(top: 2),
+                          padding: EdgeInsets.only(top: 2),
                           child: Text(
                             link.displayLabel!,
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                               fontSize: 12,
                             ),
                             maxLines: 1,
@@ -66,7 +75,9 @@ class PublicSocialMediaCard extends StatelessWidget {
                 ),
                 Icon(
                   Icons.arrow_outward,
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
                   size: 18,
                 ),
               ],
@@ -101,50 +112,34 @@ class _SocialPlatformImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageUrl = _faviconFromUrl(link.url);
-
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppSizes.r12),
       child: Container(
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.08),
-          border: Border.all(color: Colors.white12),
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurface.withValues(alpha: 0.08),
+          border: Border.all(
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.22),
+          ),
         ),
-        child: Image.network(
-          imageUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _fallbackIcon(),
-          loadingBuilder: (context, child, progress) {
-            if (progress == null) return child;
-            return _fallbackIcon();
-          },
+        child: Center(
+          child: socialPlatformVisual(
+            link.platform,
+            color: link.isActive
+                ? Theme.of(context).colorScheme.onSurface
+                : Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+            size: 22,
+          ),
         ),
       ),
     );
-  }
-
-  Widget _fallbackIcon() {
-    return Icon(
-      socialPlatformIcon(link.platform),
-      color: link.isActive ? AppColors.textPrimary : Colors.white54,
-      size: 22,
-    );
-  }
-
-  String _faviconFromUrl(String rawUrl) {
-    try {
-      final input = rawUrl.trim();
-      final withScheme = input.startsWith('http') ? input : 'https://$input';
-      final host = Uri.parse(withScheme).host;
-      if (host.isEmpty) {
-        return 'https://www.google.com/s2/favicons?sz=128&domain=vibi.social';
-      }
-      return 'https://www.google.com/s2/favicons?sz=128&domain=$host';
-    } catch (_) {
-      return 'https://www.google.com/s2/favicons?sz=128&domain=vibi.social';
-    }
   }
 }
 

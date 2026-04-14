@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
 import 'package:vibi/features/search/domain/entities/user_search_result.dart';
 
@@ -44,7 +43,7 @@ class SearchUserTile extends StatelessWidget {
       ),
       leading: CircleAvatar(
         radius: 28,
-        backgroundColor: Colors.white10,
+        backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.18),
         backgroundImage: user.avatarUrls.isNotEmpty
             ? ResizeImage(
                 CachedNetworkImageProvider(user.avatarUrls.first),
@@ -53,7 +52,7 @@ class SearchUserTile extends StatelessWidget {
               )
             : null,
         child: user.avatarUrls.isEmpty
-            ? const Icon(Icons.person, color: AppColors.textSecondary)
+            ? Icon(Icons.person, color: Theme.of(context).colorScheme.onSurfaceVariant)
             : null,
       ),
       title: Row(
@@ -61,8 +60,8 @@ class SearchUserTile extends StatelessWidget {
           Flexible(
             child: Text(
               user.name ?? 'No name',
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -71,11 +70,11 @@ class SearchUserTile extends StatelessWidget {
             ),
           ),
           if (user.isPrivate) ...[
-            const SizedBox(width: AppSizes.s4),
-            const Icon(
+SizedBox(width: AppSizes.s4),
+            Icon(
               Icons.lock_outline,
               size: 14,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ],
         ],
@@ -86,8 +85,8 @@ class SearchUserTile extends StatelessWidget {
           if (user.username != null) ...[
             Text(
               '@${user.username}',
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 13,
               ),
             ),
@@ -96,8 +95,8 @@ class SearchUserTile extends StatelessWidget {
           if (user.bio != null && user.bio!.isNotEmpty)
             Text(
               user.bio!,
-              style: const TextStyle(
-                color: AppColors.textTertiary,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                 fontSize: 12,
               ),
               maxLines: 2,
@@ -111,18 +110,22 @@ class SearchUserTile extends StatelessWidget {
         children: [
           Text(
             '${user.followersCount}',
-            style: const TextStyle(
-              color: AppColors.textPrimary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 14,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const Text(
+          Text(
             'followers',
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 11),
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 11),
           ),
         ],
       ),
     );
   }
 }
+
+
+
+

@@ -23,7 +23,9 @@ class EditorTabButton extends StatelessWidget {
       child: Container(
         height: 40,
         decoration: BoxDecoration(
-          color: selected ? ProfileEditorPalette.tabActive : Colors.transparent,
+          color: !selected
+              ? Theme.of(context).colorScheme.secondaryContainer
+              : Theme.of(context).colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(

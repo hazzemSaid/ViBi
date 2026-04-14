@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/answered_question.dart';
 import 'package:vibi/features/profile/domain/entities/public_profile.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
@@ -84,7 +83,7 @@ class _PublicProfileBody extends StatelessWidget {
     final padding = size.width * 0.05;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: BlocBuilder<PublicProfileCubit, ViewState<PublicProfile?>>(
         builder: (context, profileAsync) {
           if (profileAsync.status == ViewStatus.loading) {
@@ -98,12 +97,14 @@ class _PublicProfileBody extends StatelessWidget {
                 children: [
                   Text(
                     'Error: ${profileAsync.errorMessage}',
-                    style: const TextStyle(color: Colors.redAccent),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
                   const SizedBox(height: AppSizes.s16),
                   ElevatedButton(
                     onPressed: () => _reloadProfile(context),
-                    child: const Text('Retry'),
+                    child: Text('Retry'),
                   ),
                 ],
               ),
@@ -112,10 +113,12 @@ class _PublicProfileBody extends StatelessWidget {
 
           final profile = profileAsync.data;
           if (profile == null) {
-            return const Center(
+            return Center(
               child: Text(
                 'Profile not found',
-                style: TextStyle(color: AppColors.textPrimary),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             );
           }
@@ -129,35 +132,41 @@ class _PublicProfileBody extends StatelessWidget {
                   elevation: 0,
                   pinned: true,
                   leading: IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     style: IconButton.styleFrom(
-                      backgroundColor: Colors.white.withValues(alpha: 0.06),
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.06),
                       shape: const CircleBorder(),
                     ),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   actions: [
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.refresh,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                       style: IconButton.styleFrom(
-                        backgroundColor: Colors.white.withValues(alpha: 0.06),
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.06),
                         shape: const CircleBorder(),
                       ),
                       onPressed: () => _reloadProfile(context),
                     ),
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.more_vert,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                       style: IconButton.styleFrom(
-                        backgroundColor: Colors.white.withValues(alpha: 0.06),
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.06),
                         shape: const CircleBorder(),
                       ),
                       onPressed: () {},

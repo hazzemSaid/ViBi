@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vibi/core/constants/app_assets.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit_state.dart';
@@ -63,7 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return BlocProvider<ProfileCubit>.value(
       value: _profileCubit,
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: BlocBuilder<ProfileCubit, ProfileState>(
           builder: (context, profileState) {
             final profile = switch (profileState) {
@@ -79,7 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 final username = profile.username.trim();
                 if (username.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
+                    SnackBar(
                       content: Text(
                         'Set a username first to create a share link.',
                       ),
@@ -109,59 +109,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       elevation: 0,
                       pinned: true,
                       leading: IconButton(
-                        icon: const Icon(
-                          Icons.settings_outlined,
-                          color: AppColors.textPrimary,
+                        icon: ImageIcon(
+                          AssetImage(AppAssets.iconSettings),
+                          color: Theme.of(context).colorScheme.onSurface,
+                          size: 18,
                         ),
                         style: IconButton.styleFrom(
-                          backgroundColor: Colors.white.withValues(alpha: 0.06),
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.06),
                           shape: const CircleBorder(),
                         ),
                         onPressed: () => context.pushNamed('edit-profile'),
                       ),
-                      actions: [
-                        IconButton(
-                          icon: const Icon(
-                            Icons.refresh,
-                            color: AppColors.textPrimary,
-                          ),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.white.withValues(
-                              alpha: 0.06,
-                            ),
-                            shape: const CircleBorder(),
-                          ),
-                          onPressed: () => _reloadProfile(user.id),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.edit_outlined,
-                            color: AppColors.textPrimary,
-                          ),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.white.withValues(
-                              alpha: 0.06,
-                            ),
-                            shape: const CircleBorder(),
-                          ),
-                          onPressed: () =>
-                              context.pushNamed('edit-profile-public-web'),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.ios_share,
-                            color: AppColors.textPrimary,
-                          ),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Colors.white.withValues(
-                              alpha: 0.06,
-                            ),
-                            shape: const CircleBorder(),
-                          ),
-                          onPressed: copyShareLink,
-                        ),
-                        const SizedBox(width: AppSizes.s4),
-                      ],
                     ),
                     SliverToBoxAdapter(
                       child: Column(
@@ -192,20 +152,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   height: 56,
                                   child: ElevatedButton.icon(
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      foregroundColor: Colors.black,
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
+                                      foregroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.primaryContainer,
                                       shape: const StadiumBorder(),
                                     ),
                                     onPressed: copyShareLink,
-                                    icon: const Icon(
-                                      Icons.send_outlined,
+                                    icon: ImageIcon(
+                                      AssetImage(AppAssets.iconShare),
                                       size: 20,
                                     ),
-                                    label: const Text(
+                                    label: Text(
                                       'Share Profile Link',
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primaryContainer,
                                       ),
                                     ),
                                   ),
@@ -244,7 +211,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const SizedBox(height: AppSizes.s16),
                   ElevatedButton(
                     onPressed: () => _reloadProfile(user.id),
-                    child: const Text('Retry'),
+                    child: Text('Retry'),
                   ),
                 ],
               ),

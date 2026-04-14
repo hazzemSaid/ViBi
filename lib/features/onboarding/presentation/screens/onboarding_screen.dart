@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_assets.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/providers/shared_prefs_provider.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -42,7 +41,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -50,9 +49,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               alignment: Alignment.topRight,
               child: TextButton(
                 onPressed: _finishOnboarding,
-                child: const Text(
+                child: Text(
                   'Skip',
-                  style: TextStyle(color: AppColors.textSecondary),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
               ),
             ),
@@ -80,10 +79,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             height: 250,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) =>
-                                const Icon(
+                                Icon(
                                   Icons.image,
                                   size: 250,
-                                  color: AppColors.primary,
+                                  color: Theme.of(context).colorScheme.primary,
                                 ),
                           ),
                         ),
@@ -91,19 +90,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         Text(
                           onboardingData[index]['title']!,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: AppSizes.s16),
                         Text(
                           onboardingData[index]['description']!,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                             height: 1.4,
                           ),
                         ),
@@ -128,8 +127,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         width: _currentPage == index ? 24 : 8,
                         decoration: BoxDecoration(
                           color: _currentPage == index
-                              ? AppColors.primary
-                              : AppColors.textTertiary.withValues(alpha: 0.3),
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72).withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -167,3 +166,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 }
+
+
+

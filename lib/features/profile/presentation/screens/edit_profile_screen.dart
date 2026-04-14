@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vibi/core/constants/app_assets.dart';
+import 'package:vibi/core/theme/theme_cubit.dart';
 
 class EditProfileScreen extends StatelessWidget {
   const EditProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     const settingsSections = <_SettingsSection>[
       _SettingsSection(
         title: 'Account',
@@ -61,7 +67,7 @@ class EditProfileScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: _SettingsPalette.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -71,7 +77,7 @@ class EditProfileScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.06),
+                    color: colorScheme.outline.withValues(alpha: 0.2),
                   ),
                 ),
               ),
@@ -79,18 +85,18 @@ class EditProfileScreen extends StatelessWidget {
                 children: [
                   IconButton(
                     onPressed: () => context.pop(),
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back_ios_new_rounded,
-                      color: Colors.white,
+                      color: colorScheme.onSurface,
                       size: 18,
                     ),
                   ),
-                  const Expanded(
+                  Expanded(
                     child: Text(
                       'Settings',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
+                      style: textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onSurface,
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
                       ),
@@ -110,6 +116,76 @@ class EditProfileScreen extends StatelessWidget {
                       _SettingsSectionCard(section: section),
                       const SizedBox(height: 20),
                     ],
+                    BlocBuilder<ThemeCubit, ThemeMode>(
+                      builder: (context, themeMode) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            color: colorScheme.surface,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: colorScheme.outline.withValues(
+                                alpha: 0.35,
+                              ),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  ImageIcon(
+                                    AssetImage(AppAssets.iconSettings),
+                                    color: colorScheme.onSurfaceVariant,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Text(
+                                    'App Theme',
+                                    style: textTheme.titleMedium?.copyWith(
+                                      color: colorScheme.onSurface,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              _ThemeModeOption(
+                                title: 'System',
+                                subtitle: 'Follow device appearance',
+                                value: ThemeMode.system,
+                                groupValue: themeMode,
+                                onChanged: (mode) => context
+                                    .read<ThemeCubit>()
+                                    .setThemeMode(mode),
+                              ),
+                              _ThemeModeOption(
+                                title: 'Light',
+                                subtitle: 'Bright interface all the time',
+                                value: ThemeMode.light,
+                                groupValue: themeMode,
+                                onChanged: (mode) => context
+                                    .read<ThemeCubit>()
+                                    .setThemeMode(mode),
+                              ),
+                              _ThemeModeOption(
+                                title: 'Dark',
+                                subtitle: 'Dimmed interface all the time',
+                                value: ThemeMode.dark,
+                                groupValue: themeMode,
+                                onChanged: (mode) => context
+                                    .read<ThemeCubit>()
+                                    .setThemeMode(mode),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 20),
                     GestureDetector(
                       onTap: () {},
                       behavior: HitTestBehavior.opaque,
@@ -117,22 +193,24 @@ class EditProfileScreen extends StatelessWidget {
                         height: 50,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0x4DEF4444)),
+                          border: Border.all(
+                            color: colorScheme.error.withValues(alpha: 0.35),
+                          ),
                         ),
                         alignment: Alignment.center,
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.logout_rounded,
-                              color: Color(0xFFEF4444),
+                            ImageIcon(
+                              AssetImage(AppAssets.iconExit),
+                              color: colorScheme.error,
                               size: 18,
                             ),
                             SizedBox(width: 8),
                             Text(
                               'Sign Out',
                               style: TextStyle(
-                                color: Color(0xFFEF4444),
+                                color: colorScheme.error,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -159,6 +237,9 @@ class _SettingsSectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -166,8 +247,8 @@ class _SettingsSectionCard extends StatelessWidget {
           padding: const EdgeInsets.only(left: 2, bottom: 8),
           child: Text(
             section.title.toUpperCase(),
-            style: const TextStyle(
-              color: _SettingsPalette.label,
+            style: textTheme.labelMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
               fontSize: 12,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.6,
@@ -176,9 +257,11 @@ class _SettingsSectionCard extends StatelessWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: _SettingsPalette.surface,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: _SettingsPalette.border),
+            border: Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.35),
+            ),
           ),
           child: Column(
             children: [
@@ -203,6 +286,9 @@ class _SettingsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     final child = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       child: Row(
@@ -211,10 +297,14 @@ class _SettingsRow extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.03),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(item.icon, color: _SettingsPalette.icon, size: 18),
+            child: Icon(
+              item.icon,
+              color: colorScheme.onSurfaceVariant,
+              size: 18,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -223,8 +313,8 @@ class _SettingsRow extends StatelessWidget {
               children: [
                 Text(
                   item.title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: textTheme.bodyLarge?.copyWith(
+                    color: colorScheme.onSurface,
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
                   ),
@@ -232,8 +322,8 @@ class _SettingsRow extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   item.subtitle,
-                  style: const TextStyle(
-                    color: _SettingsPalette.subtle,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -241,9 +331,9 @@ class _SettingsRow extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(
+          Icon(
             Icons.chevron_right_rounded,
-            color: _SettingsPalette.chevron,
+            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
             size: 20,
           ),
         ],
@@ -254,7 +344,9 @@ class _SettingsRow extends StatelessWidget {
       decoration: BoxDecoration(
         border: showDivider
             ? Border(
-                top: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
+                top: BorderSide(
+                  color: colorScheme.outline.withValues(alpha: 0.2),
+                ),
               )
             : null,
       ),
@@ -290,12 +382,48 @@ class _SettingsItem {
   final String? routeName;
 }
 
-class _SettingsPalette {
-  static const background = Color(0xFF0B0F14);
-  static const surface = Color(0xFF0F1724);
-  static const border = Color(0xFF333333);
-  static const label = Color(0xFF9AA6B2);
-  static const subtle = Color(0xFF7A8692);
-  static const icon = Color(0xFF9AA6B2);
-  static const chevron = Color(0xFF4A5568);
+class _ThemeModeOption extends StatelessWidget {
+  const _ThemeModeOption({
+    required this.title,
+    required this.subtitle,
+    required this.value,
+    required this.groupValue,
+    required this.onChanged,
+  });
+
+  final String title;
+  final String subtitle;
+  final ThemeMode value;
+  final ThemeMode groupValue;
+  final ValueChanged<ThemeMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return RadioListTile<ThemeMode>(
+      value: value,
+      groupValue: groupValue,
+      onChanged: (mode) {
+        if (mode != null) onChanged(mode);
+      },
+      dense: true,
+      contentPadding: EdgeInsets.zero,
+      activeColor: colorScheme.primary,
+      title: Text(
+        title,
+        style: textTheme.bodyLarge?.copyWith(
+          color: colorScheme.onSurface,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: textTheme.bodySmall?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
 }

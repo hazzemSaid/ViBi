@@ -31,7 +31,7 @@ class EditorAvatarPickerGroup extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Avatars (Max 3)',
               style: TextStyle(
                 color: ProfileEditorPalette.mutedText,
@@ -123,7 +123,7 @@ class _EditorAvatarSlot extends StatelessWidget {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : provider == null
-                    ? const Center(
+                    ? Center(
                         child: Icon(
                           Icons.add_a_photo_outlined,
                           size: 20,
@@ -140,23 +140,23 @@ class _EditorAvatarSlot extends StatelessWidget {
             top: -8,
             right: -8,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
                 color: ProfileEditorPalette.accent,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.white),
-                boxShadow: const [
+                border: Border.all(color: Theme.of(context).colorScheme.onSurface),
+                boxShadow: [
                   BoxShadow(
-                    color: Color(0x1A000000),
+                    color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.1),
                     blurRadius: 3,
                     offset: Offset(0, 1),
                   ),
                 ],
               ),
-              child: const Text(
+              child: Text(
                 'Main',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
                 ),
@@ -174,21 +174,23 @@ class _EditorAvatarSlot extends StatelessWidget {
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: ProfileEditorPalette.outlineStrong),
-                  boxShadow: const [
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.45),
+                  ),
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x1A000000),
+                      color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.1),
                       blurRadius: 3,
                       offset: Offset(0, 1),
                     ),
                   ],
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.close_rounded,
                   size: 14,
-                  color: ProfileEditorPalette.secondaryText,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -197,3 +199,4 @@ class _EditorAvatarSlot extends StatelessWidget {
     );
   }
 }
+

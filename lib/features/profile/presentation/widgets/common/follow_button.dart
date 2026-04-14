@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/public_profile.dart';
 import 'package:vibi/features/social/presentation/providers/follow_providers.dart';
 
@@ -41,7 +40,7 @@ class FollowButton extends StatelessWidget {
               )
             : Text(
                 text,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
@@ -57,8 +56,8 @@ class FollowButton extends StatelessWidget {
         onPressed: () {
           // Could implement cancel request here
         },
-        backgroundColor: Colors.white.withValues(alpha: 0.1),
-        foregroundColor: AppColors.textSecondary,
+        backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+        foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
         isLoading: false,
       );
     } else if (profile.isFollowing) {
@@ -68,25 +67,25 @@ class FollowButton extends StatelessWidget {
           final shouldUnfollow = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
-              backgroundColor: const Color(0xFF171A25),
-              title: const Text(
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              title: Text(
                 'Unfollow?',
-                style: TextStyle(color: AppColors.textPrimary),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               ),
               content: Text(
                 'Are you sure you want to unfollow @${profile.username ?? "this user"}?',
-                style: const TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
-                  child: const Text('Cancel'),
+                  child: Text('Cancel'),
                 ),
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text(
+                  child: Text(
                     'Unfollow',
-                    style: TextStyle(color: Colors.redAccent),
+                    style: TextStyle(color: Theme.of(context).colorScheme.error),
                   ),
                 ),
               ],
@@ -101,12 +100,12 @@ class FollowButton extends StatelessWidget {
             if (context.mounted) {
               ScaffoldMessenger.of(
                 context,
-              ).showSnackBar(const SnackBar(content: Text('Unfollowed')));
+              ).showSnackBar(SnackBar(content: Text('Unfollowed')));
             }
           }
         },
-        backgroundColor: Colors.white.withValues(alpha: 0.1),
-        foregroundColor: AppColors.textPrimary,
+        backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         isLoading: isLoading,
       );
     } else if (profile.isPrivate) {
@@ -117,12 +116,12 @@ class FollowButton extends StatelessWidget {
 
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Follow request sent')),
+              SnackBar(content: Text('Follow request sent')),
             );
           }
         },
-        backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         isLoading: isLoading,
       );
     } else {
@@ -134,13 +133,17 @@ class FollowButton extends StatelessWidget {
           if (context.mounted) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(const SnackBar(content: Text('Following')));
+            ).showSnackBar(SnackBar(content: Text('Following')));
           }
         },
-        backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         isLoading: isLoading,
       );
     }
   }
 }
+
+
+
+

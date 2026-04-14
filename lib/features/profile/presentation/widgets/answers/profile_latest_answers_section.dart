@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/answered_question.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
 import 'package:vibi/features/profile/presentation/widgets/answers/profile_answer_card.dart';
@@ -27,10 +26,12 @@ class ProfileLatestAnswersSection extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'LATEST ANSWERS',
                 style: TextStyle(
-                  color: AppColors.textTertiary,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.2,
@@ -44,23 +45,30 @@ class ProfileLatestAnswersSection extends StatelessWidget {
                     if (answers.isEmpty) {
                       return Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(AppSizes.s24),
+                        padding: EdgeInsets.all(AppSizes.s24),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.05),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.05),
                           borderRadius: BorderRadius.circular(AppSizes.r20),
                         ),
-                        child: const Column(
+                        child: Column(
                           children: [
                             Icon(
                               Icons.chat_bubble_outline,
                               size: 48,
-                              color: AppColors.textTertiary,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant
+                                  .withValues(alpha: 0.72),
                             ),
                             SizedBox(height: AppSizes.s16),
                             Text(
                               'No answers yet',
                               style: TextStyle(
-                                color: AppColors.textSecondary,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                                 fontSize: 15,
                               ),
                             ),
@@ -101,14 +109,18 @@ class ProfileLatestAnswersSection extends StatelessWidget {
                 )
               else
                 Container(
-                  padding: const EdgeInsets.all(AppSizes.s16),
+                  padding: EdgeInsets.all(AppSizes.s16),
                   decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.08),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.error.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(AppSizes.r12),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Failed to load answers',
-                    style: TextStyle(color: Colors.redAccent),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
                 ),
             ],

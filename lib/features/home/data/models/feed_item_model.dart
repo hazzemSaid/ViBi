@@ -1,7 +1,7 @@
 import 'package:vibi/features/home/domain/entities/feed_item.dart';
 
 class FeedItemModel extends FeedItem {
-  FeedItemModel({
+  const FeedItemModel({
     required super.id,
     required super.userId,
     required super.username,

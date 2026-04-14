@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
 
@@ -25,15 +24,15 @@ class VerifyEmailScreen extends StatelessWidget {
     final email = user?.email ?? '';
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppColors.textPrimary,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
         leading: hasSession
             ? null
             : IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: Icon(Icons.arrow_back),
                 onPressed: () => context.go('/welcome'),
               ),
       ),
@@ -49,24 +48,24 @@ class VerifyEmailScreen extends StatelessWidget {
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.12),
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.mark_email_unread_outlined,
                     size: 52,
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ),
 
                 const SizedBox(height: 32),
 
-                const Text(
+                Text(
                   'Check Your Email',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
 
@@ -77,28 +76,28 @@ class VerifyEmailScreen extends StatelessWidget {
                       ? 'We sent a confirmation link to\n$email'
                       : 'A confirmation link was sent to your email address.',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
 
                 const SizedBox(height: 12),
 
-                const Text(
+                Text(
                   'Click the link in your email to verify your account, then tap the button below.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    color: AppColors.textSecondary,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     height: 1.5,
                   ),
                 ),
 
-                const SizedBox(height: 48),
+SizedBox(height: 48),
 
                 if (authState.isLoading)
-                  const CircularProgressIndicator(color: AppColors.primary)
+                  CircularProgressIndicator(color: Theme.of(context).colorScheme.primary)
                 else if (hasSession) ...[
                   // Case 1: session exists — can refresh to pick up confirmation
                   ElevatedButton(
@@ -107,25 +106,25 @@ class VerifyEmailScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size.fromHeight(52),
                     ),
-                    child: const Text("I've Verified My Email"),
+                    child: Text("I've Verified My Email"),
                   ),
                   const SizedBox(height: 12),
                   OutlinedButton(
                     onPressed: () =>
                         context.read<AuthController>().sendEmailVerification(),
                     style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(52),
-                      side: const BorderSide(color: AppColors.primary),
-                      foregroundColor: AppColors.primary,
+                      minimumSize: Size.fromHeight(52),
+                      side: BorderSide(color: Theme.of(context).colorScheme.primary),
+                      foregroundColor: Theme.of(context).colorScheme.primary,
                     ),
-                    child: const Text('Resend Confirmation Email'),
+                    child: Text('Resend Confirmation Email'),
                   ),
                   const SizedBox(height: 12),
                   TextButton(
                     onPressed: () => context.read<AuthController>().signOut(),
-                    child: const Text(
+                    child: Text(
                       'Sign Out',
-                      style: TextStyle(color: AppColors.textSecondary),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ),
                 ] else ...[
@@ -135,24 +134,24 @@ class VerifyEmailScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       minimumSize: const Size.fromHeight(52),
                     ),
-                    child: const Text('Sign In After Verifying'),
+                    child: Text('Sign In After Verifying'),
                   ),
                   const SizedBox(height: 12),
                   TextButton(
                     onPressed: () => context.go('/welcome'),
-                    child: const Text(
+                    child: Text(
                       'Back to Welcome',
-                      style: TextStyle(color: AppColors.textSecondary),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ),
                 ],
 
                 if (authState.hasError)
                   Padding(
-                    padding: const EdgeInsets.only(top: 20),
+                    padding: EdgeInsets.only(top: 20),
                     child: Text(
                       authState.errorMessage ?? 'Action failed',
-                      style: const TextStyle(color: AppColors.error),
+                      style: TextStyle(color: Theme.of(context).colorScheme.error),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -164,3 +163,6 @@ class VerifyEmailScreen extends StatelessWidget {
     );
   }
 }
+
+
+

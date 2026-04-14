@@ -26,7 +26,7 @@ class SunsetGlowCard extends StatelessWidget {
           image: const AssetImage(ShareCardBackgrounds.sunsetGlow),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.black.withValues(alpha: 0.24),
+            Theme.of(context).colorScheme.scrim.withValues(alpha: 0.24),
             BlendMode.darken,
           ),
         ),
@@ -46,35 +46,35 @@ class SunsetGlowCard extends StatelessWidget {
                   vertical: 5,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.16),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
                   isAnonymous ? 'ANON DROP' : 'ASK ME',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.3,
                   ),
                 ),
               ),
-              const Spacer(),
-              const Text(
+Spacer(),
+Text(
                 'ViBi',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+SizedBox(height: 20),
           Text(
             questionText,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 26,
               fontWeight: FontWeight.w900,
               height: 1.08,
@@ -85,16 +85,16 @@ class SunsetGlowCard extends StatelessWidget {
           const SizedBox(height: 18),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.18),
+              color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+              border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.18)),
             ),
             child: Text(
               answerText,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 15,
                 height: 1.5,
               ),
@@ -107,10 +107,10 @@ class SunsetGlowCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundColor: Colors.white.withValues(alpha: 0.2),
-                child: const Icon(
+                backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
+                child: Icon(
                   Icons.auto_awesome,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                   size: 16,
                 ),
               ),
@@ -118,8 +118,8 @@ class SunsetGlowCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   '@$username',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                   ),
@@ -127,10 +127,10 @@ class SunsetGlowCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const Flexible(
+Flexible(
                 child: Text(
                   'vibi.social',
-                  style: TextStyle(color: Colors.white70, fontSize: 11),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 11),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.right,
@@ -143,3 +143,5 @@ class SunsetGlowCard extends StatelessWidget {
     );
   }
 }
+
+

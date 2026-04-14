@@ -25,7 +25,7 @@ class SupabaseErrorHandler {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.red.shade700,
+        backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -78,3 +78,4 @@ class SupabaseErrorHandler {
     return 'GraphQL request failed. Please try again.';
   }
 }
+

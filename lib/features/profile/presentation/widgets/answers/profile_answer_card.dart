@@ -42,10 +42,10 @@ class ProfileAnswerCard extends StatelessWidget {
             displayName: displayName,
             questionFontSize: questionFontSize,
           ),
-          const SizedBox(height: 16),
+SizedBox(height: 16),
           Text(
             answer.answerText,
-            style: TextStyle(color: Colors.white, fontSize: bodyFontSize),
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: bodyFontSize),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
@@ -67,3 +67,4 @@ class ProfileAnswerCard extends StatelessWidget {
     );
   }
 }
+

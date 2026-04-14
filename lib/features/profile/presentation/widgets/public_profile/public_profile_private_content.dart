@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 
 class PublicProfilePrivateContent extends StatelessWidget {
   final bool isFollowing;
@@ -11,31 +10,31 @@ class PublicProfilePrivateContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppSizes.s24),
+      padding: EdgeInsets.all(AppSizes.s24),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppSizes.r20),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.18)),
       ),
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(AppSizes.s16),
+            padding: EdgeInsets.all(AppSizes.s16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.lock_outline,
               size: 48,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: AppSizes.s16),
-          const Text(
+SizedBox(height: AppSizes.s16),
+          Text(
             'This profile is private',
             style: TextStyle(
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -45,8 +44,8 @@ class PublicProfilePrivateContent extends StatelessWidget {
             isFollowing
                 ? 'You are following this user'
                 : 'Follow this user to see their content',
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 14,
             ),
             textAlign: TextAlign.center,
@@ -56,3 +55,7 @@ class PublicProfilePrivateContent extends StatelessWidget {
     );
   }
 }
+
+
+
+

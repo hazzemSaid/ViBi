@@ -49,7 +49,7 @@ class EditorButtonStyleTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(isPill ? 999 : 12),
               border: Border.all(color: ProfileEditorPalette.primaryText),
               boxShadow: hasShadow
-                  ? const [
+                  ? [
                       BoxShadow(
                         color: ProfileEditorPalette.primaryText,
                         offset: Offset(2, 2),
@@ -63,7 +63,7 @@ class EditorButtonStyleTile extends StatelessWidget {
                 label,
                 style: TextStyle(
                   color: isFilled
-                      ? Colors.white
+                      ? Theme.of(context).colorScheme.onSurface
                       : ProfileEditorPalette.primaryText,
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
@@ -76,3 +76,4 @@ class EditorButtonStyleTile extends StatelessWidget {
     );
   }
 }
+

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vibi/core/constants/app_assets.dart';
 import 'package:vibi/features/inbox/presentation/providers/inbox_providers.dart';
 
 class MainLayout extends StatelessWidget {
@@ -84,19 +85,23 @@ class _BottomNavBarState extends State<_BottomNavBar>
     final state = context.watch<PendingQuestionsCubit>().state;
     final count = state.data?.length ?? 0;
     final Image inboxIcon = Image(
-      image: const AssetImage('assets/images/inbox.png'),
+      image: AssetImage('assets/images/inbox.png'),
       width: 24,
       height: 24,
-      color: widget.currentIndex == 2 ? Colors.white : Colors.white54,
+      color: widget.currentIndex == 2
+          ? Theme.of(context).colorScheme.onSurface
+          : Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
     );
     if (count > 0) {
       return Badge(
         label: Padding(
-          padding: const EdgeInsets.only(top: 2),
+          padding: EdgeInsets.only(top: 2),
           child: Text(count > 99 ? '99+' : count.toString()),
         ),
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.error,
+        textColor: Theme.of(context).colorScheme.onSurface,
         child: inboxIcon,
       );
     }
@@ -117,10 +122,10 @@ class _BottomNavBarState extends State<_BottomNavBar>
         ).animate(_animationController),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF0F1419),
+            color: Theme.of(context).colorScheme.surface,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Theme.of(context).colorScheme.scrim.withOpacity(0.1),
                 blurRadius: 8,
                 offset: const Offset(0, -2),
               ),
@@ -129,9 +134,11 @@ class _BottomNavBarState extends State<_BottomNavBar>
           child: SafeArea(
             top: false,
             child: BottomNavigationBar(
-              backgroundColor: const Color(0xFF0F1419),
-              selectedItemColor: Colors.white,
-              unselectedItemColor: Colors.white54,
+              backgroundColor: Theme.of(context).colorScheme.surface,
+              selectedItemColor: Theme.of(context).colorScheme.onSurface,
+              unselectedItemColor: Theme.of(
+                context,
+              ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
               type: BottomNavigationBarType.fixed,
               showSelectedLabels: true,
               showUnselectedLabels: true,
@@ -146,8 +153,9 @@ class _BottomNavBarState extends State<_BottomNavBar>
                   activeIcon: Icon(Icons.home),
                   label: 'For you',
                 ),
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.search),
+                BottomNavigationBarItem(
+                  icon: ImageIcon(AssetImage(AppAssets.iconSearch)),
+                  activeIcon: ImageIcon(AssetImage(AppAssets.iconSearch)),
                   label: 'Search',
                 ),
                 BottomNavigationBarItem(

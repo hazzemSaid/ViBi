@@ -26,7 +26,7 @@ class EditorEmptyPanel extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               color: ProfileEditorPalette.primaryText,
               fontWeight: FontWeight.w600,
             ),
@@ -34,7 +34,7 @@ class EditorEmptyPanel extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             subtitle,
-            style: const TextStyle(
+            style: TextStyle(
               color: ProfileEditorPalette.mutedText,
               fontSize: 12,
             ),

@@ -6,16 +6,18 @@ class UnsavedChangesDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Dialog(
       clipBehavior: Clip.antiAlias,
       insetPadding: const EdgeInsets.symmetric(horizontal: 24),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+        padding: EdgeInsets.fromLTRB(20, 20, 20, 16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: Colors.white,
-          border: Border.all(color: ProfileEditorPalette.outlineStrong),
+          color: colorScheme.surface,
+          border: Border.all(color: colorScheme.outline.withValues(alpha: 0.45)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -30,13 +32,13 @@ class UnsavedChangesDialog extends StatelessWidget {
                     color: ProfileEditorPalette.accentSoft,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.save_rounded,
                     color: ProfileEditorPalette.accent,
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Unsaved changes',
                     style: TextStyle(
@@ -49,7 +51,7 @@ class UnsavedChangesDialog extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'You edited your profile but those changes are not saved yet.',
               style: TextStyle(
                 color: ProfileEditorPalette.secondaryText,
@@ -61,24 +63,26 @@ class UnsavedChangesDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFF4E8),
+                color: colorScheme.secondaryContainer,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFFDD5A3)),
+                border: Border.all(
+                  color: colorScheme.secondary.withValues(alpha: 0.5),
+                ),
               ),
-              child: const Row(
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(
                     Icons.warning_amber_rounded,
                     size: 18,
-                    color: Color(0xFFB45309),
+                    color: colorScheme.onSecondaryContainer,
                   ),
                   SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'If you discard, all new edits will be lost.',
                       style: TextStyle(
-                        color: Color(0xFF92400E),
+                        color: colorScheme.onSecondaryContainer,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         height: 1.4,
@@ -113,20 +117,22 @@ class UnsavedChangesDialog extends StatelessWidget {
                     Navigator.of(context).pop(UnsavedExitAction.discard);
                   },
                   style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xFFFCA5A5)),
+                    side: BorderSide(
+                      color: colorScheme.error.withValues(alpha: 0.45),
+                    ),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.delete_outline_rounded,
                     size: 16,
-                    color: Color(0xFFB91C1C),
+                    color: colorScheme.error,
                   ),
-                  label: const Text(
+                  label: Text(
                     'Discard Changes',
-                    style: TextStyle(color: Color(0xFFB91C1C)),
+                    style: TextStyle(color: colorScheme.error),
                   ),
                 );
 
@@ -169,3 +175,4 @@ class UnsavedChangesDialog extends StatelessWidget {
     );
   }
 }
+

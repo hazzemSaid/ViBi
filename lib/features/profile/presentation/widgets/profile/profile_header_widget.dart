@@ -37,15 +37,19 @@ class ProfileHeaderWidget extends StatelessWidget {
           children: [
             Text(
               name,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             if (profile?.isVerified == true) ...[
-              const SizedBox(width: AppSizes.s8),
-              Icon(Icons.verified, color: Colors.blueAccent.shade400, size: 20),
+              SizedBox(width: AppSizes.s8),
+              Icon(
+                Icons.verified,
+                color: Theme.of(context).colorScheme.secondary,
+                size: 20,
+              ),
             ],
           ],
         ),
@@ -56,13 +60,15 @@ class ProfileHeaderWidget extends StatelessWidget {
             vertical: AppSizes.s4,
           ),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
-            username,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            "@$username",
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 14,
             ),
           ),
@@ -71,8 +77,8 @@ class ProfileHeaderWidget extends StatelessWidget {
         Text(
           bio,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 15,
             height: 1.4,
           ),

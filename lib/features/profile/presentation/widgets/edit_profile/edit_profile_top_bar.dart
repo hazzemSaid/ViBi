@@ -17,9 +17,9 @@ class EditProfileTopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.background,
         border: Border(
           bottom: BorderSide(color: ProfileEditorPalette.outlineStrong),
         ),
@@ -34,7 +34,7 @@ class EditProfileTopBar extends StatelessWidget {
                 onPressed: isSaving
                     ? null
                     : () => Navigator.of(context).maybePop(),
-                icon: const Icon(
+                icon: Icon(
                   Icons.arrow_back_ios_new_rounded,
                   size: 18,
                   color: ProfileEditorPalette.primaryText,
@@ -45,7 +45,7 @@ class EditProfileTopBar extends StatelessWidget {
                   'Profile Editor',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: ProfileEditorPalette.primaryText,
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
@@ -60,7 +60,7 @@ class EditProfileTopBar extends StatelessWidget {
                         height: 18,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(
+                    : Icon(
                         Icons.cloud_upload_outlined,
                         color: ProfileEditorPalette.secondaryText,
                       ),

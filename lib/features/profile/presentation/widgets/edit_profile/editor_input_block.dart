@@ -30,7 +30,7 @@ class EditorInputBlock extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             color: ProfileEditorPalette.mutedText,
             fontSize: 12,
             fontWeight: FontWeight.w500,
@@ -43,12 +43,12 @@ class EditorInputBlock extends StatelessWidget {
           forceErrorText: errorText,
           maxLines: maxLines,
           onChanged: onChanged,
-          style: const TextStyle(color: ProfileEditorPalette.primaryText),
+          style: TextStyle(color: ProfileEditorPalette.primaryText),
           decoration: InputDecoration(
             hintText: hintText,
-            hintStyle: const TextStyle(color: ProfileEditorPalette.placeholder),
+            hintStyle: TextStyle(color: ProfileEditorPalette.placeholder),
             prefixText: prefixText,
-            prefixStyle: const TextStyle(
+            prefixStyle: TextStyle(
               color: ProfileEditorPalette.secondaryText,
             ),
             filled: true,
@@ -59,19 +59,19 @@ class EditorInputBlock extends StatelessWidget {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
+              borderSide: BorderSide(
                 color: ProfileEditorPalette.outlineStrong,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
+              borderSide: BorderSide(
                 color: ProfileEditorPalette.outlineStrong,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: const BorderSide(
+              borderSide: BorderSide(
                 color: ProfileEditorPalette.primaryText,
               ),
             ),

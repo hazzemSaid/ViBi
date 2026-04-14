@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:vibi/features/auth/presentation/widgets/auth_video_background.dart';
 
@@ -40,16 +39,13 @@ class _LoginScreenState extends State<LoginScreen> {
     final authState = context.watch<AuthController>().state;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text(
-          'Login',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: Text('Login', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppColors.textPrimary,
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
       ),
       body: AuthVideoBackground(
         child: SafeArea(
@@ -61,22 +57,22 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 40),
-                  const Text(
+                  Text(
                     'Welcome Back',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
+                  Text(
                     'Login to your account to continue',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   SizedBox(height: MediaQuery.sizeOf(context).height * 0.1),
@@ -87,24 +83,32 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: BackdropFilter(
                       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                       child: Container(
-                        padding: const EdgeInsets.all(AppSizes.s24),
+                        padding: EdgeInsets.all(AppSizes.s24),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(AppSizes.r24),
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.1),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.1),
                           ),
                         ),
                         child: Column(
                           children: [
                             TextFormField(
                               controller: _emailController,
-                              style: const TextStyle(color: Colors.white),
-                              decoration: const InputDecoration(
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                              decoration: InputDecoration(
                                 labelText: 'Email',
                                 prefixIcon: Icon(
                                   Icons.email_outlined,
-                                  color: Colors.white70,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               keyboardType: TextInputType.emailAddress,
@@ -113,15 +117,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ? null
                                   : 'Enter a valid email',
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16),
                             TextFormField(
                               controller: _passwordController,
-                              style: const TextStyle(color: Colors.white),
-                              decoration: const InputDecoration(
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                              decoration: InputDecoration(
                                 labelText: 'Password',
                                 prefixIcon: Icon(
                                   Icons.lock_outline,
-                                  color: Colors.white70,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               obscureText: true,
@@ -138,16 +146,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 48),
 
                   if (authState.isLoading)
-                    const Center(
+                    Center(
                       child: CircularProgressIndicator(
-                        color: AppColors.primary,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     )
                   else
-                    ElevatedButton(
-                      onPressed: _submit,
-                      child: const Text('Login'),
-                    ),
+                    ElevatedButton(onPressed: _submit, child: Text('Login')),
 
                   if (authState.hasError)
                     Padding(
@@ -155,8 +160,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Text(
                         authState.errorMessage ?? 'Authentication failed',
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: AppColors.error,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
                           fontSize: 13,
                         ),
                       ),

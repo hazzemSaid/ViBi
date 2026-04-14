@@ -23,13 +23,17 @@ class ProfileStatsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        vertical: AppSizes.r20,
-        horizontal: AppSizes.s8,
+        vertical: AppSizes.s8,
+        horizontal: AppSizes.s4,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Colors.white12),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(1000),
+        border: Border.all(
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.22),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -45,7 +49,13 @@ class ProfileStatsCard extends StatelessWidget {
               );
             },
           ),
-          Container(width: 1, height: 28, color: Colors.white24),
+          Container(
+            width: 1,
+            height: 28,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
+          ),
           StatItem(
             value: followingCount,
             label: 'Following',
@@ -57,7 +67,13 @@ class ProfileStatsCard extends StatelessWidget {
               );
             },
           ),
-          Container(width: 1, height: 28, color: Colors.white24),
+          Container(
+            width: 1,
+            height: 28,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
+          ),
           StatItem(value: answersCount, label: 'Answers'),
         ],
       ),

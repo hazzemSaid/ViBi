@@ -31,12 +31,14 @@ class SenderRow extends StatelessWidget {
                 )
               : null,
           backgroundColor: isAnonymous
-              ? const Color(0xFF5A4FCF).withValues(alpha: 0.3)
-              : Colors.grey,
+                ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3)
+              : Theme.of(context).colorScheme.onSurfaceVariant,
           child: displayAvatar == null
               ? Icon(
                   Icons.person,
-                  color: isAnonymous ? const Color(0xFF5A4FCF) : Colors.white24,
+                  color: isAnonymous
+                    ? Theme.of(context).colorScheme.secondary
+                    : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
                   size: 16,
                 )
               : null,
@@ -51,8 +53,8 @@ class SenderRow extends StatelessWidget {
                   Expanded(
                     child: Text(
                       displayName,
-                      style: const TextStyle(
-                        color: Colors.white70,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
                         fontSize: 12,
                       ),
@@ -68,13 +70,13 @@ class SenderRow extends StatelessWidget {
                           vertical: 1,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF5A4FCF).withValues(alpha: 0.2),
+                          color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
+                        child: Text(
                           'Anon',
                           style: TextStyle(
-                            color: Color(0xFF5A4FCF),
+                            color: Theme.of(context).colorScheme.secondary,
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
                           ),
@@ -83,9 +85,9 @@ class SenderRow extends StatelessWidget {
                     ),
                 ],
               ),
-              const Text(
+Text(
                 'Asked',
-                style: TextStyle(color: Colors.white54, fontSize: 10),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72), fontSize: 10),
               ),
             ],
           ),
@@ -94,3 +96,4 @@ class SenderRow extends StatelessWidget {
     );
   }
 }
+

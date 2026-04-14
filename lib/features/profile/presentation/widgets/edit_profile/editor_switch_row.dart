@@ -25,7 +25,7 @@ class EditorSwitchRow extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   color: ProfileEditorPalette.primaryText,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
@@ -34,7 +34,7 @@ class EditorSwitchRow extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: const TextStyle(
+                style: TextStyle(
                   color: ProfileEditorPalette.mutedText,
                   fontSize: 12,
                 ),

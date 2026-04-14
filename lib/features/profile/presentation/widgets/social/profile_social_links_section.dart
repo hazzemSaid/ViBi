@@ -3,12 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
 import 'package:vibi/features/profile/presentation/view/social_media_view/social_links_cubit.dart';
 import 'package:vibi/features/profile/presentation/view/social_media_view/social_media_cubit_state.dart';
 import 'package:vibi/features/profile/presentation/widgets/common/social_link_platform.dart';
-import 'package:vibi/features/profile/presentation/widgets/social/social_link_dialog.dart';
 
 class ProfileSocialLinksSection extends StatefulWidget {
   final String userId;
@@ -68,13 +66,7 @@ class _ProfileSocialLinksSectionState extends State<ProfileSocialLinksSection> {
             children: [
               ...activeLinks.map(
                 (link) => InkResponse(
-                  onTap: () => SocialLinkDialog.show(
-                    context,
-                    widget.userId,
-                    existingLink: link,
-                    nextOrder: link.displayOrder,
-                  ),
-                  onLongPress: () async {
+                  onTap: () async {
                     try {
                       final urlString = link.url.trim();
                       final webUrl = urlString.startsWith('https')
@@ -95,24 +87,11 @@ class _ProfileSocialLinksSectionState extends State<ProfileSocialLinksSection> {
                     }
                   },
                   radius: 18,
-                  child: Icon(
-                    socialPlatformIcon(link.platform),
-                    color: AppColors.textPrimary,
+                  child: socialPlatformVisual(
+                    link.platform,
+                    color: Theme.of(context).colorScheme.onSurface,
                     size: 18,
                   ),
-                ),
-              ),
-              InkResponse(
-                onTap: () => SocialLinkDialog.show(
-                  context,
-                  widget.userId,
-                  nextOrder: _getNextOrder(links),
-                ),
-                radius: 18,
-                child: Icon(
-                  links.isEmpty ? Icons.add_circle_outline : Icons.add,
-                  color: AppColors.textPrimary,
-                  size: 18,
                 ),
               ),
             ],
@@ -120,14 +99,5 @@ class _ProfileSocialLinksSectionState extends State<ProfileSocialLinksSection> {
         },
       ),
     );
-  }
-
-  int _getNextOrder(List<SocialLink>? links) {
-    if (links == null || links.isEmpty) return 0;
-    return links.fold<int>(
-          0,
-          (max, link) => link.displayOrder > max ? link.displayOrder : max,
-        ) +
-        1;
   }
 }

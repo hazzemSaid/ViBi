@@ -15,9 +15,9 @@ class ProfileAnswerAuthorRow extends StatelessWidget {
           backgroundImage: answer.answererAvatarUrl != null
               ? NetworkImage(answer.answererAvatarUrl!)
               : null,
-          backgroundColor: Colors.grey.withValues(alpha: 0.3),
+          backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
           child: answer.answererAvatarUrl == null
-              ? const Icon(Icons.person, color: Colors.white24)
+              ? Icon(Icons.person, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.35))
               : null,
         ),
         const SizedBox(width: 12),
@@ -27,26 +27,27 @@ class ProfileAnswerAuthorRow extends StatelessWidget {
             children: [
               Text(
                 answer.answererUsername ?? 'You',
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.bold,
                   fontSize: 15,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              const Text(
+Text(
                 'Answered',
-                style: TextStyle(color: Colors.white54, fontSize: 12),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72), fontSize: 12),
               ),
             ],
           ),
         ),
         IconButton(
-          icon: const Icon(Icons.more_horiz, color: Colors.white54),
+          icon: Icon(Icons.more_horiz, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72)),
           onPressed: () {},
         ),
       ],
     );
   }
 }
+

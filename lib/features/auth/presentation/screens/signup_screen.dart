@@ -3,9 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/theme/app_colors.dart';
+import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:vibi/features/auth/presentation/widgets/auth_video_background.dart';
 
@@ -63,16 +62,13 @@ class _SignupScreenState extends State<SignupScreen> {
         context.go('/verify-email');
       },
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: const Text(
-            'Sign Up',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
+          title: Text('Sign Up', style: TextStyle(fontWeight: FontWeight.bold)),
           backgroundColor: Colors.transparent,
           elevation: 0,
-          foregroundColor: AppColors.textPrimary,
+          foregroundColor: Theme.of(context).colorScheme.onSurface,
         ),
         body: AuthVideoBackground(
           child: SafeArea(
@@ -84,22 +80,22 @@ class _SignupScreenState extends State<SignupScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 20),
-                    const Text(
+                    Text(
                       'Create Account',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       'Join ViBi and start your journey',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 40),
@@ -110,24 +106,34 @@ class _SignupScreenState extends State<SignupScreen> {
                       child: BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                         child: Container(
-                          padding: const EdgeInsets.all(AppSizes.s24),
+                          padding: EdgeInsets.all(AppSizes.s24),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.08),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.08),
                             borderRadius: BorderRadius.circular(AppSizes.r24),
                             border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.1),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.1),
                             ),
                           ),
                           child: Column(
                             children: [
                               TextFormField(
                                 controller: _nameController,
-                                style: const TextStyle(color: Colors.white),
-                                decoration: const InputDecoration(
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
+                                decoration: InputDecoration(
                                   labelText: 'Full Name',
                                   prefixIcon: Icon(
                                     Icons.person_outline,
-                                    color: Colors.white70,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                                 validator: (val) =>
@@ -135,15 +141,21 @@ class _SignupScreenState extends State<SignupScreen> {
                                     ? null
                                     : 'Enter your name',
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
                               TextFormField(
                                 controller: _emailController,
-                                style: const TextStyle(color: Colors.white),
-                                decoration: const InputDecoration(
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
+                                decoration: InputDecoration(
                                   labelText: 'Email',
                                   prefixIcon: Icon(
                                     Icons.email_outlined,
-                                    color: Colors.white70,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                                 keyboardType: TextInputType.emailAddress,
@@ -152,15 +164,21 @@ class _SignupScreenState extends State<SignupScreen> {
                                     ? null
                                     : 'Enter a valid email',
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
                               TextFormField(
                                 controller: _passwordController,
-                                style: const TextStyle(color: Colors.white),
-                                decoration: const InputDecoration(
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
+                                decoration: InputDecoration(
                                   labelText: 'Password',
                                   prefixIcon: Icon(
                                     Icons.lock_outline,
-                                    color: Colors.white70,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                                 obscureText: true,
@@ -169,15 +187,21 @@ class _SignupScreenState extends State<SignupScreen> {
                                     ? null
                                     : 'Password must be 6+ chars',
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
                               TextFormField(
                                 controller: _confirmController,
-                                style: const TextStyle(color: Colors.white),
-                                decoration: const InputDecoration(
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                ),
+                                decoration: InputDecoration(
                                   labelText: 'Confirm Password',
                                   prefixIcon: Icon(
                                     Icons.lock_reset,
-                                    color: Colors.white70,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                                   ),
                                 ),
                                 obscureText: true,
@@ -197,15 +221,15 @@ class _SignupScreenState extends State<SignupScreen> {
                     const SizedBox(height: 48),
 
                     if (authState.isLoading)
-                      const Center(
+                      Center(
                         child: CircularProgressIndicator(
-                          color: AppColors.primary,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       )
                     else
                       ElevatedButton(
                         onPressed: _submit,
-                        child: const Text('Sign Up'),
+                        child: Text('Sign Up'),
                       ),
 
                     if (authState.hasError)
@@ -214,8 +238,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         child: Text(
                           authState.errorMessage ?? 'Signup failed',
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: AppColors.error,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
                             fontSize: 13,
                           ),
                         ),

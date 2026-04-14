@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 
 import 'answer_share_card_models.dart';
 
@@ -27,18 +26,18 @@ class NeonPulseCard extends StatelessWidget {
           image: const AssetImage(ShareCardBackgrounds.neonPulse),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.black.withValues(alpha: 0.46),
+            Theme.of(context).colorScheme.scrim.withValues(alpha: 0.46),
             BlendMode.darken,
           ),
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.25),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.18),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.18),
             blurRadius: 28,
             offset: const Offset(0, 10),
           ),
@@ -55,24 +54,24 @@ class NeonPulseCard extends StatelessWidget {
               Text(
                 'ViBi',
                 style: TextStyle(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontSize: 26,
                   fontWeight: FontWeight.w900,
                   letterSpacing: -0.5,
                 ),
               ),
-              const Spacer(),
-              Icon(Icons.favorite_rounded, color: AppColors.primary, size: 18),
+Spacer(),
+              Icon(Icons.favorite_rounded, color: Theme.of(context).colorScheme.primary, size: 18),
             ],
           ),
           const SizedBox(height: 20),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.06),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,17 +79,17 @@ class NeonPulseCard extends StatelessWidget {
                 Text(
                   isAnonymous ? 'ANONYMOUS ASKED' : 'SOMEONE ASKED',
                   style: TextStyle(
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     fontSize: 10,
                     fontWeight: FontWeight.w800,
                     letterSpacing: 1.4,
                   ),
                 ),
-                const SizedBox(height: 8),
+SizedBox(height: 8),
                 Text(
                   questionText,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
                     height: 1.3,
@@ -99,11 +98,11 @@ class NeonPulseCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+SizedBox(height: 16),
           Text(
             answerText,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 15,
               height: 1.5,
             ),
@@ -116,17 +115,17 @@ class NeonPulseCard extends StatelessWidget {
               Text(
                 '@$username',
                 style: TextStyle(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              const Spacer(),
-              const Text(
+Spacer(),
+              Text(
                 'vibi.social',
-                style: TextStyle(color: Colors.white38, fontSize: 11),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.54), fontSize: 11),
               ),
             ],
           ),
@@ -135,3 +134,8 @@ class NeonPulseCard extends StatelessWidget {
     );
   }
 }
+
+
+
+
+

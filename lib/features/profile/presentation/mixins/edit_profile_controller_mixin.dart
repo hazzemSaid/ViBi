@@ -125,7 +125,7 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
           AndroidUiSettings(
             toolbarTitle: 'Crop Photo',
             toolbarColor: ProfileEditorPalette.canvas,
-            toolbarWidgetColor: Colors.white,
+            toolbarWidgetColor: Theme.of(context).colorScheme.onSurface,
             lockAspectRatio: true,
           ),
           IOSUiSettings(title: 'Crop Photo', aspectRatioLockEnabled: true),
@@ -525,3 +525,4 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
     );
   }
 }
+

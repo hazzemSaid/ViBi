@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vibi/core/constants/app_assets.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/public_profile.dart';
 import 'package:vibi/features/profile/presentation/widgets/profile/profile_image_strip.dart';
 
@@ -42,15 +41,15 @@ class PublicProfileHeaderWidget extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontFamily: fontFamily,
               ),
             ),
             if (profile.isPrivate) ...[
-              const SizedBox(width: AppSizes.s8),
-              const Icon(
+SizedBox(width: AppSizes.s8),
+              Icon(
                 Icons.lock_outline,
-                color: AppColors.textSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: 20,
               ),
             ],
@@ -63,13 +62,13 @@ class PublicProfileHeaderWidget extends StatelessWidget {
             vertical: AppSizes.s4,
           ),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
             username,
             style: TextStyle(
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 14,
               fontFamily: fontFamily,
             ),
@@ -81,7 +80,7 @@ class PublicProfileHeaderWidget extends StatelessWidget {
             statusText,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 13,
               fontWeight: FontWeight.w500,
               fontFamily: fontFamily,
@@ -93,7 +92,7 @@ class PublicProfileHeaderWidget extends StatelessWidget {
           bio,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 15,
             height: 1.4,
             fontFamily: fontFamily,
@@ -114,3 +113,6 @@ class PublicProfileHeaderWidget extends StatelessWidget {
     }
   }
 }
+
+
+

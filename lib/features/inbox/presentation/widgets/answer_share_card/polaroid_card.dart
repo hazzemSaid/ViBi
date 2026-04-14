@@ -27,15 +27,15 @@ class PolaroidCard extends StatelessWidget {
           image: const AssetImage(ShareCardBackgrounds.polaroid),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            Colors.black.withValues(alpha: 0.18),
+            Theme.of(context).colorScheme.scrim.withValues(alpha: 0.18),
             BlendMode.darken,
           ),
         ),
-        color: const Color(0xFFFFFCF5),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x22000000),
+            color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.13),
             blurRadius: 24,
             offset: Offset(0, 12),
           ),
@@ -43,10 +43,13 @@ class PolaroidCard extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFBCE7FD),
+          color: Theme.of(context).colorScheme.primaryContainer,
           borderRadius: BorderRadius.circular(16),
-          gradient: const LinearGradient(
-            colors: [Color(0xFFBCE7FD), Color(0xFFFFD6E7)],
+          gradient: LinearGradient(
+            colors: [
+              Theme.of(context).colorScheme.primaryContainer,
+              Theme.of(context).colorScheme.secondaryContainer,
+            ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -65,13 +68,15 @@ class PolaroidCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.82),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.82),
                     borderRadius: BorderRadius.circular(999),
                   ),
-                  child: const Text(
+                  child: Text(
                     'ViBi',
                     style: TextStyle(
-                      color: Colors.black,
+                      color: Theme.of(context).colorScheme.scrim,
                       fontSize: 12,
                       fontWeight: FontWeight.w900,
                     ),
@@ -82,16 +87,20 @@ class PolaroidCard extends StatelessWidget {
                   isAnonymous
                       ? Icons.visibility_off_rounded
                       : Icons.flash_on_rounded,
-                  color: Colors.black87,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.scrim.withValues(alpha: 0.87),
                   size: 18,
                 ),
               ],
             ),
             const SizedBox(height: 18),
-            const Text(
+            Text(
               'TODAY\'S DROP',
               style: TextStyle(
-                color: Colors.black54,
+                color: Theme.of(
+                  context,
+                ).colorScheme.scrim.withValues(alpha: 0.54),
                 fontSize: 10,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.5,
@@ -100,8 +109,8 @@ class PolaroidCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               questionText,
-              style: const TextStyle(
-                color: Colors.black,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.scrim,
                 fontSize: 22,
                 fontWeight: FontWeight.w900,
                 height: 1.1,
@@ -112,15 +121,19 @@ class PolaroidCard extends StatelessWidget {
             const SizedBox(height: 16),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(14),
+              padding: EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.72),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.72),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Text(
                 answerText,
-                style: const TextStyle(
-                  color: Colors.black87,
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.scrim.withValues(alpha: 0.87),
                   fontSize: 14,
                   height: 1.45,
                 ),
@@ -134,8 +147,8 @@ class PolaroidCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     '@$username',
-                    style: const TextStyle(
-                      color: Colors.black,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.scrim,
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
                     ),
@@ -143,10 +156,15 @@ class PolaroidCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Flexible(
+                Flexible(
                   child: Text(
                     'stick this on your story',
-                    style: TextStyle(color: Colors.black54, fontSize: 10),
+                    style: TextStyle(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.scrim.withValues(alpha: 0.54),
+                      fontSize: 10,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.right,

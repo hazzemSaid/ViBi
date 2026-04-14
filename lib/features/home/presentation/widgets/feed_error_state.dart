@@ -11,9 +11,10 @@ class FeedErrorState extends StatelessWidget {
       child: Center(
         child: Text(
           'Error: $message',
-          style: const TextStyle(color: Colors.redAccent),
+          style: TextStyle(color: Theme.of(context).colorScheme.error),
         ),
       ),
     );
   }
 }
+

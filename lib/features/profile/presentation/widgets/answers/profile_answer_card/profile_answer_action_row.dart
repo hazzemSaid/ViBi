@@ -119,18 +119,18 @@ class _ProfileAnswerActionRowState extends State<ProfileAnswerActionRow> {
                 color: Colors.transparent,
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(
-                  color: const Color(0xFF5A4FCF).withValues(alpha: 0.35),
+                  color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.35),
                 ),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.auto_awesome, color: Colors.white, size: 16),
+                  Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.onSurface, size: 16),
                   SizedBox(width: 7),
                   Text(
                     'Send Tell',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.w700,
                       fontSize: 10,
                     ),
@@ -172,9 +172,9 @@ class _ProfileAnswerActionRowState extends State<ProfileAnswerActionRow> {
         SizedBox(width: spacing),
         GestureDetector(
           onTap: widget.onShareTap,
-          child: const Icon(
+          child: Icon(
             Icons.share_outlined,
-            color: Colors.white54,
+            color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
             size: 20,
           ),
         ),
@@ -182,18 +182,18 @@ class _ProfileAnswerActionRowState extends State<ProfileAnswerActionRow> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFF1C212A),
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(20),
           ),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.auto_awesome, color: Colors.white, size: 16),
+              Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.onSurface, size: 16),
               SizedBox(width: 6),
               Text(
                 'Send Tell',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                 ),
@@ -223,11 +223,12 @@ class _ActionIconButton extends StatelessWidget {
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: const Color(0xFF5A4FCF).withValues(alpha: 0.35),
+            color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.35),
           ),
         ),
-        child: Icon(icon, color: Colors.white70, size: 21),
+        child: Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 21),
       ),
     );
   }
 }
+

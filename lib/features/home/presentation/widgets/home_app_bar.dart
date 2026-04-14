@@ -8,17 +8,17 @@ class HomeAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliverAppBar(
-      backgroundColor: const Color(0xFF0F1419),
+      backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       floating: true,
-      title: const Row(
+      title: Row(
         children: [
           Text(
             'ViBi',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 24,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           SizedBox(width: 16),
@@ -27,22 +27,32 @@ class HomeAppBar extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 12,
-              color: Colors.white70,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.notifications_none, color: Colors.white),
+          icon: Icon(
+            Icons.notifications_none,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () {},
         ),
         IconButton(
-          icon: const Icon(Icons.search, color: Colors.white),
+          icon: Icon(
+            Icons.search,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () {},
         ),
         IconButton(
-          icon: const Icon(Icons.logout, color: Colors.redAccent, size: 20),
+          icon: Icon(
+            Icons.logout,
+            color: Theme.of(context).colorScheme.error,
+            size: 20,
+          ),
           onPressed: () => context.read<AuthController>().signOut(),
         ),
       ],

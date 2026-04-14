@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/inbox/domain/entities/inbox_question.dart';
 import 'package:vibi/features/inbox/presentation/providers/inbox_providers.dart';
 import 'package:vibi/features/inbox/presentation/widgets/full_answer_modal.dart';
@@ -54,24 +53,24 @@ class _InboxScreenState extends State<InboxScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        title: Text(
           'Delete Question',
-          style: TextStyle(color: AppColors.textPrimary),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
-        content: const Text(
+        content: Text(
           'Are you sure you want to delete this question? This action cannot be undone.',
-          style: TextStyle(color: AppColors.textSecondary),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+            child: Text('Delete'),
           ),
         ],
       ),
@@ -88,16 +87,16 @@ class _InboxScreenState extends State<InboxScreen> {
     final state = context.read<DeleteQuestionCubit>().state;
     if (!state.hasError) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Question deleted'),
           duration: Duration(seconds: 2),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Failed to delete question'),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -111,14 +110,14 @@ class _InboxScreenState extends State<InboxScreen> {
         BlocProvider(create: (_) => getIt<DeleteQuestionCubit>()),
       ],
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          title: const Text(
+          title: Text(
             'Inbox',
             style: TextStyle(
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
@@ -216,13 +215,13 @@ class _InboxScreenState extends State<InboxScreen> {
                             Icon(
                               Icons.error_outline,
                               size: 48,
-                              color: AppColors.textTertiary,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                             ),
                             SizedBox(height: AppSizes.r16),
                             Text(
                               'Failed to load questions',
                               style: TextStyle(
-                                color: AppColors.textPrimary,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontSize: 16,
                               ),
                             ),
@@ -230,7 +229,7 @@ class _InboxScreenState extends State<InboxScreen> {
                             Text(
                               questionsAsync.errorMessage ?? 'Unknown error',
                               style: TextStyle(
-                                color: AppColors.textTertiary,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                                 fontSize: 12,
                               ),
                               textAlign: TextAlign.center,
@@ -240,7 +239,7 @@ class _InboxScreenState extends State<InboxScreen> {
                               onPressed: () {
                                 context.read<PendingQuestionsCubit>().refresh();
                               },
-                              child: const Text('Retry'),
+                              child: Text('Retry'),
                             ),
                           ],
                         ),
@@ -268,17 +267,17 @@ class _InboxScreenState extends State<InboxScreen> {
         ),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary
-              : Colors.white.withValues(alpha: 0.05),
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(AppSizes.r20),
           border: Border.all(
-            color: isSelected ? AppColors.primary : Colors.white10,
+            color: isSelected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.18),
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : AppColors.textSecondary,
+            color: isSelected ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurfaceVariant,
             fontSize: 14,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
@@ -308,20 +307,20 @@ class _InboxScreenState extends State<InboxScreen> {
           Container(
             padding: EdgeInsets.all(AppSizes.r24),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.inbox_outlined,
               size: 64,
-              color: AppColors.textTertiary,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
             ),
           ),
           SizedBox(height: AppSizes.r24),
           Text(
             message,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -331,8 +330,8 @@ class _InboxScreenState extends State<InboxScreen> {
             _selectedFilter == QuestionFilter.all
                 ? 'Questions sent to you will appear here'
                 : 'Try selecting a different filter',
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 14,
             ),
             textAlign: TextAlign.center,
@@ -342,3 +341,7 @@ class _InboxScreenState extends State<InboxScreen> {
     );
   }
 }
+
+
+
+

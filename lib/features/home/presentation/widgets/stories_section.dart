@@ -10,7 +10,6 @@ class StoriesSection extends StatelessWidget {
       title: 'Add your story',
       subtitle: 'Share your latest reply',
       badgeText: 'You',
-      badgeColor: Color(0xFF5A4FCF),
       isAdd: true,
       hasBorder: false,
     ),
@@ -19,7 +18,6 @@ class StoriesSection extends StatelessWidget {
       title: 'raza.rz...',
       subtitle: 'Living life one coffee at a time ☕',
       badgeText: '7h',
-      badgeColor: Color(0x8A000000), // Colors.black54
       isAdd: false,
       hasBorder: true,
     ),
@@ -28,7 +26,6 @@ class StoriesSection extends StatelessWidget {
       title: 'eltrust...',
       subtitle: 'New ans...',
       badgeText: 'Today',
-      badgeColor: Color(0x8A000000), // Colors.black54
       isAdd: false,
       hasBorder: true,
     ),
@@ -44,7 +41,7 @@ class StoriesSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +49,7 @@ class StoriesSection extends StatelessWidget {
               Text(
                 'Stories',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
@@ -60,7 +57,12 @@ class StoriesSection extends StatelessWidget {
               SizedBox(height: 4),
               Text(
                 'Tap a card to view. They auto-cycle as you scroll.',
-                style: TextStyle(color: Colors.white54, fontSize: 12),
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+                  fontSize: 12,
+                ),
               ),
             ],
           ),
@@ -74,12 +76,15 @@ class StoriesSection extends StatelessWidget {
             itemCount: _stories.length,
             itemBuilder: (context, index) {
               final s = _stories[index];
+              final badgeColor = s.isAdd
+                  ? Theme.of(context).colorScheme.secondary
+                  : Theme.of(context).colorScheme.scrim.withValues(alpha: 0.54);
               return StoryCard(
                 imageUrl: s.imageUrl,
                 title: s.title,
                 subtitle: s.subtitle,
                 badgeText: s.badgeText,
-                badgeColor: s.badgeColor,
+                badgeColor: badgeColor,
                 isAdd: s.isAdd,
                 hasBorder: s.hasBorder,
                 onTap: () {},

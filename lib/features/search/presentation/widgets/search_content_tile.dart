@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/search/domain/entities/content_search_result.dart';
 
 class SearchContentTile extends StatelessWidget {
@@ -22,11 +21,11 @@ class SearchContentTile extends StatelessWidget {
           horizontal: AppSizes.s16,
           vertical: AppSizes.s8,
         ),
-        padding: const EdgeInsets.all(AppSizes.s16),
+        padding: EdgeInsets.all(AppSizes.s16),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.05),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(AppSizes.r16),
-          border: Border.all(color: Colors.white10),
+          border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.18)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,7 +35,7 @@ class SearchContentTile extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 16,
-                  backgroundColor: Colors.white10,
+                  backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.18),
                   backgroundImage: content.avatarUrl != null
                       ? ResizeImage(
                           CachedNetworkImageProvider(content.avatarUrl!),
@@ -45,10 +44,10 @@ class SearchContentTile extends StatelessWidget {
                         )
                       : null,
                   child: content.avatarUrl == null
-                      ? const Icon(
+                      ? Icon(
                           Icons.person,
                           size: 16,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         )
                       : null,
                 ),
@@ -58,8 +57,8 @@ class SearchContentTile extends StatelessWidget {
                     content.isAnonymous
                         ? 'Anonymous'
                         : '@${content.username ?? "unknown"}',
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -67,8 +66,8 @@ class SearchContentTile extends StatelessWidget {
                 ),
                 Text(
                   _formatDate(content.createdAt),
-                  style: const TextStyle(
-                    color: AppColors.textTertiary,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                     fontSize: 11,
                   ),
                 ),
@@ -78,8 +77,8 @@ class SearchContentTile extends StatelessWidget {
             // Question
             Text(
               content.questionText,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
               ),
@@ -90,8 +89,8 @@ class SearchContentTile extends StatelessWidget {
             // Answer
             Text(
               content.answerText,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: 14,
                 height: 1.4,
               ),
@@ -102,16 +101,16 @@ class SearchContentTile extends StatelessWidget {
             // Stats
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.favorite_border,
                   size: 16,
-                  color: AppColors.textTertiary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                 ),
-                const SizedBox(width: 4),
+SizedBox(width: 4),
                 Text(
                   '${content.likesCount}',
-                  style: const TextStyle(
-                    color: AppColors.textTertiary,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                     fontSize: 12,
                   ),
                 ),
@@ -140,3 +139,6 @@ class SearchContentTile extends StatelessWidget {
     }
   }
 }
+
+
+

@@ -69,7 +69,7 @@ GoRouter createAppRouter(AuthCubit authCubit) {
       GoRoute(
         path: '/edit-profile',
         name: 'edit-profile',
-        builder: (context, state) => const EditProfileScreen(),
+        builder: (context, state) => EditProfileScreen(),
       ),
       // GoRoute(
       //   path: '/edit-profile/basic',
@@ -157,12 +157,15 @@ GoRouter createAppRouter(AuthCubit authCubit) {
             routes: [
               GoRoute(
                 path: '/favorites',
-                builder: (context, state) => const Scaffold(
-                  backgroundColor: Color(0xFF0F1419),
+                builder: (context, state) => Scaffold(
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   body: Center(
                     child: Text(
                       'Favorites',
-                      style: TextStyle(color: Colors.white, fontSize: 24),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontSize: 24,
+                      ),
                     ),
                   ),
                 ),
@@ -213,8 +216,9 @@ GoRouter createAppRouter(AuthCubit authCubit) {
           return '/welcome';
         }
       }
-      if (authCubit.state.isLoading || authControllerState.isLoading)
+      if (authCubit.state.isLoading || authControllerState.isLoading) {
         return null;
+      }
       return null;
     },
   );

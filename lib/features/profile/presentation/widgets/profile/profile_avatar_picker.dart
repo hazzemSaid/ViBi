@@ -23,7 +23,7 @@ class ProfileAvatarPicker extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 60,
-            backgroundColor: Colors.white10,
+            backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.18),
             backgroundImage: imageFile != null
                 ? FileImage(imageFile!)
                 : (currentImageUrl != null
@@ -31,22 +31,22 @@ class ProfileAvatarPicker extends StatelessWidget {
                           : null)
                       as ImageProvider?,
             child: imageFile == null && currentImageUrl == null
-                ? const Icon(Icons.person, size: 60, color: Colors.white24)
+                ? Icon(Icons.person, size: 60, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.35))
                 : null,
           ),
           Positioned(
             bottom: 0,
             right: 0,
             child: Container(
-              padding: const EdgeInsets.all(AppSizes.s8),
-              decoration: const BoxDecoration(
-                color: Colors.blueAccent,
+              padding: EdgeInsets.all(AppSizes.s8),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.secondary,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.camera_alt,
                 size: 20,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ),
@@ -55,3 +55,4 @@ class ProfileAvatarPicker extends StatelessWidget {
     );
   }
 }
+

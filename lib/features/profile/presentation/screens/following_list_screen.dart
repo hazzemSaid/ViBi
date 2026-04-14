@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/following_user.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
 import 'package:vibi/features/social/presentation/providers/follow_providers.dart';
@@ -48,18 +47,21 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
         BlocProvider<FollowCubit>.value(value: _followCubit),
       ],
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: AppColors.background,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+            icon: Icon(
+              Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             onPressed: () => context.pop(),
           ),
-          title: const Text(
+          title: Text(
             'Following',
             style: TextStyle(
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -70,11 +72,11 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
             if (followingAsync.status == ViewStatus.success) {
               final following = followingAsync.data ?? [];
               if (following.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text(
                     'Not following anyone yet',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 16,
                     ),
                   ),
@@ -102,7 +104,7 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
                                       ?.substring(0, 1)
                                       .toUpperCase() ??
                                   'U',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -113,8 +115,8 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
                       followingUser.fullName ??
                           followingUser.username ??
                           'Unknown',
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -124,8 +126,10 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
                             followingUser.bio!,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                               fontSize: 14,
                             ),
                           )
@@ -155,7 +159,9 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
             return Center(
               child: Text(
                 'Error: ${followingAsync.errorMessage}',
-                style: const TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             );
           },
@@ -184,24 +190,28 @@ class _UnfollowButton extends StatelessWidget {
         final confirmed = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            backgroundColor: AppColors.surface,
-            title: const Text(
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            title: Text(
               'Unfollow',
-              style: TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             ),
-            content: const Text(
+            content: Text(
               'Are you sure you want to unfollow this user?',
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+                child: Text('Cancel'),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('Unfollow'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: Text('Unfollow'),
               ),
             ],
           ),
@@ -213,9 +223,9 @@ class _UnfollowButton extends StatelessWidget {
             await followCubit.unfollowUser(followingUserId);
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                   content: Text('Unfollowed successfully'),
-                  backgroundColor: AppColors.success,
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
             }
@@ -226,7 +236,7 @@ class _UnfollowButton extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Error: $e'),
-                  backgroundColor: Colors.red,
+                  backgroundColor: Theme.of(context).colorScheme.error,
                 ),
               );
             }
@@ -234,10 +244,10 @@ class _UnfollowButton extends StatelessWidget {
         }
       },
       style: TextButton.styleFrom(
-        foregroundColor: AppColors.textSecondary,
+        foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
-      child: const Text('Unfollow'),
+      child: Text('Unfollow'),
     );
   }
 }

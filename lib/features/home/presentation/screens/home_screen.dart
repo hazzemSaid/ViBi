@@ -59,11 +59,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return BlocProvider<GlobalFeedCubit>.value(
       value: _globalFeedCubit,
       child: Scaffold(
-        backgroundColor: const Color(0xFF0F1419),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: RefreshIndicator(
           onRefresh: _globalFeedCubit.refresh,
-          color: const Color(0xFF5A4FCF),
-          backgroundColor: const Color(0xFF1C212A),
+          color: Theme.of(context).colorScheme.secondary,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           child: CustomScrollView(
             controller: _scrollController,
             cacheExtent: 1500,
@@ -73,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 delegate: SliverChildListDelegate(const [
                   SizedBox(height: 8),
                   StoriesSection(),
-                  Divider(color: Color(0x0DFFFFFF), height: 1),
+                  Divider(height: 1),
                 ]),
               ),
               BlocBuilder<GlobalFeedCubit, FeedState>(
@@ -110,15 +110,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                   item: item,
                                 ),
                               ),
-                              const Divider(
-                                color: Color(0x0DFFFFFF),
+                              Divider(
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
                                 height: 1,
                               ),
                               if (index == 0) ...const [
                                 SuggestedSection(
                                   key: ValueKey('suggested_section'),
                                 ),
-                                Divider(color: Color(0x0DFFFFFF), height: 1),
+                                Divider(height: 1),
                               ],
                             ],
                           );

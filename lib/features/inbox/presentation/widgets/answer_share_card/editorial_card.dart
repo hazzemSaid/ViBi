@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 
 import 'answer_share_card_models.dart';
 
@@ -27,7 +26,7 @@ class EditorialCard extends StatelessWidget {
           image: const AssetImage(ShareCardBackgrounds.editorial),
           fit: BoxFit.cover,
           colorFilter: ColorFilter.mode(
-            const Color(0xFFF6EFE6).withValues(alpha: 0.82),
+            Theme.of(context).colorScheme.surface.withValues(alpha: 0.82),
             BlendMode.lighten,
           ),
         ),
@@ -41,12 +40,12 @@ class EditorialCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(width: 38, height: 2, color: Colors.black),
+              Container(width: 38, height: 2, color: Theme.of(context).colorScheme.scrim),
               const SizedBox(width: 10),
-              const Text(
+              Text(
                 'ViBi EDIT',
                 style: TextStyle(
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.scrim,
                   fontSize: 16,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.2,
@@ -58,7 +57,7 @@ class EditorialCard extends StatelessWidget {
           Text(
             'QUESTION',
             style: TextStyle(
-              color: Colors.black.withValues(alpha: 0.5),
+              color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.5),
               fontSize: 11,
               fontWeight: FontWeight.w700,
               letterSpacing: 1.8,
@@ -67,8 +66,8 @@ class EditorialCard extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             questionText,
-            style: const TextStyle(
-              color: Colors.black,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.scrim,
               fontSize: 24,
               fontWeight: FontWeight.w900,
               height: 1.08,
@@ -81,7 +80,7 @@ class EditorialCard extends StatelessWidget {
             width: 56,
             height: 4,
             decoration: BoxDecoration(
-              color: AppColors.primary,
+              color: Theme.of(context).colorScheme.primary,
               borderRadius: BorderRadius.circular(999),
             ),
           ),
@@ -89,7 +88,7 @@ class EditorialCard extends StatelessWidget {
           Text(
             answerText,
             style: TextStyle(
-              color: Colors.black.withValues(alpha: 0.86),
+              color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.86),
               fontSize: 15,
               height: 1.45,
             ),
@@ -102,8 +101,8 @@ class EditorialCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   '@$username',
-                  style: const TextStyle(
-                    color: Colors.black,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.scrim,
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                   ),
@@ -115,7 +114,7 @@ class EditorialCard extends StatelessWidget {
                 child: Text(
                   isAnonymous ? 'ANON PROMPT' : 'REAL QUESTION',
                   style: TextStyle(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.5),
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.1,
@@ -132,3 +131,7 @@ class EditorialCard extends StatelessWidget {
     );
   }
 }
+
+
+
+

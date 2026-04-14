@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 
 class StatItem extends StatelessWidget {
   final String value;
   final String label;
   final VoidCallback? onTap;
 
-  const StatItem({required this.value, required this.label, this.onTap});
+  const StatItem({super.key, required this.value, required this.label, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -15,16 +14,16 @@ class StatItem extends StatelessWidget {
       children: [
         Text(
           value,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: AppSizes.s4),
+SizedBox(height: AppSizes.s4),
         Text(
           label,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12),
         ),
       ],
     );
@@ -43,3 +42,5 @@ class StatItem extends StatelessWidget {
     return child;
   }
 }
+
+

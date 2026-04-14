@@ -39,11 +39,13 @@ class EditorColorSwatch extends StatelessWidget {
             ? Icon(
                 Icons.check_rounded,
                 color: color.computeLuminance() > 0.55
-                    ? Colors.black
-                    : Colors.white,
+                    ? Theme.of(context).colorScheme.scrim
+                    : Theme.of(context).colorScheme.onSurface,
               )
             : null,
       ),
     );
   }
 }
+
+

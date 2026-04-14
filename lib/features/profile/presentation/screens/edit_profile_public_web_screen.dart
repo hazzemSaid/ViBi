@@ -71,7 +71,7 @@ class _EditProfilePublicWebScreenState extends State<EditProfilePublicWebScreen>
               Navigator.of(this.context).pop();
             },
             child: Scaffold(
-              backgroundColor: ProfileEditorPalette.canvas,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               body: SafeArea(
                 child: Column(
                   children: [

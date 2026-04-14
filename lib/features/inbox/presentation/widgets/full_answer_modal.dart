@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/services/instagram_share_service.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/inbox/presentation/providers/inbox_providers.dart';
 
 class FullAnswerModal extends StatefulWidget {
@@ -52,9 +51,9 @@ class _FullAnswerModalState extends State<FullAnswerModal> {
 
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text('Answer posted successfully'),
-          backgroundColor: Colors.green,
+          backgroundColor: Theme.of(context).colorScheme.tertiary,
         ),
       );
     }
@@ -83,7 +82,7 @@ class _FullAnswerModalState extends State<FullAnswerModal> {
 
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(AppSizes.r24),
           topRight: Radius.circular(AppSizes.r24),
@@ -111,7 +110,9 @@ class _FullAnswerModalState extends State<FullAnswerModal> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: AppColors.textTertiary,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -121,20 +122,20 @@ class _FullAnswerModalState extends State<FullAnswerModal> {
                 // Header
                 Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Answer Question',
                         style: TextStyle(
-                          color: AppColors.textPrimary,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.close,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                       onPressed: isLoading
                           ? null
@@ -148,14 +149,20 @@ class _FullAnswerModalState extends State<FullAnswerModal> {
                 Container(
                   padding: EdgeInsets.all(AppSizes.r12),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(AppSizes.r12),
-                    border: Border.all(color: Colors.white10),
+                    border: Border.all(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.18),
+                    ),
                   ),
                   child: Text(
                     widget.questionText,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 14,
                       fontStyle: FontStyle.italic,
                     ),
@@ -170,23 +177,29 @@ class _FullAnswerModalState extends State<FullAnswerModal> {
                   maxLength: 5000,
                   enabled: !isLoading,
                   autofocus: true,
-                  style: const TextStyle(color: AppColors.textPrimary),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                   decoration: InputDecoration(
                     hintText: 'Write your answer...',
-                    hintStyle: TextStyle(color: AppColors.textSecondary),
+                    hintStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                     filled: true,
-                    fillColor: AppColors.background,
+                    fillColor: Theme.of(context).scaffoldBackgroundColor,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppSizes.r12),
                       borderSide: BorderSide.none,
                     ),
-                    counterStyle: TextStyle(color: AppColors.textSecondary),
+                    counterStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter an answer';
                     }
-                    if (value.trim().length < 1) {
+                    if (value.trim().isEmpty) {
                       return 'Answer must be at least 1 character';
                     }
                     return null;
@@ -200,7 +213,10 @@ class _FullAnswerModalState extends State<FullAnswerModal> {
                     padding: EdgeInsets.only(bottom: AppSizes.r12),
                     child: Text(
                       'Failed to post answer. Please try again.',
-                      style: const TextStyle(color: Colors.red, fontSize: 12),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
+                        fontSize: 12,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -209,25 +225,25 @@ class _FullAnswerModalState extends State<FullAnswerModal> {
                 ElevatedButton(
                   onPressed: isLoading ? null : _submitAnswer,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    foregroundColor: Theme.of(context).colorScheme.onSurface,
                     padding: EdgeInsets.symmetric(vertical: AppSizes.r16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppSizes.r12),
                     ),
                   ),
                   child: isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
+                              Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         )
-                      : const Text(
+                      : Text(
                           'Post Answer',
                           style: TextStyle(
                             fontSize: 16,

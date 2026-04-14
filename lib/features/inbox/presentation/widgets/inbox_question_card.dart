@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/inbox/domain/entities/inbox_question.dart';
 
 class InboxQuestionCard extends StatelessWidget {
@@ -24,9 +23,9 @@ class InboxQuestionCard extends StatelessWidget {
       margin: EdgeInsets.only(bottom: AppSizes.r12),
       padding: EdgeInsets.all(AppSizes.r16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppSizes.r16),
-        border: Border.all(color: Colors.white10),
+        border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.18)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,14 +39,14 @@ class InboxQuestionCard extends StatelessWidget {
                 height: 40,
                 decoration: BoxDecoration(
                   color: isAnonymous
-                      ? Colors.white.withValues(alpha: 0.1)
-                      : AppColors.primary.withValues(alpha: 0.2),
+                      ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1)
+                      : Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: isAnonymous
-                    ? const Icon(
+                    ? Icon(
                         Icons.help_outline,
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         size: 20,
                       )
                     : question.senderAvatarUrl != null
@@ -56,17 +55,17 @@ class InboxQuestionCard extends StatelessWidget {
                           question.senderAvatarUrl!,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
-                            return const Icon(
+                            return Icon(
                               Icons.person,
-                              color: AppColors.textSecondary,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                               size: 20,
                             );
                           },
                         ),
                       )
-                    : const Icon(
+                    : Icon(
                         Icons.person,
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         size: 20,
                       ),
               ),
@@ -80,16 +79,16 @@ class InboxQuestionCard extends StatelessWidget {
                       isAnonymous
                           ? 'Anonymous'
                           : '@${question.senderUsername ?? 'user'}',
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Text(
                       timeAgo,
-                      style: const TextStyle(
-                        color: AppColors.textTertiary,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                         fontSize: 12,
                       ),
                     ),
@@ -98,9 +97,9 @@ class InboxQuestionCard extends StatelessWidget {
               ),
               // Delete button
               IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.close,
-                  color: AppColors.textTertiary,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                   size: 20,
                 ),
                 onPressed: onDelete,
@@ -111,8 +110,8 @@ class InboxQuestionCard extends StatelessWidget {
           // Question Text
           Text(
             question.questionText,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 15,
               height: 1.4,
             ),
@@ -125,14 +124,14 @@ class InboxQuestionCard extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: onAnswer,
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary),
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    side: BorderSide(color: Theme.of(context).colorScheme.primary),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppSizes.r12),
                     ),
                     padding: EdgeInsets.symmetric(vertical: AppSizes.r12),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Answer',
                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                   ),
@@ -166,3 +165,7 @@ class InboxQuestionCard extends StatelessWidget {
     }
   }
 }
+
+
+
+

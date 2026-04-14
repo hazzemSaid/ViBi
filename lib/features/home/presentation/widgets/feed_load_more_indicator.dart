@@ -5,9 +5,13 @@ class FeedLoadMoreIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
+    return Padding(
       padding: EdgeInsets.symmetric(vertical: 24.0),
-      child: Center(child: CircularProgressIndicator(color: Color(0xFF5A4FCF))),
+      child: Center(
+        child: CircularProgressIndicator(
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+      ),
     );
   }
 }

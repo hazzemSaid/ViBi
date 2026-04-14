@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:vibi/features/auth/presentation/widgets/auth_video_background.dart';
 
@@ -19,7 +18,7 @@ class WelcomeScreen extends StatelessWidget {
     final isShort = size.height < 700;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: AuthVideoBackground(
         child: SafeArea(
           child: Padding(
@@ -33,42 +32,46 @@ class WelcomeScreen extends StatelessWidget {
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                     child: Container(
-                      padding: const EdgeInsets.all(22),
+                      padding: EdgeInsets.all(22),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.12),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(AppSizes.r24),
                         border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.2),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.2),
                           width: 1.5,
                         ),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.favorite_outline,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                         size: 44,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: AppSizes.s24),
-                const Text(
+                Text(
                   'Welcome to ViBi',
                   style: TextStyle(
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).colorScheme.onSurface,
                     letterSpacing: 1.5,
                   ),
                 ),
                 const SizedBox(height: AppSizes.s12),
-                const Padding(
+                Padding(
                   padding: EdgeInsets.symmetric(horizontal: 24),
                   child: Text(
                     'The honest place for anonymous\nquestions, feedback, and fun.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 17,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                       height: 1.4,
                       fontWeight: FontWeight.w400,
                     ),
@@ -78,11 +81,11 @@ class WelcomeScreen extends StatelessWidget {
 
                 // Buttons Section
                 if (authState.isLoading)
-                  const Center(
+                  Center(
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 40),
                       child: CircularProgressIndicator(
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   )
@@ -93,8 +96,10 @@ class WelcomeScreen extends StatelessWidget {
                     height: 58,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Colors.black,
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onSurface,
+                        foregroundColor: Theme.of(context).colorScheme.scrim,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppSizes.r16),
                         ),
@@ -126,21 +131,32 @@ class WelcomeScreen extends StatelessWidget {
                   // Divider
                   Row(
                     children: [
-                      const Expanded(
-                        child: Divider(color: Colors.white24, thickness: 1),
+                      Expanded(
+                        child: Divider(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant
+                              .withValues(alpha: 0.35),
+                          thickness: 1,
+                        ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           'or',
                           style: TextStyle(
-                            color: AppColors.textTertiary,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant
+                                .withValues(alpha: 0.72),
                             fontSize: 14,
                           ),
                         ),
                       ),
-                      const Expanded(
-                        child: Divider(color: Colors.white24, thickness: 1),
+                      Expanded(
+                        child: Divider(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant
+                              .withValues(alpha: 0.35),
+                          thickness: 1,
+                        ),
                       ),
                     ],
                   ),
@@ -151,15 +167,17 @@ class WelcomeScreen extends StatelessWidget {
                     height: 58,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onSurface,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppSizes.r16),
                         ),
                         elevation: 0,
                       ),
                       onPressed: () => context.push('/signup'),
-                      child: const Text(
+                      child: Text(
                         'Create an account',
                         style: TextStyle(
                           fontSize: 17,
@@ -175,10 +193,16 @@ class WelcomeScreen extends StatelessWidget {
                     height: 58,
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.white.withValues(alpha: 0.08),
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onSurface,
+                        backgroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.08),
                         side: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.25),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.25),
                           width: 1.5,
                         ),
                         shape: RoundedRectangleBorder(
@@ -186,7 +210,7 @@ class WelcomeScreen extends StatelessWidget {
                         ),
                       ),
                       onPressed: () => context.push('/login'),
-                      child: const Text(
+                      child: Text(
                         'Log In',
                         style: TextStyle(
                           fontSize: 17,
@@ -203,8 +227,8 @@ class WelcomeScreen extends StatelessWidget {
                     child: Text(
                       authState.errorMessage ?? 'Authentication failed',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: AppColors.error,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.error,
                         fontSize: 12,
                       ),
                     ),
@@ -218,7 +242,9 @@ class WelcomeScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       style: TextStyle(
-                        color: AppColors.textTertiary,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                         fontSize: 12,
                       ),
                       children: [
@@ -227,16 +253,16 @@ class WelcomeScreen extends StatelessWidget {
                         ),
                         TextSpan(
                           text: 'Terms of Service',
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
                             decoration: TextDecoration.underline,
                           ),
                         ),
-                        const TextSpan(text: ' and '),
+                        TextSpan(text: ' and '),
                         TextSpan(
                           text: 'Privacy Policy',
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
                             decoration: TextDecoration.underline,
                           ),
                         ),

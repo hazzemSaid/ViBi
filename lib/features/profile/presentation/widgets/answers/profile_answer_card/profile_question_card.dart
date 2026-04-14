@@ -19,31 +19,31 @@ class ProfileQuestionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C212A),
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ProfileSenderRow(answer: answer, displayName: displayName),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'TELL',
             style: TextStyle(
-              color: Color(0xFF6B8AFF),
+              color: Theme.of(context).colorScheme.secondary,
               fontWeight: FontWeight.w900,
               fontSize: 10,
               letterSpacing: 1.5,
             ),
           ),
-          const SizedBox(height: 8),
+SizedBox(height: 8),
           Text(
             answer.questionText,
             style: TextStyle(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: questionFontSize,
               fontWeight: FontWeight.bold,
             ),
@@ -53,3 +53,4 @@ class ProfileQuestionCard extends StatelessWidget {
     );
   }
 }
+

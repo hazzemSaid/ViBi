@@ -28,7 +28,10 @@ class InboxQuestionModel extends InboxQuestion {
       senderAvatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first : null,
       questionText: map['question_text'] as String,
       isAnonymous: map['is_anonymous'] as bool? ?? false,
-      status: map['status'] as String? ?? 'pending',
+      status:
+          (map['status']?.toString().trim().toLowerCase().isNotEmpty ?? false)
+          ? map['status'].toString().trim().toLowerCase()
+          : 'pending',
       createdAt: map['created_at'] != null
           ? DateTime.parse(map['created_at'] as String)
           : DateTime.now(),

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vibi/core/constants/app_assets.dart';
-import 'package:vibi/features/inbox/presentation/providers/inbox_providers.dart';
+import 'package:vibi/features/inbox/presentation/cubits/pending_questions_cubit.dart';
+import 'package:vibi/features/inbox/presentation/state/answer_screen_visibility.dart';
+import 'package:vibi/features/inbox/presentation/state/pending_questions_state.dart';
 
 class MainLayout extends StatelessWidget {
   const MainLayout({required this.navigationShell, super.key});
@@ -20,19 +21,24 @@ class MainLayout extends StatelessWidget {
   bool _isModalOpen(BuildContext context) {
     // Check if there's a modal/dialog open above the main navigation
     // Navigator.canPop() returns true if there's a route that can be popped
-    return Navigator.of(context).canPop();
+    return Navigator.of(context, rootNavigator: false).canPop();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: _isModalOpen(context)
-          ? null
-          : _BottomNavBar(
-              currentIndex: navigationShell.currentIndex,
-              onTap: _onTap,
-            ),
+    return ValueListenableBuilder<bool>(
+      valueListenable: answerScreenVisibilityNotifier,
+      builder: (context, isAnswerScreenOpen, _) {
+        return Scaffold(
+          body: navigationShell,
+          bottomNavigationBar: (isAnswerScreenOpen || _isModalOpen(context))
+              ? null
+              : _BottomNavBar(
+                  currentIndex: navigationShell.currentIndex,
+                  onTap: _onTap,
+                ),
+        );
+      },
     );
   }
 }
@@ -83,25 +89,21 @@ class _BottomNavBarState extends State<_BottomNavBar>
 
   Widget _buildInboxIconWithBadge() {
     final state = context.watch<PendingQuestionsCubit>().state;
-    final count = state.data?.length ?? 0;
+    final count = state is PendingQuestionsSuccess ? state.questions.length : 0;
     final Image inboxIcon = Image(
-      image: AssetImage('assets/images/inbox.png'),
+      image: const AssetImage('assets/images/inbox.png'),
       width: 24,
       height: 24,
-      color: widget.currentIndex == 2
-          ? Theme.of(context).colorScheme.onSurface
-          : Theme.of(
-              context,
-            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+      color: widget.currentIndex == 2 ? Colors.white : Colors.white54,
     );
     if (count > 0) {
       return Badge(
         label: Padding(
-          padding: EdgeInsets.only(top: 2),
+          padding: const EdgeInsets.only(top: 2),
           child: Text(count > 99 ? '99+' : count.toString()),
         ),
-        backgroundColor: Theme.of(context).colorScheme.error,
-        textColor: Theme.of(context).colorScheme.onSurface,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
         child: inboxIcon,
       );
     }
@@ -122,10 +124,10 @@ class _BottomNavBarState extends State<_BottomNavBar>
         ).animate(_animationController),
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            color: const Color(0xFF0F1419),
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).colorScheme.scrim.withOpacity(0.1),
+                color: Colors.black.withOpacity(0.1),
                 blurRadius: 8,
                 offset: const Offset(0, -2),
               ),
@@ -134,11 +136,9 @@ class _BottomNavBarState extends State<_BottomNavBar>
           child: SafeArea(
             top: false,
             child: BottomNavigationBar(
-              backgroundColor: Theme.of(context).colorScheme.surface,
-              selectedItemColor: Theme.of(context).colorScheme.onSurface,
-              unselectedItemColor: Theme.of(
-                context,
-              ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+              backgroundColor: const Color(0xFF0F1419),
+              selectedItemColor: Colors.white,
+              unselectedItemColor: Colors.white54,
               type: BottomNavigationBarType.fixed,
               showSelectedLabels: true,
               showUnselectedLabels: true,
@@ -153,9 +153,8 @@ class _BottomNavBarState extends State<_BottomNavBar>
                   activeIcon: Icon(Icons.home),
                   label: 'For you',
                 ),
-                BottomNavigationBarItem(
-                  icon: ImageIcon(AssetImage(AppAssets.iconSearch)),
-                  activeIcon: ImageIcon(AssetImage(AppAssets.iconSearch)),
+                const BottomNavigationBarItem(
+                  icon: Icon(Icons.search),
                   label: 'Search',
                 ),
                 BottomNavigationBarItem(

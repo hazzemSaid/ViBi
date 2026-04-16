@@ -63,7 +63,6 @@
 	<string>This app requires access to the photo library to pick a profile picture.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app requires access to the camera to take a profile picture.</string>
-	<!-- Instagram Stories URL scheme -->
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>instagram-stories</string>

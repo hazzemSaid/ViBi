@@ -1,13 +1,16 @@
 import 'package:dartz/dartz.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/features/inbox/data/datasources/graphql_inbox_datasource.dart';
 import 'package:vibi/features/inbox/domain/entities/inbox_question.dart';
 import 'package:vibi/features/inbox/domain/repositories/inbox_repository.dart';
 
 class InboxRepositoryImpl implements InboxRepository {
   final GraphQLInboxDataSource _dataSource;
-  final String _currentUserId;
 
-  InboxRepositoryImpl(this._dataSource, this._currentUserId);
+  InboxRepositoryImpl(this._dataSource);
+
+  String get _currentUserId =>
+      Supabase.instance.client.auth.currentUser?.id ?? '';
 
   @override
   Future<Either<String, List<InboxQuestion>>> getPendingQuestions({

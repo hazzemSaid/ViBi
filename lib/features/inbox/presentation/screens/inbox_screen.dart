@@ -2,7 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/theme/app_colors.dart';
@@ -144,6 +146,13 @@ class _InboxScreenState extends State<InboxScreen> {
       _selectedFilter = filter;
       _hiddenQuestionIds.clear();
     });
+
+    final pendingQuestionsCubit = context.read<PendingQuestionsCubit>();
+    if (filter == QuestionFilter.archived) {
+      await pendingQuestionsCubit.loadArchivedQuestions();
+      return;
+    }
+    await pendingQuestionsCubit.loadUnansweredQuestions();
   }
 
   /**
@@ -207,13 +216,24 @@ class _InboxScreenState extends State<InboxScreen> {
    * - Share card quick-copy action.
    */
   Future<void> _copyProfileLink() async {
-    const link = 'vibi.app/your-profile';
-    await Clipboard.setData(const ClipboardData(text: link));
+    final link = _shareProfileUrl;
+    await Clipboard.setData(ClipboardData(text: link));
     if (!mounted) return;
 
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Profile link copied')));
+  }
+
+  String get _shareProfileUrl {
+    final user = Supabase.instance.client.auth.currentUser;
+    final rawUsername = (user?.userMetadata?['username'] as String?)?.trim();
+    final username =
+        rawUsername != null && rawUsername.isNotEmpty
+        ? rawUsername
+        : user?.email?.split('@').first ?? 'user';
+    final shareBaseUrl = dotenv.env['SHARE_BASE_URL'] ?? 'https://vibi.social';
+    return '$shareBaseUrl/u/$username';
   }
 
   /**
@@ -837,8 +857,8 @@ class _InboxScreenState extends State<InboxScreen> {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
+                children: [
+                  const Text(
                     'Share to get messages',
                     style: TextStyle(
                       color: Colors.white,
@@ -846,10 +866,13 @@ class _InboxScreenState extends State<InboxScreen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
-                    'vibi.app/your-profile',
-                    style: TextStyle(color: Color(0xFF636363), fontSize: 12),
+                    _shareProfileUrl,
+                    style: const TextStyle(
+                      color: Color(0xFF636363),
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),

@@ -201,10 +201,7 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
     () => GraphQLInboxDataSource(graphQLClient: GraphQLConfig.client),
   );
   getIt.registerFactory<InboxRepository>(
-    () => InboxRepositoryImpl(
-      getIt<GraphQLInboxDataSource>(),
-      Supabase.instance.client.auth.currentUser?.id ?? '',
-    ),
+    () => InboxRepositoryImpl(getIt<GraphQLInboxDataSource>()),
   );
   getIt.registerFactory<GetPendingQuestionsUseCase>(
     () => GetPendingQuestionsUseCase(getIt<InboxRepository>()),
@@ -229,7 +226,7 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   );
   getIt.registerFactory<ArchiveQuestionCubit>(
     () => ArchiveQuestionCubit(
-      archivequestionUseCase: getIt<ArchiveQuestionUseCase>(),
+      archiveQuestionUseCase: getIt<ArchiveQuestionUseCase>(),
     ),
   );
   getIt.registerLazySingleton<GraphQLFollowDataSource>(

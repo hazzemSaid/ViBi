@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/errors/errors_handel.dart';
@@ -68,7 +69,12 @@ class GraphQLInboxDataSource {
     String status = 'pending',
   }) async {
     try {
-      final statuses = const <String>['pending', 'archive', 'archived'];
+      final normalizedStatus = status.trim().toLowerCase();
+      final statuses = switch (normalizedStatus) {
+        'archived' || 'archive' => const <String>['archive', 'archived'],
+        '' || 'unanswered' => const <String>['pending'],
+        _ => <String>[normalizedStatus],
+      };
 
       final result = await _graphQLClient.query(
         QueryOptions(
@@ -120,7 +126,9 @@ class GraphQLInboxDataSource {
             }),
           );
         } catch (e) {
-          print('WARN: Skipping malformed inbox edge: $e');
+          if (kDebugMode) {
+            debugPrint('WARN: Skipping malformed inbox edge: $e');
+          }
         }
       }
 
@@ -136,7 +144,9 @@ class GraphQLInboxDataSource {
     required String userId,
   }) async {
     try {
-      print('DEBUG: Starting answerQuestion via RPC: $questionId');
+      if (kDebugMode) {
+        debugPrint('DEBUG: Starting answerQuestion via RPC: $questionId');
+      }
 
       final result = await _graphQLClient.mutate(
         MutationOptions(
@@ -151,21 +161,29 @@ class GraphQLInboxDataSource {
       );
 
       if (result.hasException) {
-        print('DEBUG: RPC Answer failed: ${result.exception}');
+        if (kDebugMode) {
+          debugPrint('DEBUG: RPC Answer failed: ${result.exception}');
+        }
         return left(SupabaseErrorHandler.getErrorMessage(result.exception));
       }
 
-      print('DEBUG: answerQuestion completed successfully via RPC');
+      if (kDebugMode) {
+        debugPrint('DEBUG: answerQuestion completed successfully via RPC');
+      }
       return right(unit);
     } catch (e) {
-      print('DEBUG: Exception in answerQuestion RPC: $e');
+      if (kDebugMode) {
+        debugPrint('DEBUG: Exception in answerQuestion RPC: $e');
+      }
       return left('Failed to answer question: $e');
     }
   }
 
   Future<Either<String, Unit>> deleteQuestion(String questionId) async {
     try {
-      print('DEBUG: Starting deleteQuestion via RPC: $questionId');
+      if (kDebugMode) {
+        debugPrint('DEBUG: Starting deleteQuestion via RPC: $questionId');
+      }
 
       final user = Supabase.instance.client.auth.currentUser;
       final userId = user?.id ?? '';
@@ -183,13 +201,17 @@ class GraphQLInboxDataSource {
       );
 
       if (result.hasException) {
-        print('DEBUG: RPC Delete failed: ${result.exception}');
+        if (kDebugMode) {
+          debugPrint('DEBUG: RPC Delete failed: ${result.exception}');
+        }
         return left(SupabaseErrorHandler.getErrorMessage(result.exception));
       }
 
       return right(unit);
     } catch (e) {
-      print('DEBUG: Exception in deleteQuestion RPC: $e');
+      if (kDebugMode) {
+        debugPrint('DEBUG: Exception in deleteQuestion RPC: $e');
+      }
       return left('Failed to delete question: $e');
     }
   }
@@ -198,7 +220,9 @@ class GraphQLInboxDataSource {
     required String questionId,
   }) async {
     try {
-      print('DEBUG: Starting archiveQuestion via RPC: $questionId');
+      if (kDebugMode) {
+        debugPrint('DEBUG: Starting archiveQuestion via RPC: $questionId');
+      }
 
       final user = Supabase.instance.client.auth.currentUser;
       final userId = user?.id ?? '';
@@ -215,13 +239,17 @@ class GraphQLInboxDataSource {
       );
 
       if (result.hasException) {
-        print('DEBUG: RPC Archive failed: ${result.exception}');
+        if (kDebugMode) {
+          debugPrint('DEBUG: RPC Archive failed: ${result.exception}');
+        }
         return left(SupabaseErrorHandler.getErrorMessage(result.exception));
       }
 
       return right(unit);
     } catch (e) {
-      print('DEBUG: Exception in archiveQuestion RPC: $e');
+      if (kDebugMode) {
+        debugPrint('DEBUG: Exception in archiveQuestion RPC: $e');
+      }
       return left('Failed to archive question: $e');
     }
   }
@@ -230,7 +258,9 @@ class GraphQLInboxDataSource {
     required String questionId,
   }) async {
     try {
-      print('DEBUG: Starting unarchiveQuestion via RPC: $questionId');
+      if (kDebugMode) {
+        debugPrint('DEBUG: Starting unarchiveQuestion via RPC: $questionId');
+      }
 
       final user = Supabase.instance.client.auth.currentUser;
       final userId = user?.id ?? '';
@@ -247,13 +277,17 @@ class GraphQLInboxDataSource {
       );
 
       if (result.hasException) {
-        print('DEBUG: RPC Unarchive failed: ${result.exception}');
+        if (kDebugMode) {
+          debugPrint('DEBUG: RPC Unarchive failed: ${result.exception}');
+        }
         return left(SupabaseErrorHandler.getErrorMessage(result.exception));
       }
 
       return right(unit);
     } catch (e) {
-      print('DEBUG: Exception in unarchiveQuestion RPC: $e');
+      if (kDebugMode) {
+        debugPrint('DEBUG: Exception in unarchiveQuestion RPC: $e');
+      }
       return left('Failed to unarchive question: $e');
     }
   }

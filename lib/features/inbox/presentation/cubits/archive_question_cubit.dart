@@ -3,27 +3,27 @@ import 'package:vibi/features/inbox/domain/usecases/archive_question_usecase.dar
 import 'package:vibi/features/inbox/presentation/state/archive_question_state.dart';
 
 class ArchiveQuestionCubit extends Cubit<ArchiveQuestionState> {
-  ArchiveQuestionCubit({required this.archivequestionUseCase})
+  ArchiveQuestionCubit({required this.archiveQuestionUseCase})
     : super(ArchiveQuestionInitial());
-  final ArchiveQuestionUseCase archivequestionUseCase;
+  final ArchiveQuestionUseCase archiveQuestionUseCase;
 
   Future<void> archiveQuestion(String questionId) async {
     emit(ArchiveQuestionLoading());
-    try {
-      await archivequestionUseCase(questionId: questionId);
-      emit(ArchiveQuestionSuccess());
-    } catch (e) {
-      emit(ArchiveQuestionFailure(message: e.toString()));
-    }
+    final result = await archiveQuestionUseCase(questionId: questionId);
+    result.fold(
+      (error) => emit(ArchiveQuestionFailure(message: error)),
+      (_) => emit(ArchiveQuestionSuccess()),
+    );
   }
 
   Future<void> unarchiveQuestion(String questionId) async {
     emit(ArchiveQuestionLoading());
-    try {
-      await archivequestionUseCase.unarchive(questionId: questionId);
-      emit(ArchiveQuestionSuccess());
-    } catch (e) {
-      emit(ArchiveQuestionFailure(message: e.toString()));
-    }
+    final result = await archiveQuestionUseCase.unarchive(
+      questionId: questionId,
+    );
+    result.fold(
+      (error) => emit(ArchiveQuestionFailure(message: error)),
+      (_) => emit(ArchiveQuestionSuccess()),
+    );
   }
 }

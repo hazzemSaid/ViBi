@@ -29,8 +29,9 @@ class FeedItemModel extends FeedItem {
     return FeedItemModel(
       id: map['id'] as String,
       userId: map['user_id'] as String,
-      answerAuthorId: map['user_id'] as String?,
-      questionSenderId: null,
+      answerAuthorId:
+          map['answer_author_id'] as String? ?? map['user_id'] as String,
+      questionSenderId: map['question_sender_id'] as String?,
       username: profile?['username'] as String? ?? 'unknown',
       avatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first : null,
       answerAuthorUsername: 'unknown',

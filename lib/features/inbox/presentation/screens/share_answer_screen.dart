@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -131,11 +132,14 @@ class _ShareAnswerScreenState extends State<ShareAnswerScreen> {
    * - Save/share operations requiring one flattened image.
    */
   Future<String?> _captureToFile() async {
-    setState(() => _isCapturing = true);
-    await Future.delayed(const Duration(milliseconds: 60));
-    final bytes = await _screenshotController.capture(pixelRatio: 3.0);
-    if (mounted) setState(() => _isCapturing = false);
-    return _writePngToTemp(bytes, 'vibi_story');
+    if (mounted) setState(() => _isCapturing = true);
+    try {
+      await Future.delayed(const Duration(milliseconds: 60));
+      final bytes = await _screenshotController.capture(pixelRatio: 3.0);
+      return _writePngToTemp(bytes, 'vibi_story');
+    } finally {
+      if (mounted) setState(() => _isCapturing = false);
+    }
   }
 
   /**
@@ -172,15 +176,17 @@ class _ShareAnswerScreenState extends State<ShareAnswerScreen> {
    * - Native Instagram sticker story integration.
    */
   Future<Map<String, String>?> _captureInstagramAssets() async {
-    setState(() => _isCapturing = true);
-    await Future.delayed(const Duration(milliseconds: 60));
+    if (mounted) setState(() => _isCapturing = true);
+    Uint8List? backgroundBytes;
+    Uint8List? stickerBytes;
+    try {
+      await Future.delayed(const Duration(milliseconds: 60));
 
-    final backgroundBytes = await _backgroundController.capture(
-      pixelRatio: 3.0,
-    );
-    final stickerBytes = await _stickerController.capture(pixelRatio: 3.0);
-
-    if (mounted) setState(() => _isCapturing = false);
+      backgroundBytes = await _backgroundController.capture(pixelRatio: 3.0);
+      stickerBytes = await _stickerController.capture(pixelRatio: 3.0);
+    } finally {
+      if (mounted) setState(() => _isCapturing = false);
+    }
 
     final backgroundPath = await _writePngToTemp(
       backgroundBytes,
@@ -227,11 +233,19 @@ class _ShareAnswerScreenState extends State<ShareAnswerScreen> {
    * - Save action and non-Instagram sharing fallback.
    */
   Future<void> _share({String? text}) async {
-    setState(() => _isSharing = true);
+    if (mounted) setState(() => _isSharing = true);
     try {
       final path = await _captureToFile();
       if (path == null) throw Exception('Capture failed');
       await _shareFile(path, text: text);
+    } catch (error, stackTrace) {
+      if (kDebugMode) {
+        debugPrint('Share failed: $error\n$stackTrace');
+      }
+      final message = error.toString().contains('Capture failed')
+          ? 'Failed to capture your story image. Please try again.'
+          : 'Failed to share your story. Please try again.';
+      _showSnack(message);
     } finally {
       if (mounted) setState(() => _isSharing = false);
     }

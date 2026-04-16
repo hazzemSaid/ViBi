@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/questions/presentation/providers/question_providers.dart';
 
 class SendQuestionDialog extends StatefulWidget {
@@ -54,9 +53,9 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
       if (!state.hasError) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text('Question sent successfully'),
-            backgroundColor: Colors.green,
+            backgroundColor: Theme.of(context).colorScheme.tertiary,
           ),
         );
       }
@@ -72,7 +71,7 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
           final isLoading = sendState.isLoading;
 
           return Dialog(
-            backgroundColor: AppColors.surface,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSizes.r20),
             ),
@@ -90,17 +89,17 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
                         Expanded(
                           child: Text(
                             'Ask @${widget.recipientUsername}',
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.close,
-                            color: AppColors.textPrimary,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                           onPressed: isLoading
                               ? null
@@ -116,17 +115,23 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
                       maxLines: 5,
                       maxLength: 1000,
                       enabled: !isLoading,
-                      style: const TextStyle(color: AppColors.textPrimary),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Ask a question...',
-                        hintStyle: TextStyle(color: AppColors.textSecondary),
+                        hintStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                         filled: true,
-                        fillColor: AppColors.background,
+                        fillColor: Theme.of(context).scaffoldBackgroundColor,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(AppSizes.r12),
                           borderSide: BorderSide.none,
                         ),
-                        counterStyle: TextStyle(color: AppColors.textSecondary),
+                        counterStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -147,22 +152,24 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
                         vertical: AppSizes.r12,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.background,
+                        color: Theme.of(context).scaffoldBackgroundColor,
                         borderRadius: BorderRadius.circular(AppSizes.r12),
                       ),
                       child: Row(
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.visibility_off,
-                            color: AppColors.textSecondary,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                             size: 20,
                           ),
                           SizedBox(width: AppSizes.r12),
-                          const Expanded(
+                          Expanded(
                             child: Text(
                               'Ask anonymously',
                               style: TextStyle(
-                                color: AppColors.textPrimary,
+                                color: Theme.of(context).colorScheme.onSurface,
                                 fontSize: 14,
                               ),
                             ),
@@ -176,7 +183,9 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
                                       _isAnonymous = value;
                                     });
                                   },
-                            activeThumbColor: AppColors.primary,
+                            activeThumbColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
                           ),
                         ],
                       ),
@@ -189,8 +198,8 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
                         padding: EdgeInsets.only(bottom: AppSizes.r12),
                         child: Text(
                           'Failed to send question. Please try again.',
-                          style: const TextStyle(
-                            color: Colors.red,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
                             fontSize: 12,
                           ),
                           textAlign: TextAlign.center,
@@ -201,25 +210,27 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
                     ElevatedButton(
                       onPressed: isLoading ? null : _sendQuestion,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onSurface,
                         padding: EdgeInsets.symmetric(vertical: AppSizes.r16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(AppSizes.r12),
                         ),
                       ),
                       child: isLoading
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
+                                  Theme.of(context).colorScheme.onSurface,
                                 ),
                               ),
                             )
-                          : const Text(
+                          : Text(
                               'Send Question',
                               style: TextStyle(
                                 fontSize: 16,

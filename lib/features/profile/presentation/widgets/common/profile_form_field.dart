@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 
 class ProfileFormField extends StatelessWidget {
   const ProfileFormField({
@@ -34,7 +33,7 @@ class ProfileFormField extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: AppColors.textPrimary.withValues(alpha: 0.55),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.55),
             fontSize: 12,
             fontWeight: FontWeight.w500,
             letterSpacing: 0.4,
@@ -47,22 +46,22 @@ class ProfileFormField extends StatelessWidget {
           maxLines: maxLines,
           maxLength: maxLength,
           onChanged: onChanged,
-          style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 15),
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: TextStyle(
-              color: AppColors.textPrimary.withValues(alpha: 0.25),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.25),
               fontSize: 15,
             ),
             prefixText: prefixText,
             prefixStyle:
                 prefixStyle ??
                 TextStyle(
-                  color: AppColors.textPrimary.withValues(alpha: 0.4),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                   fontSize: 15,
                 ),
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.05),
+            fillColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 12,
@@ -70,22 +69,22 @@ class ProfileFormField extends StatelessWidget {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSizes.r12),
               borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSizes.r12),
               borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSizes.r12),
-              borderSide: const BorderSide(color: Colors.blueAccent),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.secondary),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(AppSizes.r12),
-              borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.error, width: 1),
             ),
             counterText: '',
           ),
@@ -94,3 +93,6 @@ class ProfileFormField extends StatelessWidget {
     );
   }
 }
+
+
+

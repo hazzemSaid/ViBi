@@ -15,6 +15,7 @@ import 'package:vibi/features/inbox/presentation/cubits/pending_questions_cubit.
 import 'core/routing/app_router.dart';
 import 'core/services/push_notification_service.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_cubit.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -117,6 +118,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late final AuthCubit _authCubit;
   late final AuthController _authController;
   late final PendingQuestionsCubit _pendingQuestionsCubit;
+  late final ThemeCubit _themeCubit;
   late final AppRouterHolder _routerHolder;
 
   @override
@@ -126,6 +128,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _authCubit = getIt<AuthCubit>();
     _authController = getIt<AuthController>();
     _pendingQuestionsCubit = getIt<PendingQuestionsCubit>();
+    _themeCubit = getIt<ThemeCubit>();
     _routerHolder = AppRouterHolder(createAppRouter(_authCubit));
   }
 
@@ -143,6 +146,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _authCubit.close();
     _authController.close();
     _pendingQuestionsCubit.close();
+    _themeCubit.close();
     super.dispose();
   }
 
@@ -155,12 +159,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         BlocProvider<PendingQuestionsCubit>.value(
           value: _pendingQuestionsCubit,
         ),
+        BlocProvider<ThemeCubit>.value(value: _themeCubit),
       ],
-      child: MaterialApp.router(
-        title: 'ViBi',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.darkTheme,
-        routerConfig: _routerHolder.router,
+      child: BlocBuilder<ThemeCubit, ThemeMode>(
+        builder: (context, themeMode) {
+          return MaterialApp.router(
+            title: 'ViBi',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeMode,
+            routerConfig: _routerHolder.router,
+          );
+        },
       ),
     );
   }

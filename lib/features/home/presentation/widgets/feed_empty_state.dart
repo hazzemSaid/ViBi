@@ -24,38 +24,38 @@ class FeedEmptyState extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1C212A),
+                          color: Theme.of(context).colorScheme.surface,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF5A4FCF).withOpacity(0.15),
+                              color: Theme.of(context).colorScheme.secondary.withOpacity(0.15),
                               blurRadius: 30,
                               spreadRadius: 5,
                             ),
                           ],
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.feed_outlined,
-                          color: Color(0xFF5A4FCF),
+                          color: Theme.of(context).colorScheme.secondary,
                           size: 56,
                         ),
                       ),
-                      const SizedBox(height: 32),
-                      const Text(
+SizedBox(height: 32),
+Text(
                         'No posts found',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
                         ),
                       ),
                       const SizedBox(height: 12),
-                      const Text(
+Text(
                         'Pull to refresh or start a conversation!',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.white54,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                           fontSize: 15,
                           height: 1.5,
                         ),
@@ -71,3 +71,4 @@ class FeedEmptyState extends StatelessWidget {
     );
   }
 }
+

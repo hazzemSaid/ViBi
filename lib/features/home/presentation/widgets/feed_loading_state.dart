@@ -5,8 +5,12 @@ class FeedLoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SliverFillRemaining(
-      child: Center(child: CircularProgressIndicator(color: Color(0xFF5A4FCF))),
+    return SliverFillRemaining(
+      child: Center(
+        child: CircularProgressIndicator(
+          color: Theme.of(context).colorScheme.secondary,
+        ),
+      ),
     );
   }
 }

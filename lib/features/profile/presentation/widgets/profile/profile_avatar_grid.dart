@@ -73,9 +73,9 @@ class _AvatarSlot extends StatelessWidget {
               else
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.06),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.1),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
                     ),
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -89,11 +89,11 @@ class _AvatarSlot extends StatelessWidget {
                     height: 36,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.12),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.camera_alt_rounded,
-                      color: Colors.white70,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       size: 18,
                     ),
                   ),
@@ -107,11 +107,11 @@ class _AvatarSlot extends StatelessWidget {
                     height: 30,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.black.withValues(alpha: 0.55),
+                      color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.55),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.camera_alt_rounded,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                       size: 15,
                     ),
                   ),
@@ -127,13 +127,13 @@ class _AvatarSlot extends StatelessWidget {
                     child: Container(
                       width: 22,
                       height: 22,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.black54,
+                        color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.54),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.close,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                         size: 13,
                       ),
                     ),
@@ -151,13 +151,13 @@ class _AvatarSlot extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.blueAccent.withValues(alpha: 0.85),
+                      color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.85),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Main',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
                       ),
@@ -171,3 +171,5 @@ class _AvatarSlot extends StatelessWidget {
     );
   }
 }
+
+

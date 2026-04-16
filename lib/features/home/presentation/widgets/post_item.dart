@@ -48,10 +48,10 @@ class PostItem extends StatelessWidget {
                 displayAvatar: currentItem.displayAvatar,
                 questionFontSize: questionFontSize,
               ),
-              const SizedBox(height: 16),
+SizedBox(height: 16),
               Text(
                 currentItem.answerText,
-                style: TextStyle(color: Colors.white, fontSize: bodyFontSize),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: bodyFontSize),
               ),
               const SizedBox(height: 20),
               ActionRow(
@@ -118,3 +118,4 @@ class _PostBodyData extends Equatable {
     isAnonymous,
   ];
 }
+

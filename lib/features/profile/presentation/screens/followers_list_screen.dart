@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/follower_user.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
 import 'package:vibi/features/social/domain/repositories/follow_repository.dart';
@@ -42,18 +41,21 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
     return BlocProvider<FollowersCubit>.value(
       value: _followersCubit,
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: AppColors.background,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+            icon: Icon(
+              Icons.arrow_back,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
             onPressed: () => context.pop(),
           ),
-          title: const Text(
+          title: Text(
             'Followers',
             style: TextStyle(
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -64,11 +66,11 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
             if (followersAsync.status == ViewStatus.success) {
               final followers = followersAsync.data ?? [];
               if (followers.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text(
                     'No followers yet',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 16,
                     ),
                   ),
@@ -96,7 +98,7 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
                                       ?.substring(0, 1)
                                       .toUpperCase() ??
                                   'U',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -105,8 +107,8 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
                     ),
                     title: Text(
                       follower.fullName ?? follower.username ?? 'Unknown',
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
@@ -116,8 +118,10 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
                             follower.bio!,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                               fontSize: 14,
                             ),
                           )
@@ -147,7 +151,9 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
             return Center(
               child: Text(
                 'Error: ${followersAsync.errorMessage}',
-                style: const TextStyle(color: AppColors.textSecondary),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
             );
           },
@@ -176,24 +182,28 @@ class _RemoveButton extends StatelessWidget {
         final confirmed = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            backgroundColor: AppColors.surface,
-            title: const Text(
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            title: Text(
               'Remove Follower',
-              style: TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             ),
-            content: const Text(
+            content: Text(
               'Are you sure you want to remove this follower?',
-              style: TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancel'),
+                child: Text('Cancel'),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('Remove'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
+                child: Text('Remove'),
               ),
             ],
           ),
@@ -206,9 +216,9 @@ class _RemoveButton extends StatelessWidget {
 
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
+                SnackBar(
                   content: Text('Follower removed'),
-                  backgroundColor: AppColors.success,
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
                 ),
               );
             }
@@ -219,7 +229,7 @@ class _RemoveButton extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Error: $e'),
-                  backgroundColor: Colors.red,
+                  backgroundColor: Theme.of(context).colorScheme.error,
                 ),
               );
             }
@@ -227,10 +237,10 @@ class _RemoveButton extends StatelessWidget {
         }
       },
       style: TextButton.styleFrom(
-        foregroundColor: AppColors.textSecondary,
+        foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
-      child: const Text('Remove'),
+      child: Text('Remove'),
     );
   }
 }

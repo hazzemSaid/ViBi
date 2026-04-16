@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/user_profile.dart';
 
 class ProfileCompletionWidget extends StatelessWidget {
@@ -58,18 +57,18 @@ class ProfileCompletionWidget extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Complete your profile',
               style: TextStyle(
-                color: AppColors.textPrimary,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
               '$completedCount/${tasks.length}',
-              style: const TextStyle(
-                color: Colors.blueAccent,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.secondary,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
@@ -81,8 +80,8 @@ class ProfileCompletionWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           child: LinearProgressIndicator(
             value: progress,
-            backgroundColor: Colors.white10,
-            valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+            backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.18),
+            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.secondary),
             minHeight: 8,
           ),
         ),
@@ -100,32 +99,32 @@ class ProfileCompletionWidget extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppSizes.r20),
                 child: Container(
                   width: 160,
-                  padding: const EdgeInsets.all(AppSizes.s16),
+                  padding: EdgeInsets.all(AppSizes.s16),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(AppSizes.r20),
-                    border: Border.all(color: Colors.white10),
+                    border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.18)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(AppSizes.s8),
+                        padding: EdgeInsets.all(AppSizes.s8),
                         decoration: BoxDecoration(
-                          color: Colors.blueAccent.withValues(alpha: 0.1),
+                          color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           task.icon,
-                          color: Colors.blueAccent,
+                          color: Theme.of(context).colorScheme.secondary,
                           size: 20,
                         ),
                       ),
-                      const Spacer(),
+Spacer(),
                       Text(
                         task.title,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
@@ -135,8 +134,8 @@ class ProfileCompletionWidget extends StatelessWidget {
                         task.description,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppColors.textSecondary,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           fontSize: 11,
                         ),
                       ),
@@ -165,3 +164,7 @@ class _CompletionTask {
     required this.isCompleted,
   });
 }
+
+
+
+

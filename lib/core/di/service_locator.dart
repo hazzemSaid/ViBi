@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
+import 'package:vibi/core/theme/theme_cubit.dart';
 import 'package:vibi/features/auth/data/datasources/supabase_auth_datasource.dart';
 import 'package:vibi/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:vibi/features/auth/domain/repositories/auth_repository.dart';
@@ -64,6 +65,9 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   if (getIt.isRegistered<SharedPreferences>()) return;
 
   getIt.registerSingleton<SharedPreferences>(prefs);
+  getIt.registerLazySingleton<ThemeCubit>(
+    () => ThemeCubit(getIt<SharedPreferences>()),
+  );
 
   getIt.registerLazySingleton<SupabaseAuthDataSource>(
     SupabaseAuthDataSource.new,

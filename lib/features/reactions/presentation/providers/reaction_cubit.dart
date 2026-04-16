@@ -61,8 +61,9 @@ class ReactionCubit extends Cubit<ViewState<ReactionSummary>> {
         emit(ViewState(status: ViewStatus.success, data: currentSummary));
       } catch (e) {
         debugPrint('[ReactionCubit] pre-toggle summary fetch failed: $e');
-        if (!isClosed)
+        if (!isClosed) {
           emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
+        }
         _isToggling = false;
         return;
       }

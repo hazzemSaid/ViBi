@@ -58,8 +58,8 @@ class _AuthVideoBackgroundState extends State<AuthVideoBackground> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.black.withValues(alpha: 0.3),
-                  Colors.black.withValues(alpha: 0.9),
+                  Theme.of(context).colorScheme.scrim.withValues(alpha: 0.3),
+                  Theme.of(context).colorScheme.scrim.withValues(alpha: 0.9),
                 ],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -73,3 +73,4 @@ class _AuthVideoBackgroundState extends State<AuthVideoBackground> {
     );
   }
 }
+

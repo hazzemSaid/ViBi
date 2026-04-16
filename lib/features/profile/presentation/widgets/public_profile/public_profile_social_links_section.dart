@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/theme/app_colors.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
 import 'package:vibi/features/profile/presentation/view/social_media_view/social_links_cubit.dart';
 import 'package:vibi/features/profile/presentation/view/social_media_view/social_media_cubit_state.dart';
@@ -74,9 +73,9 @@ class _PublicProfileSocialLinksSectionState
                   (link) => InkResponse(
                     onTap: () => _launchUrl(link.url),
                     radius: 18,
-                    child: Icon(
-                      socialPlatformIcon(link.platform),
-                      color: AppColors.textPrimary,
+                    child: socialPlatformVisual(
+                      link.platform,
+                      color: Theme.of(context).colorScheme.onSurface,
                       size: 18,
                     ),
                   ),

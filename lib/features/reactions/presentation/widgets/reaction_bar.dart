@@ -23,8 +23,8 @@ class ReactionBar extends StatefulWidget {
     this.onCountsChanged,
     this.compact = false,
     this.showCommentButton = true,
-    this.inactiveColor = Colors.white54,
-    this.activeColor = const Color(0xFF5A4FCF),
+    this.inactiveColor,
+    this.activeColor,
   });
 
   final String answerId;
@@ -32,8 +32,8 @@ class ReactionBar extends StatefulWidget {
   final void Function(int reactionsCount, int commentsCount)? onCountsChanged;
   final bool compact;
   final bool showCommentButton;
-  final Color inactiveColor;
-  final Color activeColor;
+  final Color? inactiveColor;
+  final Color? activeColor;
 
   @override
   State<ReactionBar> createState() => _ReactionBarState();
@@ -117,6 +117,15 @@ class _ReactionBarState extends State<ReactionBar> {
                   );
 
               if (widget.compact) {
+                final inactiveColor =
+                    widget.inactiveColor ??
+                    Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72);
+                final activeColor =
+                    widget.activeColor ??
+                    Theme.of(context).colorScheme.secondary;
+
                 return Row(
                   mainAxisSize: MainAxisSize.min,
                   children: _reactionIcons.entries.map((entry) {
@@ -132,17 +141,17 @@ class _ReactionBarState extends State<ReactionBar> {
                             Icon(
                               entry.value,
                               size: 26,
-                              color: isActive
-                                  ? widget.activeColor
-                                  : widget.inactiveColor,
+                              color: isActive ? activeColor : inactiveColor,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               '$count',
                               style: TextStyle(
                                 color: isActive
-                                    ? widget.activeColor
-                                    : Colors.white70,
+                                    ? activeColor
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -173,10 +182,12 @@ class _ReactionBarState extends State<ReactionBar> {
             const SizedBox(height: 2),
             TextButton.icon(
               onPressed: _openComments,
-              icon: const Icon(Icons.chat_bubble_outline, size: 16),
+              icon: Icon(Icons.chat_bubble_outline, size: 16),
               label: Text('Comment ($_commentCount)'),
               style: TextButton.styleFrom(
-                foregroundColor: Colors.white54,
+                foregroundColor: Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                 padding: const EdgeInsets.symmetric(horizontal: 0),
                 minimumSize: const Size(0, 28),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -209,14 +220,16 @@ class _ReactionChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         margin: const EdgeInsets.only(right: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: active
-              ? const Color(0xFF5A4FCF).withValues(alpha: 0.2)
-              : Colors.white.withValues(alpha: 0.12),
+              ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2)
+              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: active ? const Color(0xFF5A4FCF) : Colors.transparent,
+            color: active
+                ? Theme.of(context).colorScheme.secondary
+                : Colors.transparent,
           ),
         ),
         child: Row(
@@ -230,7 +243,9 @@ class _ReactionChip extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: active ? const Color(0xFF5A4FCF) : Colors.white,
+                  color: active
+                      ? Theme.of(context).colorScheme.secondary
+                      : Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],

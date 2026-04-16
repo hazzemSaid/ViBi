@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 const List<String> kSocialPlatforms = [
   'instagram',
@@ -60,6 +61,51 @@ IconData socialPlatformIcon(String platform) {
     default:
       return Icons.link;
   }
+}
+
+String? socialPlatformSvgAsset(String platform) {
+  switch (platform) {
+    case 'instagram':
+      return 'assets/icons/Platform=Instagram, Color=Negative.svg';
+    case 'twitter':
+      return 'assets/icons/Platform=X (Twitter), Color=Negative.svg';
+    case 'facebook':
+      return 'assets/icons/Platform=Facebook, Color=Negative.svg';
+    case 'threads':
+      return 'assets/icons/Platform=Threads, Color=Negative.svg';
+    case 'telegram':
+      return 'assets/icons/Platform=Telegram, Color=Negative.svg';
+    case 'snapchat':
+      return 'assets/icons/Platform=Snapchat, Color=Negative.svg';
+    case 'youtube':
+      return 'assets/icons/Platform=YouTube, Color=Negative.svg';
+    case 'twitch':
+      return 'assets/icons/Platform=Twitch, Color=Negative.svg';
+    case 'tiktok':
+      return 'assets/icons/Platform=TikTok, Color=Negative.svg';
+    case 'linkedin':
+      return 'assets/icons/Platform=LinkedIn, Color=Negative.svg';
+    case 'github':
+      return 'assets/icons/Platform=Github, Color=Negative.svg';
+    default:
+      return null;
+  }
+}
+
+Widget socialPlatformVisual(String platform, {Color? color, double size = 20}) {
+  final svgAsset = socialPlatformSvgAsset(platform);
+  if (svgAsset != null) {
+    return SvgPicture.asset(
+      svgAsset,
+      width: size,
+      height: size,
+      colorFilter: color == null
+          ? null
+          : ColorFilter.mode(color, BlendMode.srcIn),
+    );
+  }
+
+  return Icon(socialPlatformIcon(platform), color: color, size: size);
 }
 
 String socialPlatformLabel(String platform) {
@@ -262,4 +308,42 @@ String usernameFromSocialUrl(String platform, String url) {
   }
 
   return normalizeSocialUsername(url);
+}
+
+/// Utility icon types for common UI actions
+enum UtilityIconType { search, eye, exit, pin, send, settings }
+
+/// Get the asset path for a utility icon by type
+String getUtilityIconAsset(UtilityIconType type) {
+  switch (type) {
+    case UtilityIconType.search:
+      return 'assets/icons/magnifying-glass.png';
+    case UtilityIconType.eye:
+      return 'assets/icons/eye.png';
+    case UtilityIconType.exit:
+      return 'assets/icons/exit.png';
+    case UtilityIconType.pin:
+      return 'assets/icons/pin-hand-drawn-irregular-outline.png';
+    case UtilityIconType.send:
+      return 'assets/icons/paper.png';
+    case UtilityIconType.settings:
+      return 'assets/icons/setting-lines.png';
+  }
+}
+
+/// Display a utility icon with optional color and size
+Widget utilityIconVisual(
+  UtilityIconType type, {
+  Color? color,
+  double size = 24,
+}) {
+  final assetPath = getUtilityIconAsset(type);
+  return Image.asset(
+    assetPath,
+    width: size,
+    height: size,
+    color: color,
+    colorBlendMode: color == null ? BlendMode.srcIn : BlendMode.srcIn,
+    fit: BoxFit.contain,
+  );
 }

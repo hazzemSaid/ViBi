@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vibi/core/constants/app_constants.dart';
 import 'package:vibi/features/profile/presentation/widgets/edit_profile/edit_profile_widgets.dart';
 
 class EditProfileTabBar extends StatelessWidget {
@@ -16,9 +15,9 @@ class EditProfileTabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 58,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.background,
         border: Border(bottom: BorderSide(color: ProfileEditorPalette.outline)),
       ),
       child: Row(

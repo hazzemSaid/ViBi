@@ -338,7 +338,7 @@ class _ProfileEditorLinksTabState extends State<ProfileEditorLinksTab> {
                 },
                 tilePadding: EdgeInsets.zero,
                 childrenPadding: const EdgeInsets.only(top: 8),
-                title: const Text(
+                title: Text(
                   'Manage Social Media',
                   style: TextStyle(
                     color: ProfileEditorPalette.primaryText,
@@ -346,7 +346,7 @@ class _ProfileEditorLinksTabState extends State<ProfileEditorLinksTab> {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                subtitle: const Text(
+                subtitle: Text(
                   'Add your social accounts using username only.',
                   style: TextStyle(
                     color: ProfileEditorPalette.mutedText,
@@ -354,7 +354,7 @@ class _ProfileEditorLinksTabState extends State<ProfileEditorLinksTab> {
                   ),
                 ),
                 children: [
-                  const Text(
+                  Text(
                     'Add your social accounts. They will appear as icons on your public page.',
                     style: TextStyle(
                       color: ProfileEditorPalette.mutedText,
@@ -375,6 +375,7 @@ class _ProfileEditorLinksTabState extends State<ProfileEditorLinksTab> {
                       children: [
                         for (final link in socialLinks) ...[
                           _InlineSocialLinkRow(
+                            platform: link.platform,
                             platformLabel: socialPlatformLabel(link.platform),
                             controller: _controllerForLink(link),
                             isSaving: _savingLinkIds.contains(link.id),
@@ -390,6 +391,7 @@ class _ProfileEditorLinksTabState extends State<ProfileEditorLinksTab> {
                     ),
                   if (_pendingPlatform != null) ...[
                     _InlinePendingSocialLinkRow(
+                      platform: _pendingPlatform!,
                       platformLabel: socialPlatformLabel(_pendingPlatform!),
                       controller: _pendingUsernameController,
                       isSaving: _isPendingSaveInProgress,
@@ -406,7 +408,7 @@ class _ProfileEditorLinksTabState extends State<ProfileEditorLinksTab> {
                     const SizedBox(height: 10),
                   ],
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     'Add platform',
                     style: TextStyle(
                       color: ProfileEditorPalette.mutedText,
@@ -420,8 +422,8 @@ class _ProfileEditorLinksTabState extends State<ProfileEditorLinksTab> {
                     children: [
                       for (final platform in availablePlatforms)
                         EditorPlatformChip(
+                          platform: platform,
                           label: socialPlatformLabel(platform),
-                          icon: socialPlatformIcon(platform),
                           onTap: () {
                             setState(() {
                               _pendingPlatform = platform;
@@ -433,7 +435,7 @@ class _ProfileEditorLinksTabState extends State<ProfileEditorLinksTab> {
                   ),
                   if (availablePlatforms.isEmpty) ...[
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'All supported social platforms are already connected.',
                       style: TextStyle(
                         color: ProfileEditorPalette.mutedText,
@@ -487,6 +489,7 @@ class _ProfileEditorLinksTabState extends State<ProfileEditorLinksTab> {
 
 class _InlineSocialLinkRow extends StatelessWidget {
   const _InlineSocialLinkRow({
+    required this.platform,
     required this.platformLabel,
     required this.controller,
     required this.isSaving,
@@ -496,6 +499,7 @@ class _InlineSocialLinkRow extends StatelessWidget {
     required this.isActive,
   });
 
+  final String platform;
   final String platformLabel;
   final TextEditingController controller;
   final bool isSaving;
@@ -513,19 +517,29 @@ class _InlineSocialLinkRow extends StatelessWidget {
         final field = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              platformLabel,
-              style: const TextStyle(
-                color: ProfileEditorPalette.mutedText,
-                fontSize: 11,
-              ),
+            Row(
+              children: [
+                socialPlatformVisual(
+                  platform,
+                  color: ProfileEditorPalette.mutedText,
+                  size: 14,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  platformLabel,
+                  style: TextStyle(
+                    color: ProfileEditorPalette.mutedText,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 6),
             TextField(
               controller: controller,
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => onSave(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 color: ProfileEditorPalette.primaryText,
               ),
@@ -540,19 +554,19 @@ class _InlineSocialLinkRow extends StatelessWidget {
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(
+                  borderSide: BorderSide(
                     color: ProfileEditorPalette.outlineStrong,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(
+                  borderSide: BorderSide(
                     color: ProfileEditorPalette.outlineStrong,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(
+                  borderSide: BorderSide(
                     color: ProfileEditorPalette.primaryText,
                   ),
                 ),
@@ -575,9 +589,10 @@ class _InlineSocialLinkRow extends StatelessWidget {
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(
+                  : Icon(
                       Icons.check_rounded,
                       color: ProfileEditorPalette.accent,
+                      size: 18,
                     ),
             ),
             Switch.adaptive(
@@ -587,19 +602,19 @@ class _InlineSocialLinkRow extends StatelessWidget {
             ),
             IconButton(
               onPressed: onDelete,
-              icon: const Icon(
+              icon: Icon(
                 Icons.delete_outline_rounded,
                 size: 18,
-                color: ProfileEditorPalette.placeholder,
+                color: Theme.of(context).colorScheme.error,
               ),
             ),
           ],
         );
 
         return Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.background,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: ProfileEditorPalette.outlineStrong),
           ),
@@ -623,6 +638,7 @@ class _InlineSocialLinkRow extends StatelessWidget {
 
 class _InlinePendingSocialLinkRow extends StatelessWidget {
   const _InlinePendingSocialLinkRow({
+    required this.platform,
     required this.platformLabel,
     required this.controller,
     required this.isSaving,
@@ -630,6 +646,7 @@ class _InlinePendingSocialLinkRow extends StatelessWidget {
     required this.onSave,
   });
 
+  final String platform;
   final String platformLabel;
   final TextEditingController controller;
   final bool isSaving;
@@ -645,16 +662,26 @@ class _InlinePendingSocialLinkRow extends StatelessWidget {
         final field = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '$platformLabel username',
-              style: const TextStyle(
-                color: ProfileEditorPalette.mutedText,
-                fontSize: 11,
-              ),
+            Row(
+              children: [
+                socialPlatformVisual(
+                  platform,
+                  color: ProfileEditorPalette.mutedText,
+                  size: 14,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '$platformLabel username',
+                  style: TextStyle(
+                    color: ProfileEditorPalette.mutedText,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 6),
             TextField(
-              style: const TextStyle(color: ProfileEditorPalette.primaryText),
+              style: TextStyle(color: ProfileEditorPalette.primaryText),
               controller: controller,
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => onSave(),
@@ -669,19 +696,19 @@ class _InlinePendingSocialLinkRow extends StatelessWidget {
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(
+                  borderSide: BorderSide(
                     color: ProfileEditorPalette.outlineStrong,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(
+                  borderSide: BorderSide(
                     color: ProfileEditorPalette.outlineStrong,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: const BorderSide(
+                  borderSide: BorderSide(
                     color: ProfileEditorPalette.primaryText,
                   ),
                 ),
@@ -703,25 +730,27 @@ class _InlinePendingSocialLinkRow extends StatelessWidget {
                       height: 16,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Icon(
-                      Icons.add_rounded,
+                  : utilityIconVisual(
+                      UtilityIconType.send,
                       color: ProfileEditorPalette.accent,
+                      size: 18,
                     ),
             ),
             IconButton(
               onPressed: onCancel,
-              icon: const Icon(
-                Icons.close_rounded,
+              icon: utilityIconVisual(
+                UtilityIconType.exit,
                 color: ProfileEditorPalette.placeholder,
+                size: 18,
               ),
             ),
           ],
         );
 
         return Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.background,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(color: ProfileEditorPalette.outlineStrong),
           ),

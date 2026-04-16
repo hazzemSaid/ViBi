@@ -17,9 +17,9 @@ class EditorSectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.background,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: ProfileEditorPalette.outline),
       ),
@@ -30,14 +30,14 @@ class EditorSectionCard extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   color: ProfileEditorPalette.primaryText,
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const Spacer(),
-              if (trailing != null) trailing!,
+              ?trailing,
             ],
           ),
           const SizedBox(height: 16),

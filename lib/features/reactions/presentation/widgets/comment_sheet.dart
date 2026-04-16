@@ -15,7 +15,7 @@ class CommentSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black12,
+      barrierColor: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.12),
       useRootNavigator: false,
       builder: (_) => CommentSheet(answerId: answerId),
     );
@@ -137,9 +137,8 @@ class _CommentSheetState extends State<CommentSheet> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.05,
-                                      ),
+                                      color: Theme.of(context).colorScheme.scrim
+                                          .withValues(alpha: 0.05),
                                       blurRadius: 10,
                                       offset: const Offset(0, 2),
                                     ),
@@ -264,18 +263,22 @@ class _CommentSheetState extends State<CommentSheet> {
                                 child: CircleAvatar(
                                   backgroundColor: theme.colorScheme.primary,
                                   child: state.isSending
-                                      ? const SizedBox(
+                                      ? SizedBox(
                                           width: 16,
                                           height: 16,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            color: Colors.white,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onSurface,
                                           ),
                                         )
-                                      : const Icon(
+                                      : Icon(
                                           Icons.send,
                                           size: 18,
-                                          color: Colors.white,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
                                         ),
                                 ),
                               ),

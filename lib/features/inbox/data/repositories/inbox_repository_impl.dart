@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:vibi/features/inbox/data/datasources/graphql_inbox_datasource.dart';
 import 'package:vibi/features/inbox/domain/entities/inbox_question.dart';
 import 'package:vibi/features/inbox/domain/repositories/inbox_repository.dart';
@@ -9,16 +10,25 @@ class InboxRepositoryImpl implements InboxRepository {
   InboxRepositoryImpl(this._dataSource, this._currentUserId);
 
   @override
-  Future<List<InboxQuestion>> getPendingQuestions() async {
-    return await _dataSource.getPendingQuestions(_currentUserId);
+  Future<Either<String, List<InboxQuestion>>> getPendingQuestions({
+    int limit = 20,
+    int offset = 0,
+    String status = 'pending',
+  }) async {
+    return _dataSource.getPendingQuestions(
+      _currentUserId,
+      limit: limit,
+      offset: offset,
+      status: status,
+    );
   }
 
   @override
-  Future<void> answerQuestion({
+  Future<Either<String, Unit>> answerQuestion({
     required String questionId,
     required String answerText,
   }) async {
-    await _dataSource.answerQuestion(
+    return _dataSource.answerQuestion(
       questionId: questionId,
       answerText: answerText,
       userId: _currentUserId,
@@ -26,7 +36,16 @@ class InboxRepositoryImpl implements InboxRepository {
   }
 
   @override
-  Future<void> deleteQuestion(String questionId) async {
-    await _dataSource.deleteQuestion(questionId);
+  Future<Either<String, Unit>> deleteQuestion({
+    required String questionId,
+  }) async {
+    return _dataSource.deleteQuestion(questionId);
+  }
+
+  @override
+  Future<Either<String, Unit>> archiveQuestion({
+    required String questionId,
+  }) async {
+    return _dataSource.archiveQuestion(questionId: questionId);
   }
 }

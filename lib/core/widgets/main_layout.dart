@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vibi/features/inbox/presentation/providers/inbox_providers.dart';
+import 'package:vibi/features/inbox/presentation/cubits/pending_questions_cubit.dart';
+import 'package:vibi/features/inbox/presentation/state/answer_screen_visibility.dart';
+import 'package:vibi/features/inbox/presentation/state/pending_questions_state.dart';
 
 class MainLayout extends StatelessWidget {
   const MainLayout({required this.navigationShell, super.key});
@@ -19,19 +21,24 @@ class MainLayout extends StatelessWidget {
   bool _isModalOpen(BuildContext context) {
     // Check if there's a modal/dialog open above the main navigation
     // Navigator.canPop() returns true if there's a route that can be popped
-    return Navigator.of(context).canPop();
+    return Navigator.of(context, rootNavigator: false).canPop();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: navigationShell,
-      bottomNavigationBar: _isModalOpen(context)
-          ? null
-          : _BottomNavBar(
-              currentIndex: navigationShell.currentIndex,
-              onTap: _onTap,
-            ),
+    return ValueListenableBuilder<bool>(
+      valueListenable: answerScreenVisibilityNotifier,
+      builder: (context, isAnswerScreenOpen, _) {
+        return Scaffold(
+          body: navigationShell,
+          bottomNavigationBar: (isAnswerScreenOpen || _isModalOpen(context))
+              ? null
+              : _BottomNavBar(
+                  currentIndex: navigationShell.currentIndex,
+                  onTap: _onTap,
+                ),
+        );
+      },
     );
   }
 }
@@ -82,7 +89,7 @@ class _BottomNavBarState extends State<_BottomNavBar>
 
   Widget _buildInboxIconWithBadge() {
     final state = context.watch<PendingQuestionsCubit>().state;
-    final count = state.data?.length ?? 0;
+    final count = state is PendingQuestionsSuccess ? state.questions.length : 0;
     final Image inboxIcon = Image(
       image: const AssetImage('assets/images/inbox.png'),
       width: 24,

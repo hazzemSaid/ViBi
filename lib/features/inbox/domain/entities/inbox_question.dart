@@ -6,7 +6,7 @@ class InboxQuestion {
   final String? senderAvatarUrl;
   final String questionText;
   final bool isAnonymous;
-  final String status; // pending, answered, deleted
+  final String status; // pending, answered, deleted , archive
   final DateTime createdAt;
 
   InboxQuestion({

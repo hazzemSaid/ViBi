@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
 import 'package:vibi/features/auth/data/datasources/supabase_auth_datasource.dart';
 import 'package:vibi/features/auth/data/repositories/auth_repository_impl.dart';
@@ -9,11 +10,20 @@ import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
 import 'package:vibi/features/home/data/datasources/graphql_feed_data_source.dart';
 import 'package:vibi/features/home/data/repositories/feed_repository_impl.dart';
 import 'package:vibi/features/home/domain/repositories/feed_repository.dart';
-import 'package:vibi/features/home/domain/usecases/get_global_feed_usecase.dart';
 import 'package:vibi/features/home/domain/usecases/get_following_feed_usecase.dart';
+import 'package:vibi/features/home/domain/usecases/get_global_feed_usecase.dart';
 import 'package:vibi/features/home/presentation/providers/feed_providers.dart';
 import 'package:vibi/features/inbox/data/datasources/graphql_inbox_datasource.dart';
-import 'package:vibi/features/inbox/presentation/providers/inbox_providers.dart';
+import 'package:vibi/features/inbox/data/repositories/inbox_repository_impl.dart';
+import 'package:vibi/features/inbox/domain/repositories/inbox_repository.dart';
+import 'package:vibi/features/inbox/domain/usecases/answer_question_usecase.dart';
+import 'package:vibi/features/inbox/domain/usecases/archive_question_usecase.dart';
+import 'package:vibi/features/inbox/domain/usecases/delete_question_usecase.dart';
+import 'package:vibi/features/inbox/domain/usecases/get_pending_questions_usecase.dart';
+import 'package:vibi/features/inbox/presentation/cubits/answer_question_cubit.dart';
+import 'package:vibi/features/inbox/presentation/cubits/archive_question_cubit.dart';
+import 'package:vibi/features/inbox/presentation/cubits/delete_question_cubit.dart';
+import 'package:vibi/features/inbox/presentation/cubits/pending_questions_cubit.dart';
 import 'package:vibi/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:vibi/features/profile/data/repositories/public_profile_repository_impl.dart';
 import 'package:vibi/features/profile/data/repositories/social_links_repository_impl.dart';
@@ -184,18 +194,40 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   );
 
   getIt.registerLazySingleton<GraphQLInboxDataSource>(
-    GraphQLInboxDataSource.new,
+    () => GraphQLInboxDataSource(graphQLClient: GraphQLConfig.client),
+  );
+  getIt.registerFactory<InboxRepository>(
+    () => InboxRepositoryImpl(
+      getIt<GraphQLInboxDataSource>(),
+      Supabase.instance.client.auth.currentUser?.id ?? '',
+    ),
+  );
+  getIt.registerFactory<GetPendingQuestionsUseCase>(
+    () => GetPendingQuestionsUseCase(getIt<InboxRepository>()),
+  );
+  getIt.registerFactory<AnswerQuestionUseCase>(
+    () => AnswerQuestionUseCase(getIt<InboxRepository>()),
+  );
+  getIt.registerFactory<DeleteQuestionUseCase>(
+    () => DeleteQuestionUseCase(getIt<InboxRepository>()),
   );
   getIt.registerFactory<PendingQuestionsCubit>(
-    () => PendingQuestionsCubit(getIt<GraphQLInboxDataSource>()),
+    () => PendingQuestionsCubit(getIt<GetPendingQuestionsUseCase>()),
   );
   getIt.registerFactory<AnswerQuestionCubit>(
-    () => AnswerQuestionCubit(getIt<GraphQLInboxDataSource>()),
+    () => AnswerQuestionCubit(getIt<AnswerQuestionUseCase>()),
   );
   getIt.registerFactory<DeleteQuestionCubit>(
-    () => DeleteQuestionCubit(getIt<GraphQLInboxDataSource>()),
+    () => DeleteQuestionCubit(getIt<DeleteQuestionUseCase>()),
   );
-
+  getIt.registerLazySingleton<ArchiveQuestionUseCase>(
+    () => ArchiveQuestionUseCase(getIt<InboxRepository>()),
+  );
+  getIt.registerFactory<ArchiveQuestionCubit>(
+    () => ArchiveQuestionCubit(
+      archivequestionUseCase: getIt<ArchiveQuestionUseCase>(),
+    ),
+  );
   getIt.registerLazySingleton<GraphQLFollowDataSource>(
     GraphQLFollowDataSource.new,
   );

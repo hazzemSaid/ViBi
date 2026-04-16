@@ -1,159 +1,228 @@
+import 'package:dartz/dartz.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:vibi/core/errors/errors_handel.dart';
+import 'package:vibi/core/graphql/graphql_config.dart';
 import 'package:vibi/features/inbox/data/models/inbox_question_model.dart';
 
 class GraphQLInboxDataSource {
-  final SupabaseClient _client;
+  final GraphQLClient _graphQLClient;
 
-  GraphQLInboxDataSource({SupabaseClient? client})
-    : _client = client ?? Supabase.instance.client;
+  GraphQLInboxDataSource({GraphQLClient? graphQLClient})
+    : _graphQLClient = graphQLClient ?? GraphQLConfig.client;
 
-  Future<List<InboxQuestionModel>> getPendingQuestions(
-    String currentUserId,
-  ) async {
-    try {
-      // Fetch pending questions
-      final response = await _client
-          .from('questions')
-          .select()
-          .eq('recipient_id', currentUserId)
-          .eq('status', 'pending')
-          .order('created_at', ascending: false);
+  // ── Queries ────────────────────────────────────────────────────────────────
 
-      // For non-anonymous questions, fetch sender info separately
-      final questions = (response as List)
-          .map((json) => InboxQuestionModel.fromMap(json))
-          .toList();
-
-      // Enrich with sender profile data for non-anonymous questions
-      for (var i = 0; i < questions.length; i++) {
-        if (!questions[i].isAnonymous && questions[i].senderId != null) {
-          try {
-            final senderProfile = await _client
-                .from('profiles')
-                .select('username, avatar_urls')
-                .eq('id', questions[i].senderId!)
-                .maybeSingle();
-
-            if (senderProfile != null) {
-              final avatarUrls = _parseAvatarUrls(senderProfile['avatar_urls']);
-              // Create updated question with sender info
-              questions[i] = InboxQuestionModel(
-                id: questions[i].id,
-                recipientId: questions[i].recipientId,
-                senderId: questions[i].senderId,
-                senderUsername: senderProfile['username'] as String?,
-                senderAvatarUrl: avatarUrls.isNotEmpty
-                    ? avatarUrls.first
-                    : null,
-                questionText: questions[i].questionText,
-                isAnonymous: questions[i].isAnonymous,
-                status: questions[i].status,
-                createdAt: questions[i].createdAt,
-              );
+  static const _pendingQuestionsQuery = r'''
+    query GetPendingQuestions($currentUserId: UUID!, $limit: Int!, $offset: Int!, $statuses: [String!]!) {
+      questionsCollection(
+        filter: {
+          recipient_id: { eq: $currentUserId }
+          status: { in: $statuses }
+        }
+        orderBy: [{ created_at: DescNullsLast }]
+        first: $limit
+        offset: $offset
+      ) {
+        edges {
+          node {
+            id
+            recipient_id
+            sender_id
+            question_text
+            is_anonymous
+            status
+            created_at
+            profiles {
+              username
+              avatar_urls
             }
-          } catch (e) {
-            print('Error fetching sender profile: $e');
-            // Continue without sender profile
           }
         }
       }
+    }
+  ''';
 
-      return questions;
+  static const _handleQuestionActionMutation = r'''
+    mutation HandleQuestionAction(
+      $questionId: UUID!
+      $userId: UUID!
+      $action: String!
+      $answerText: String
+    ) {
+      handle_question_action(
+        p_question_id: $questionId
+        p_user_id: $userId
+        p_action: $action
+        p_answer_text: $answerText
+      )
+    }
+  ''';
+
+  // ── Public Methods ─────────────────────────────────────────────────────────
+
+  Future<Either<String, List<InboxQuestionModel>>> getPendingQuestions(
+    String currentUserId, {
+    int limit = 20,
+    int offset = 0,
+    String status = 'pending',
+  }) async {
+    try {
+      final statuses = const <String>['pending', 'archive', 'archived'];
+
+      final result = await _graphQLClient.query(
+        QueryOptions(
+          document: gql(_pendingQuestionsQuery),
+          variables: {
+            'currentUserId': currentUserId,
+            'limit': limit,
+            'offset': offset,
+            'statuses': statuses,
+          },
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
+
+      if (result.hasException) {
+        return left(SupabaseErrorHandler.getErrorMessage(result.exception));
+      }
+
+      final edges =
+          result.data?['questionsCollection']?['edges'] as List<dynamic>? ??
+          const <dynamic>[];
+
+      final questions = <InboxQuestionModel>[];
+      for (final edge in edges) {
+        try {
+          final node =
+              (edge as Map<String, dynamic>)['node'] as Map<String, dynamic>;
+          final rawProfile = node['profiles'];
+
+          Map<String, dynamic>? senderProfile;
+          if (rawProfile is Map<String, dynamic>) {
+            senderProfile = rawProfile;
+          } else if (rawProfile is List &&
+              rawProfile.isNotEmpty &&
+              rawProfile.first is Map) {
+            senderProfile = Map<String, dynamic>.from(rawProfile.first as Map);
+          }
+
+          questions.add(
+            InboxQuestionModel.fromMap({
+              'id': node['id'],
+              'recipient_id': node['recipient_id'],
+              'sender_id': node['sender_id'],
+              'question_text': node['question_text'],
+              'is_anonymous': node['is_anonymous'],
+              'status': node['status'],
+              'created_at': node['created_at'],
+              'sender': senderProfile,
+            }),
+          );
+        } catch (e) {
+          print('WARN: Skipping malformed inbox edge: $e');
+        }
+      }
+
+      return right(questions);
     } catch (e) {
-      print('Get pending questions error: $e');
-      rethrow;
+      return left('Failed to fetch pending questions: $e');
     }
   }
 
-  Future<void> answerQuestion({
+  Future<Either<String, Unit>> answerQuestion({
     required String questionId,
     required String answerText,
     required String userId,
   }) async {
     try {
-      // Get the question first to get recipient_id
-      final questionData = await _client
-          .from('questions')
-          .select('recipient_id')
-          .eq('id', questionId)
-          .maybeSingle();
+      print('DEBUG: Starting answerQuestion via RPC: $questionId');
 
-      if (questionData == null) {
-        throw Exception('Question not found');
+      final result = await _graphQLClient.mutate(
+        MutationOptions(
+          document: gql(_handleQuestionActionMutation),
+          variables: {
+            'questionId': questionId,
+            'userId': userId,
+            'action': 'answer',
+            'answerText': answerText,
+          },
+        ),
+      );
+
+      if (result.hasException) {
+        print('DEBUG: RPC Answer failed: ${result.exception}');
+        return left(SupabaseErrorHandler.getErrorMessage(result.exception));
       }
 
-      // Insert answer
-      await _client.from('answers').insert({
-        'question_id': questionId,
-        'user_id': userId,
-        'answer_text': answerText,
-      });
-
-      // Update question status
-      await _client
-          .from('questions')
-          .update({
-            'status': 'answered',
-            'answered_at': DateTime.now().toIso8601String(),
-          })
-          .eq('id', questionId);
-
-      // Update answer count for user
-      await _updateAnswerCount(userId);
-
-      // Update question count for recipient (decrement pending)
-      await _updateQuestionCount(questionData['recipient_id'] as String);
+      print('DEBUG: answerQuestion completed successfully via RPC');
+      return right(unit);
     } catch (e) {
-      print('Answer question error: $e');
-      rethrow;
+      print('DEBUG: Exception in answerQuestion RPC: $e');
+      return left('Failed to answer question: $e');
     }
   }
 
-  Future<void> deleteQuestion(String questionId) async {
+  Future<Either<String, Unit>> deleteQuestion(String questionId) async {
     try {
-      // Get the question first to get recipient_id
-      final questionData = await _client
-          .from('questions')
-          .select('recipient_id')
-          .eq('id', questionId)
-          .maybeSingle();
+      print('DEBUG: Starting deleteQuestion via RPC: $questionId');
 
-      if (questionData == null) {
-        throw Exception('Question not found');
+      final user = Supabase.instance.client.auth.currentUser;
+      final userId = user?.id ?? '';
+
+      final result = await _graphQLClient.mutate(
+        MutationOptions(
+          document: gql(_handleQuestionActionMutation),
+          variables: {
+            'questionId': questionId,
+            'userId': userId,
+            'action': 'delete',
+            'answerText': null,
+          },
+        ),
+      );
+
+      if (result.hasException) {
+        print('DEBUG: RPC Delete failed: ${result.exception}');
+        return left(SupabaseErrorHandler.getErrorMessage(result.exception));
       }
 
-      // Update status to deleted instead of hard delete
-      await _client
-          .from('questions')
-          .update({'status': 'deleted'})
-          .eq('id', questionId);
-
-      // Update question count for recipient
-      await _updateQuestionCount(questionData['recipient_id'] as String);
+      return right(unit);
     } catch (e) {
-      print('Delete question error: $e');
-      rethrow;
+      print('DEBUG: Exception in deleteQuestion RPC: $e');
+      return left('Failed to delete question: $e');
     }
   }
 
-  Future<void> _updateAnswerCount(String userId) async {
-    // The profiles table no longer stores denormalized answer counters.
-    // Counts are derived from relations in GraphQL queries.
-    final _ = userId;
-  }
+  Future<Either<String, Unit>> archiveQuestion({
+    required String questionId,
+  }) async {
+    try {
+      print('DEBUG: Starting archiveQuestion via RPC: $questionId');
 
-  Future<void> _updateQuestionCount(String userId) {
-    // The profiles table no longer stores denormalized question counters.
-    // Counts are derived from relations in GraphQL queries.
-    return Future.value();
-  }
+      final user = Supabase.instance.client.auth.currentUser;
+      final userId = user?.id ?? '';
 
-  static List<String> _parseAvatarUrls(dynamic value) {
-    if (value == null) return const [];
-    if (value is List) {
-      return value.map((e) => e.toString()).toList();
+      final result = await _graphQLClient.mutate(
+        MutationOptions(
+          document: gql(_handleQuestionActionMutation),
+          variables: {
+            'questionId': questionId,
+            'userId': userId,
+            'action': 'archive',
+          },
+        ),
+      );
+
+      if (result.hasException) {
+        print('DEBUG: RPC Archive failed: ${result.exception}');
+        return left(SupabaseErrorHandler.getErrorMessage(result.exception));
+      }
+
+      return right(unit);
+    } catch (e) {
+      print('DEBUG: Exception in archiveQuestion RPC: $e');
+      return left('Failed to archive question: $e');
     }
-    if (value is String) return [value];
-    return const [];
   }
 }

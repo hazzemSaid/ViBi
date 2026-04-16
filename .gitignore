@@ -86,3 +86,4 @@ supabase/supabase_test_data_real.sql
 vibi_share_web
 .tracker/
 tracked.txt
+sentry.properties

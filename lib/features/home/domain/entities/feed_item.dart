@@ -3,6 +3,8 @@ import 'package:equatable/equatable.dart';
 class FeedItem extends Equatable {
   final String id;
   final String userId;
+  final String? answerAuthorId;
+  final String? questionSenderId;
   final String username;
   final String? avatarUrl;
   final String answerAuthorUsername;
@@ -15,9 +17,11 @@ class FeedItem extends Equatable {
   final DateTime createdAt;
   final bool isAnonymous;
 
-  FeedItem({
+  const FeedItem({
     required this.id,
     required this.userId,
+    this.answerAuthorId,
+    this.questionSenderId,
     required this.username,
     this.avatarUrl,
     required this.answerAuthorUsername,
@@ -34,6 +38,8 @@ class FeedItem extends Equatable {
   FeedItem copyWith({
     String? id,
     String? userId,
+    String? answerAuthorId,
+    String? questionSenderId,
     String? username,
     String? avatarUrl,
     String? answerAuthorUsername,
@@ -49,6 +55,8 @@ class FeedItem extends Equatable {
     return FeedItem(
       id: id ?? this.id,
       userId: userId ?? this.userId,
+      answerAuthorId: answerAuthorId ?? this.answerAuthorId,
+      questionSenderId: questionSenderId ?? this.questionSenderId,
       username: username ?? this.username,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       answerAuthorUsername: answerAuthorUsername ?? this.answerAuthorUsername,
@@ -68,6 +76,8 @@ class FeedItem extends Equatable {
   List<Object?> get props => [
     id,
     userId,
+    answerAuthorId,
+    questionSenderId,
     username,
     avatarUrl,
     answerAuthorUsername,

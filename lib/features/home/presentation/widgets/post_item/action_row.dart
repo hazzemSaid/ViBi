@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/services/instagram_share_service.dart';
 import 'package:vibi/features/home/presentation/providers/feed_providers.dart';
 import 'package:vibi/features/home/presentation/providers/feed_state.dart';
+import 'package:vibi/features/inbox/presentation/screens/share_answer_screen.dart';
 import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
 import 'package:vibi/features/reactions/presentation/widgets/comment_sheet.dart';
 import 'package:vibi/features/reactions/presentation/widgets/reaction_bar.dart';
@@ -15,12 +16,14 @@ class ActionRow extends StatelessWidget {
     required this.fallbackAnswerText,
     required this.fallbackQuestionText,
     required this.fallbackUsername,
+    required this.fallbackIsAnonymous,
   });
 
   final String answerId;
   final String fallbackAnswerText;
   final String fallbackQuestionText;
   final String fallbackUsername;
+  final bool fallbackIsAnonymous;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +38,7 @@ class ActionRow extends StatelessWidget {
           fallbackAnswerText: fallbackAnswerText,
           fallbackQuestionText: fallbackQuestionText,
           fallbackUsername: fallbackUsername,
+          fallbackIsAnonymous: fallbackIsAnonymous,
         ),
         const SizedBox(width: 10),
         const _SendTellButton(),
@@ -124,22 +128,43 @@ class _ShareActionButton extends StatelessWidget {
     required this.fallbackAnswerText,
     required this.fallbackQuestionText,
     required this.fallbackUsername,
+    required this.fallbackIsAnonymous,
   });
 
   final String answerId;
   final String fallbackAnswerText;
   final String fallbackQuestionText;
   final String fallbackUsername;
+  final bool fallbackIsAnonymous;
 
-  Future<void> _showShareDialog(
+  Future<void> _openShareScreen(
     BuildContext context,
-    ({String answerText, String questionText, String username}) payload,
+    ({
+      String answerText,
+      String questionText,
+      String username,
+      bool isAnonymous,
+      bool canShare,
+    }) payload,
   ) async {
-    await InstagramShareService.showShareSheet(
-      context,
-      questionText: payload.questionText,
-      answerText: payload.answerText,
-      username: payload.username,
+    if (!payload.canShare) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You can only share your own answers or questions.'),
+        ),
+      );
+      return;
+    }
+
+    await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) => ShareAnswerScreen(
+          questionText: payload.questionText,
+          answerText: payload.answerText,
+          username: payload.username,
+          isAnonymous: payload.isAnonymous,
+        ),
+      ),
     );
   }
 
@@ -149,9 +174,16 @@ class _ShareActionButton extends StatelessWidget {
     return BlocSelector<
       GlobalFeedCubit,
       FeedState,
-      ({String answerText, String questionText, String username})
+      ({
+        String answerText,
+        String questionText,
+        String username,
+        bool isAnonymous,
+        bool canShare,
+      })
     >(
       selector: (state) {
+        final currentUserId = Supabase.instance.client.auth.currentUser?.id;
         final item = state is FeedLoaded
             ? feedCubit.getItemById(answerId)
             : null;
@@ -160,20 +192,30 @@ class _ShareActionButton extends StatelessWidget {
             answerText: fallbackAnswerText,
             questionText: fallbackQuestionText,
             username: fallbackUsername,
+            isAnonymous: fallbackIsAnonymous,
+            canShare: false,
           );
         }
+
+        final canShare =
+            currentUserId != null &&
+            (item.answerAuthorId == currentUserId ||
+                item.userId == currentUserId ||
+                item.questionSenderId == currentUserId);
 
         return (
           answerText: item.answerText,
           questionText: item.questionText,
           username: item.answerAuthorUsername,
+          isAnonymous: item.isAnonymous,
+          canShare: canShare,
         );
       },
       builder: (context, payload) {
         return _ActionIconButton(
           icon: Icons.share_outlined,
           onTap: () {
-            _showShareDialog(context, payload);
+            _openShareScreen(context, payload);
           },
         );
       },

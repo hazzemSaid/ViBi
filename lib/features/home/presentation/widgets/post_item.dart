@@ -59,6 +59,7 @@ class PostItem extends StatelessWidget {
                 fallbackAnswerText: currentItem.answerText,
                 fallbackQuestionText: currentItem.questionText,
                 fallbackUsername: currentItem.answerAuthorUsername,
+                fallbackIsAnonymous: currentItem.isAnonymous,
               ),
             ],
           ),

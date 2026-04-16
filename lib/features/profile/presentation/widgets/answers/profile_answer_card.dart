@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/services/instagram_share_service.dart';
+import 'package:vibi/features/inbox/presentation/screens/share_answer_screen.dart';
 import 'package:vibi/features/profile/domain/entities/answered_question.dart';
 
 import 'profile_answer_card/profile_answer_action_row.dart';
@@ -53,13 +53,18 @@ class ProfileAnswerCard extends StatelessWidget {
           ProfileAnswerActionRow(
             answer: answer,
             compact: compactActions,
-            onShareTap: () => InstagramShareService.showShareSheet(
-              context,
-              questionText: answer.questionText,
-              answerText: answer.answerText,
-              username: answer.answererUsername ?? 'me',
-              isAnonymous: answer.isAnonymous,
-            ),
+            onShareTap: () {
+              Navigator.of(context).push<bool>(
+                MaterialPageRoute<bool>(
+                  builder: (_) => ShareAnswerScreen(
+                    questionText: answer.questionText,
+                    answerText: answer.answerText,
+                    username: answer.answererUsername ?? 'me',
+                    isAnonymous: answer.isAnonymous,
+                  ),
+                ),
+              );
+            },
             onCountsChanged: onCountsChanged,
           ),
         ],

@@ -1,9 +1,11 @@
 import 'package:vibi/features/home/domain/entities/feed_item.dart';
 
 class FeedItemModel extends FeedItem {
-  FeedItemModel({
+  const FeedItemModel({
     required super.id,
     required super.userId,
+    super.answerAuthorId,
+    super.questionSenderId,
     required super.username,
     super.avatarUrl,
     required super.answerAuthorUsername,
@@ -27,6 +29,8 @@ class FeedItemModel extends FeedItem {
     return FeedItemModel(
       id: map['id'] as String,
       userId: map['user_id'] as String,
+      answerAuthorId: map['user_id'] as String?,
+      questionSenderId: null,
       username: profile?['username'] as String? ?? 'unknown',
       avatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first : null,
       answerAuthorUsername: 'unknown',
@@ -84,6 +88,9 @@ class FeedItemModel extends FeedItem {
     return FeedItemModel(
       id: answerId,
       userId: node['user_id'] as String,
+      answerAuthorId:
+          answersData?['user_id'] as String? ?? node['user_id'] as String?,
+      questionSenderId: question?['sender_id'] as String?,
       username: displayName,
       avatarUrl: displayAvatar,
       answerAuthorUsername:
@@ -130,6 +137,8 @@ class FeedItemModel extends FeedItem {
     return {
       'id': id,
       'user_id': userId,
+      'answer_author_id': answerAuthorId,
+      'question_sender_id': questionSenderId,
       'answer_text': answerText,
       'likes_count': likesCount,
       'comments_count': commentsCount,

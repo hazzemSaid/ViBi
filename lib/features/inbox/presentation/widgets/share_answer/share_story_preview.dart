@@ -192,41 +192,46 @@ class ShareStoryPreview extends StatelessWidget {
                       children: [
                         Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 5,
-                              ),
-                              decoration: BoxDecoration(
-                                color: accent.withValues(alpha: 0.14),
-                                borderRadius: BorderRadius.circular(999),
-                                border: Border.all(
-                                  color: accent.withValues(alpha: 0.36),
+                            Expanded(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: accent.withValues(alpha: 0.14),
+                                  borderRadius: BorderRadius.circular(999),
+                                  border: Border.all(
+                                    color: accent.withValues(alpha: 0.36),
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      isAnonymous ? '👻' : '👤',
+                                      style: const TextStyle(fontSize: 10),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    Expanded(
+                                      child: Text(
+                                        isAnonymous
+                                            ? 'Anonymous Question'
+                                            : 'From ViBi User',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontFamily: 'Inter',
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w800,
+                                          color: accent,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    isAnonymous ? '👻' : '👤',
-                                    style: const TextStyle(fontSize: 10),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    isAnonymous
-                                        ? 'Anonymous Question'
-                                        : 'From ViBi User',
-                                    style: TextStyle(
-                                      fontFamily: 'Inter',
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w800,
-                                      color: accent,
-                                    ),
-                                  ),
-                                ],
-                              ),
                             ),
-                            const Spacer(),
+                            const SizedBox(width: 8),
                             Icon(
                               Icons.auto_awesome_rounded,
                               color: accent.withValues(alpha: 0.85),
@@ -238,6 +243,8 @@ class ShareStoryPreview extends StatelessWidget {
                         Text(
                           questionText,
                           textAlign: TextAlign.start,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontFamily: 'Inter',
                             fontSize: 26,
@@ -268,6 +275,8 @@ class ShareStoryPreview extends StatelessWidget {
                               child: Text(
                                 answerText,
                                 textAlign: TextAlign.start,
+                                maxLines: 4,
+                                overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
                                   fontFamily: 'Inter',
                                   fontSize: 18,
@@ -280,34 +289,41 @@ class ShareStoryPreview extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: accent.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.alternate_email_rounded,
-                                size: 13,
-                                color: accent,
-                              ),
-                              const SizedBox(width: 5),
-                              Text(
-                                '@$username',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 220),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: accent.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.alternate_email_rounded,
+                                  size: 13,
                                   color: accent,
                                 ),
-                              ),
-                            ],
+                                const SizedBox(width: 5),
+                                Flexible(
+                                  child: Text(
+                                    '@$username',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontFamily: 'Inter',
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: accent,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ],

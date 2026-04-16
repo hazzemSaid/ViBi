@@ -225,4 +225,36 @@ class GraphQLInboxDataSource {
       return left('Failed to archive question: $e');
     }
   }
+
+  Future<Either<String, Unit>> unarchiveQuestion({
+    required String questionId,
+  }) async {
+    try {
+      print('DEBUG: Starting unarchiveQuestion via RPC: $questionId');
+
+      final user = Supabase.instance.client.auth.currentUser;
+      final userId = user?.id ?? '';
+
+      final result = await _graphQLClient.mutate(
+        MutationOptions(
+          document: gql(_handleQuestionActionMutation),
+          variables: {
+            'questionId': questionId,
+            'userId': userId,
+            'action': 'unarchive',
+          },
+        ),
+      );
+
+      if (result.hasException) {
+        print('DEBUG: RPC Unarchive failed: ${result.exception}');
+        return left(SupabaseErrorHandler.getErrorMessage(result.exception));
+      }
+
+      return right(unit);
+    } catch (e) {
+      print('DEBUG: Exception in unarchiveQuestion RPC: $e');
+      return left('Failed to unarchive question: $e');
+    }
+  }
 }

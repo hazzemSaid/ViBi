@@ -356,6 +356,47 @@ class _InboxScreenState extends State<InboxScreen> {
     );
   }
 
+  Future<void> _unarchiveQuestion(
+    BuildContext context,
+    String questionId,
+  ) async {
+    if (_archivingQuestionIds.contains(questionId)) return;
+
+    setState(() {
+      _archivingQuestionIds.add(questionId);
+    });
+
+    final archiveCubit = context.read<ArchiveQuestionCubit>();
+    final messenger = ScaffoldMessenger.of(context);
+
+    await archiveCubit.unarchiveQuestion(questionId);
+    if (!mounted) return;
+
+    final state = archiveCubit.state;
+    setState(() {
+      _archivingQuestionIds.remove(questionId);
+    });
+
+    if (state is ArchiveQuestionSuccess) {
+      await context.read<PendingQuestionsCubit>().loadUnansweredQuestions();
+      if (!mounted) return;
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Moved back to pending'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    final message = state is ArchiveQuestionFailure
+        ? state.message
+        : 'Failed to move question to pending';
+    messenger.showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
   /**
    * Builds inbox page with state-driven list sections.
    *
@@ -504,6 +545,8 @@ class _InboxScreenState extends State<InboxScreen> {
                           child: _buildQuestionCard(
                             onArchive: () =>
                                 _archiveQuestion(context, question.id),
+                            onUnarchive: () =>
+                                _unarchiveQuestion(context, question.id),
                             question: question,
                             accentColor: _colorForQuestion(index),
                             onAnswer: () => _showAnswerModal(context, question),
@@ -874,6 +917,7 @@ class _InboxScreenState extends State<InboxScreen> {
     required VoidCallback onAnswer,
     required VoidCallback onDelete,
     required VoidCallback onArchive,
+    required VoidCallback onUnarchive,
   }) {
     final timeAgo = _getTimeAgo(question.createdAt);
     final displayName = question.isAnonymous
@@ -1014,23 +1058,28 @@ class _InboxScreenState extends State<InboxScreen> {
                         ],
                       ),
                     ),
-                    if (_selectedFilter != QuestionFilter.archived)
-                      IconButton(
-                        onPressed: isArchiving ? null : onArchive,
-                        icon: isArchiving
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white70,
-                                ),
-                              )
-                            : const Icon(
-                                Icons.archive_outlined,
-                                color: Color.fromARGB(255, 166, 165, 165),
+                    IconButton(
+                      onPressed: isArchiving
+                          ? null
+                          : (_selectedFilter == QuestionFilter.archived
+                                ? onUnarchive
+                                : onArchive),
+                      icon: isArchiving
+                          ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white70,
                               ),
-                      ),
+                            )
+                          : Icon(
+                              _selectedFilter == QuestionFilter.archived
+                                  ? Icons.unarchive_outlined
+                                  : Icons.archive_outlined,
+                              color: const Color.fromARGB(255, 166, 165, 165),
+                            ),
+                    ),
                   ],
                 ),
                 SizedBox(height: AppSizes.r12),

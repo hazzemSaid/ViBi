@@ -48,4 +48,11 @@ class InboxRepositoryImpl implements InboxRepository {
   }) async {
     return _dataSource.archiveQuestion(questionId: questionId);
   }
+
+  @override
+  Future<Either<String, Unit>> unarchiveQuestion({
+    required String questionId,
+  }) async {
+    return _dataSource.unarchiveQuestion(questionId: questionId);
+  }
 }

@@ -15,4 +15,5 @@ abstract class InboxRepository {
 
   Future<Either<String, Unit>> deleteQuestion({required String questionId});
   Future<Either<String, Unit>> archiveQuestion({required String questionId});
+  Future<Either<String, Unit>> unarchiveQuestion({required String questionId});
 }

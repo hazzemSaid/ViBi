@@ -6,10 +6,21 @@ class ArchiveQuestionCubit extends Cubit<ArchiveQuestionState> {
   ArchiveQuestionCubit({required this.archivequestionUseCase})
     : super(ArchiveQuestionInitial());
   final ArchiveQuestionUseCase archivequestionUseCase;
+
   Future<void> archiveQuestion(String questionId) async {
     emit(ArchiveQuestionLoading());
     try {
       await archivequestionUseCase(questionId: questionId);
+      emit(ArchiveQuestionSuccess());
+    } catch (e) {
+      emit(ArchiveQuestionFailure(message: e.toString()));
+    }
+  }
+
+  Future<void> unarchiveQuestion(String questionId) async {
+    emit(ArchiveQuestionLoading());
+    try {
+      await archivequestionUseCase.unarchive(questionId: questionId);
       emit(ArchiveQuestionSuccess());
     } catch (e) {
       emit(ArchiveQuestionFailure(message: e.toString()));

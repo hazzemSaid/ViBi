@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:dartz/dartz.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:ferry/ferry.dart' as ferry;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/errors/errors_handel.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
@@ -20,12 +20,11 @@ import 'package:vibi/features/profile/data/models/user_profile_model.dart';
 /// - Better performance and reduced latency
 class GraphQLProfileDataSource {
   final SupabaseClient _client;
+  final ferry.Client _ferryClient;
 
-  GraphQLProfileDataSource({SupabaseClient? client})
-    : _client = client ?? Supabase.instance.client;
-
-  /// Lazy getter for GraphQL client
-  GraphQLClient get _graphqlClient => GraphQLConfig.client;
+  GraphQLProfileDataSource({SupabaseClient? client, ferry.Client? ferryClient})
+    : _client = client ?? Supabase.instance.client,
+      _ferryClient = ferryClient ?? GraphQLConfig.ferryClient;
 
   Either<String, List<String>> _parseAvatarUrls(dynamic value) {
     if (value == null) return right(const <String>[]);
@@ -88,12 +87,15 @@ class GraphQLProfileDataSource {
       }
     ''';
 
-    final result = await _graphqlClient.query(
-      QueryOptions(document: gql(query), variables: {'id': uid}),
+    final result = await GraphQLConfig.ferryQuery(
+      'GetProfile',
+      document: query,
+      variables: {'id': uid},
+      clientOverride: _ferryClient,
     );
 
-    if (result.hasException) {
-      return left(SupabaseErrorHandler.getErrorMessage(result.exception));
+    if (result.hasErrors) {
+      return left(SupabaseErrorHandler.getErrorMessage(result));
     }
 
     final edges = result.data?['profilesCollection']?['edges'] as List? ?? [];
@@ -107,31 +109,31 @@ class GraphQLProfileDataSource {
 
   /// Update user profile using GraphQL mutation
   Future<void> updateProfile(UserProfileModel profile) async {
-    final result = await _graphqlClient.mutate(
-      MutationOptions(
-        document: gql(GraphQLMutations.updateProfile),
-        variables: {
-          'userId': profile.uid,
-          'username': profile.username,
-          'fullName': profile.name,
-          'bio': profile.bio,
-          'avatarUrls': profile.avatarUrls,
-          'isPrivate': profile.isPrivate,
-          'allowAnonymousQuestions': profile.allowAnonymousQuestions,
-          'publicProfileEnabled': profile.publicProfileEnabled,
-          'publicCtaText': profile.publicCtaText,
-          'favColor': profile.favColor,
-          'questionPlaceholder': profile.questionPlaceholder,
-          'showSocialIcons': profile.showSocialIcons,
-          'statusText': profile.statusText,
-          'publicFontFamily': profile.publicFontFamily,
-          'backgroundcolor': profile.backgroundcolor,
-        },
-      ),
+    final result = await GraphQLConfig.ferryMutate(
+      'UpdateProfile',
+      document: GraphQLMutations.updateProfile,
+      variables: {
+        'userId': profile.uid,
+        'username': profile.username,
+        'fullName': profile.name,
+        'bio': profile.bio,
+        'avatarUrls': profile.avatarUrls,
+        'isPrivate': profile.isPrivate,
+        'allowAnonymousQuestions': profile.allowAnonymousQuestions,
+        'publicProfileEnabled': profile.publicProfileEnabled,
+        'publicCtaText': profile.publicCtaText,
+        'favColor': profile.favColor,
+        'questionPlaceholder': profile.questionPlaceholder,
+        'showSocialIcons': profile.showSocialIcons,
+        'statusText': profile.statusText,
+        'publicFontFamily': profile.publicFontFamily,
+        'backgroundcolor': profile.backgroundcolor,
+      },
+      clientOverride: _ferryClient,
     );
 
-    if (result.hasException) {
-      throw Exception(SupabaseErrorHandler.getErrorMessage(result.exception));
+    if (result.hasErrors) {
+      throw Exception(SupabaseErrorHandler.getErrorMessage(result));
     }
 
     final records = result.data?['updateprofilesCollection']?['records'];
@@ -187,19 +189,19 @@ class GraphQLProfileDataSource {
       }
     ''';
 
-    final result = await _graphqlClient.mutate(
-      MutationOptions(
-        document: gql(mutation),
-        variables: {
-          'userId': uid,
-          'avatarUrls': updatedUrls,
-          'updatedAt': DateTime.now().toIso8601String(),
-        },
-      ),
+    final result = await GraphQLConfig.ferryMutate(
+      'UpdateAvatarUrls',
+      document: mutation,
+      variables: {
+        'userId': uid,
+        'avatarUrls': updatedUrls,
+        'updatedAt': DateTime.now().toIso8601String(),
+      },
+      clientOverride: _ferryClient,
     );
 
-    if (result.hasException) {
-      throw Exception(SupabaseErrorHandler.getErrorMessage(result.exception));
+    if (result.hasErrors) {
+      throw Exception(SupabaseErrorHandler.getErrorMessage(result));
     }
 
     return updatedUrls;
@@ -289,16 +291,15 @@ class GraphQLProfileDataSource {
       }
     ''';
 
-    final result = await _graphqlClient.query(
-      QueryOptions(
-        document: gql(query),
-        variables: {'id': userId},
-        fetchPolicy: FetchPolicy.networkOnly,
-      ),
+    final result = await GraphQLConfig.ferryQuery(
+      'GetPublicProfile',
+      document: query,
+      variables: {'id': userId},
+      clientOverride: _ferryClient,
     );
 
-    if (result.hasException) {
-      throw Exception(SupabaseErrorHandler.getErrorMessage(result.exception));
+    if (result.hasErrors) {
+      throw Exception(SupabaseErrorHandler.getErrorMessage(result));
     }
 
     final edges = result.data?['profilesCollection']?['edges'] as List? ?? [];
@@ -365,16 +366,15 @@ class GraphQLProfileDataSource {
       }
     ''';
 
-    final result = await _graphqlClient.query(
-      QueryOptions(
-        document: gql(query),
-        variables: {'username': username},
-        fetchPolicy: FetchPolicy.networkOnly,
-      ),
+    final result = await GraphQLConfig.ferryQuery(
+      'GetPublicProfileByUsername',
+      document: query,
+      variables: {'username': username},
+      clientOverride: _ferryClient,
     );
 
-    if (result.hasException) {
-      throw Exception(SupabaseErrorHandler.getErrorMessage(result.exception));
+    if (result.hasErrors) {
+      throw Exception(SupabaseErrorHandler.getErrorMessage(result));
     }
 
     final edges = result.data?['profilesCollection']?['edges'] as List? ?? [];
@@ -428,15 +428,14 @@ class GraphQLProfileDataSource {
       }
     ''';
 
-    final result = await _graphqlClient.query(
-      QueryOptions(
-        document: gql(query),
-        variables: {'followerId': followerId, 'followingId': followingId},
-        fetchPolicy: FetchPolicy.networkOnly,
-      ),
+    final result = await GraphQLConfig.ferryQuery(
+      'CheckIsFollowing',
+      document: query,
+      variables: {'followerId': followerId, 'followingId': followingId},
+      clientOverride: _ferryClient,
     );
 
-    if (result.hasException) {
+    if (result.hasErrors) {
       return false;
     }
 
@@ -467,15 +466,14 @@ class GraphQLProfileDataSource {
       }
     ''';
 
-    final result = await _graphqlClient.query(
-      QueryOptions(
-        document: gql(query),
-        variables: {'requesterId': requesterId, 'targetId': targetId},
-        fetchPolicy: FetchPolicy.networkOnly,
-      ),
+    final result = await GraphQLConfig.ferryQuery(
+      'CheckHasRequestedFollow',
+      document: query,
+      variables: {'requesterId': requesterId, 'targetId': targetId},
+      clientOverride: _ferryClient,
     );
 
-    if (result.hasException) {
+    if (result.hasErrors) {
       return false;
     }
 
@@ -528,16 +526,15 @@ class GraphQLProfileDataSource {
       }
     ''';
 
-    final result = await _graphqlClient.query(
-      QueryOptions(
-        document: gql(query),
-        variables: {'userId': userId},
-        fetchPolicy: FetchPolicy.networkOnly,
-      ),
+    final result = await GraphQLConfig.ferryQuery(
+      'GetUserAnswers',
+      document: query,
+      variables: {'userId': userId},
+      clientOverride: _ferryClient,
     );
 
-    if (result.hasException) {
-      throw Exception(SupabaseErrorHandler.getErrorMessage(result.exception));
+    if (result.hasErrors) {
+      throw Exception(SupabaseErrorHandler.getErrorMessage(result));
     }
 
     String? answererUsername;
@@ -625,16 +622,15 @@ class GraphQLProfileDataSource {
       }
     ''';
 
-    final result = await _graphqlClient.query(
-      QueryOptions(
-        document: gql(query),
-        variables: {'userId': userId, 'limit': limit, 'offset': offset},
-        fetchPolicy: FetchPolicy.networkOnly,
-      ),
+    final result = await GraphQLConfig.ferryQuery(
+      'GetFollowers',
+      document: query,
+      variables: {'userId': userId, 'limit': limit, 'offset': offset},
+      clientOverride: _ferryClient,
     );
 
-    if (result.hasException) {
-      throw Exception(SupabaseErrorHandler.getErrorMessage(result.exception));
+    if (result.hasErrors) {
+      throw Exception(SupabaseErrorHandler.getErrorMessage(result));
     }
 
     final edges = result.data?['followsCollection']?['edges'] as List? ?? [];
@@ -687,16 +683,15 @@ class GraphQLProfileDataSource {
       }
     ''';
 
-    final result = await _graphqlClient.query(
-      QueryOptions(
-        document: gql(query),
-        variables: {'userId': userId, 'limit': limit, 'offset': offset},
-        fetchPolicy: FetchPolicy.networkOnly,
-      ),
+    final result = await GraphQLConfig.ferryQuery(
+      'GetFollowing',
+      document: query,
+      variables: {'userId': userId, 'limit': limit, 'offset': offset},
+      clientOverride: _ferryClient,
     );
 
-    if (result.hasException) {
-      throw Exception(SupabaseErrorHandler.getErrorMessage(result.exception));
+    if (result.hasErrors) {
+      throw Exception(SupabaseErrorHandler.getErrorMessage(result));
     }
 
     final edges = result.data?['followsCollection']?['edges'] as List? ?? [];

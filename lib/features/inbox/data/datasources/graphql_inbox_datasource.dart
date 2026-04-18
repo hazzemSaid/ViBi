@@ -1,16 +1,16 @@
 import 'package:dartz/dartz.dart';
+import 'package:ferry/ferry.dart' as ferry;
 import 'package:flutter/foundation.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/errors/errors_handel.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
 import 'package:vibi/features/inbox/data/models/inbox_question_model.dart';
 
 class GraphQLInboxDataSource {
-  final GraphQLClient _graphQLClient;
+  final ferry.Client _ferryClient;
 
-  GraphQLInboxDataSource({GraphQLClient? graphQLClient})
-    : _graphQLClient = graphQLClient ?? GraphQLConfig.client;
+  GraphQLInboxDataSource({ferry.Client? ferryClient})
+    : _ferryClient = ferryClient ?? GraphQLConfig.ferryClient;
 
   // ── Queries ────────────────────────────────────────────────────────────────
 
@@ -60,6 +60,34 @@ class GraphQLInboxDataSource {
     }
   ''';
 
+  Future<ferry.OperationResponse<Map<String, dynamic>, Map<String, dynamic>>>
+  _runNetworkFirstQuery({
+    required String operationName,
+    required String document,
+    required Map<String, dynamic> variables,
+  }) {
+    return GraphQLConfig.ferryQuery(
+      operationName,
+      document: document,
+      variables: variables,
+      clientOverride: _ferryClient,
+    );
+  }
+
+  Future<ferry.OperationResponse<Map<String, dynamic>, Map<String, dynamic>>>
+  _runMutation({
+    required String operationName,
+    required String document,
+    required Map<String, dynamic> variables,
+  }) {
+    return GraphQLConfig.ferryMutate(
+      operationName,
+      document: document,
+      variables: variables,
+      clientOverride: _ferryClient,
+    );
+  }
+
   // ── Public Methods ─────────────────────────────────────────────────────────
 
   Future<Either<String, List<InboxQuestionModel>>> getPendingQuestions(
@@ -76,21 +104,19 @@ class GraphQLInboxDataSource {
         _ => <String>[normalizedStatus],
       };
 
-      final result = await _graphQLClient.query(
-        QueryOptions(
-          document: gql(_pendingQuestionsQuery),
-          variables: {
-            'currentUserId': currentUserId,
-            'limit': limit,
-            'offset': offset,
-            'statuses': statuses,
-          },
-          fetchPolicy: FetchPolicy.networkOnly,
-        ),
+      final result = await _runNetworkFirstQuery(
+        operationName: 'GetPendingQuestions',
+        document: _pendingQuestionsQuery,
+        variables: {
+          'currentUserId': currentUserId,
+          'limit': limit,
+          'offset': offset,
+          'statuses': statuses,
+        },
       );
 
-      if (result.hasException) {
-        return left(SupabaseErrorHandler.getErrorMessage(result.exception));
+      if (result.hasErrors) {
+        return left(SupabaseErrorHandler.getErrorMessage(result));
       }
 
       final edges =
@@ -148,23 +174,23 @@ class GraphQLInboxDataSource {
         debugPrint('DEBUG: Starting answerQuestion via RPC: $questionId');
       }
 
-      final result = await _graphQLClient.mutate(
-        MutationOptions(
-          document: gql(_handleQuestionActionMutation),
-          variables: {
-            'questionId': questionId,
-            'userId': userId,
-            'action': 'answer',
-            'answerText': answerText,
-          },
-        ),
+      final result = await _runMutation(
+        operationName: 'HandleQuestionAction',
+        document: _handleQuestionActionMutation,
+        variables: {
+          'questionId': questionId,
+          'userId': userId,
+          'action': 'answer',
+          'answerText': answerText,
+        },
       );
 
-      if (result.hasException) {
+      if (result.hasErrors) {
         if (kDebugMode) {
-          debugPrint('DEBUG: RPC Answer failed: ${result.exception}');
+          debugPrint('DEBUG: RPC Answer failed: ${result.graphqlErrors}');
+          debugPrint('DEBUG: RPC Answer link error: ${result.linkException}');
         }
-        return left(SupabaseErrorHandler.getErrorMessage(result.exception));
+        return left(SupabaseErrorHandler.getErrorMessage(result));
       }
 
       if (kDebugMode) {
@@ -188,23 +214,23 @@ class GraphQLInboxDataSource {
       final user = Supabase.instance.client.auth.currentUser;
       final userId = user?.id ?? '';
 
-      final result = await _graphQLClient.mutate(
-        MutationOptions(
-          document: gql(_handleQuestionActionMutation),
-          variables: {
-            'questionId': questionId,
-            'userId': userId,
-            'action': 'delete',
-            'answerText': null,
-          },
-        ),
+      final result = await _runMutation(
+        operationName: 'HandleQuestionAction',
+        document: _handleQuestionActionMutation,
+        variables: {
+          'questionId': questionId,
+          'userId': userId,
+          'action': 'delete',
+          'answerText': null,
+        },
       );
 
-      if (result.hasException) {
+      if (result.hasErrors) {
         if (kDebugMode) {
-          debugPrint('DEBUG: RPC Delete failed: ${result.exception}');
+          debugPrint('DEBUG: RPC Delete failed: ${result.graphqlErrors}');
+          debugPrint('DEBUG: RPC Delete link error: ${result.linkException}');
         }
-        return left(SupabaseErrorHandler.getErrorMessage(result.exception));
+        return left(SupabaseErrorHandler.getErrorMessage(result));
       }
 
       return right(unit);
@@ -227,22 +253,22 @@ class GraphQLInboxDataSource {
       final user = Supabase.instance.client.auth.currentUser;
       final userId = user?.id ?? '';
 
-      final result = await _graphQLClient.mutate(
-        MutationOptions(
-          document: gql(_handleQuestionActionMutation),
-          variables: {
-            'questionId': questionId,
-            'userId': userId,
-            'action': 'archive',
-          },
-        ),
+      final result = await _runMutation(
+        operationName: 'HandleQuestionAction',
+        document: _handleQuestionActionMutation,
+        variables: {
+          'questionId': questionId,
+          'userId': userId,
+          'action': 'archive',
+        },
       );
 
-      if (result.hasException) {
+      if (result.hasErrors) {
         if (kDebugMode) {
-          debugPrint('DEBUG: RPC Archive failed: ${result.exception}');
+          debugPrint('DEBUG: RPC Archive failed: ${result.graphqlErrors}');
+          debugPrint('DEBUG: RPC Archive link error: ${result.linkException}');
         }
-        return left(SupabaseErrorHandler.getErrorMessage(result.exception));
+        return left(SupabaseErrorHandler.getErrorMessage(result));
       }
 
       return right(unit);
@@ -265,22 +291,24 @@ class GraphQLInboxDataSource {
       final user = Supabase.instance.client.auth.currentUser;
       final userId = user?.id ?? '';
 
-      final result = await _graphQLClient.mutate(
-        MutationOptions(
-          document: gql(_handleQuestionActionMutation),
-          variables: {
-            'questionId': questionId,
-            'userId': userId,
-            'action': 'unarchive',
-          },
-        ),
+      final result = await _runMutation(
+        operationName: 'HandleQuestionAction',
+        document: _handleQuestionActionMutation,
+        variables: {
+          'questionId': questionId,
+          'userId': userId,
+          'action': 'unarchive',
+        },
       );
 
-      if (result.hasException) {
+      if (result.hasErrors) {
         if (kDebugMode) {
-          debugPrint('DEBUG: RPC Unarchive failed: ${result.exception}');
+          debugPrint('DEBUG: RPC Unarchive failed: ${result.graphqlErrors}');
+          debugPrint(
+            'DEBUG: RPC Unarchive link error: ${result.linkException}',
+          );
         }
-        return left(SupabaseErrorHandler.getErrorMessage(result.exception));
+        return left(SupabaseErrorHandler.getErrorMessage(result));
       }
 
       return right(unit);

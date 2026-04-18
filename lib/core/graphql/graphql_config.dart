@@ -1,119 +1,181 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:ferry/ferry.dart' as ferry;
+import 'package:ferry_hive_store/ferry_hive_store.dart';
+import 'package:gql/language.dart';
+import 'package:gql_exec/gql_exec.dart';
+import 'package:gql_http_link/gql_http_link.dart' as gql_http;
+import 'package:hive/hive.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// GraphQL client configuration for Supabase
 /// This eliminates N+1 query problems by fetching nested data in a single request
 class GraphQLConfig {
-  static GraphQLClient? _client;
+  static const String cacheBoxName = 'ferry_graphql_cache';
 
-  /// Get the configured GraphQL client instance
-  static GraphQLClient get client {
-    if (_client == null) {
+  static ferry.Client? _ferryClient;
+
+  /// Get the configured Ferry client instance.
+  static ferry.Client get ferryClient {
+    if (_ferryClient == null) {
       throw Exception(
-        'GraphQL client not initialized. Call GraphQLConfig.initialize() first.',
+        'Ferry client not initialized. Call GraphQLConfig.initialize() first.',
       );
     }
-    return _client!;
+    return _ferryClient!;
   }
 
   /// Initialize the GraphQL client with Supabase configuration
-  static void initialize() {
+  static Future<void> initialize() async {
     final graphqlUrl = dotenv.env['SUPABASE_GRAPHQL_URL'];
     if (graphqlUrl == null || graphqlUrl.isEmpty) {
       throw Exception('SUPABASE_GRAPHQL_URL not found in .env file');
     }
 
-    // Create auth link that adds bearer token to every request
-    final authLink = AuthLink(
-      getToken: () async {
-        var session = Supabase.instance.client.auth.currentSession;
-        if (session != null && session.isExpired) {
-          try {
-            final res = await Supabase.instance.client.auth.refreshSession();
-            session = res.session;
-          } catch (_) {
-            // Ignore, if we can't refresh we still pass the old token or null,
-            // the server will naturally reject it.
-          }
-        }
-        if (session?.accessToken != null) {
-          return 'Bearer ${session!.accessToken}';
-        }
-        return null;
+    final defaultHeaders = {
+      'apikey': dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+      'Content-Type': 'application/json',
+    };
+
+    final ferryAuthLink = ferry.Link.function((request, [forward]) async* {
+      if (forward == null) {
+        return;
+      }
+
+      final token = await _getBearerToken();
+      final requestWithHeaders = request
+          .updateContextEntry<gql_http.HttpLinkHeaders>((existing) {
+            final existingHeaders =
+                existing?.headers ?? const <String, String>{};
+            return gql_http.HttpLinkHeaders(
+              headers: {
+                ...existingHeaders,
+                ...defaultHeaders,
+                ...(token == null
+                    ? const <String, String>{}
+                    : <String, String>{'Authorization': token}),
+              },
+            );
+          });
+
+      yield* forward(requestWithHeaders);
+    });
+
+    final ferryHttpLink = gql_http.HttpLink(graphqlUrl);
+    final ferryLink = ferry.Link.from([ferryAuthLink, ferryHttpLink]);
+
+    final cacheBox = await _openCacheBox();
+    final cache = ferry.Cache(store: HiveStore(cacheBox));
+
+    _ferryClient = ferry.Client(
+      link: ferryLink,
+      cache: cache,
+      defaultFetchPolicies: const {
+        ferry.OperationType.query: ferry.FetchPolicy.NetworkOnly,
+        ferry.OperationType.mutation: ferry.FetchPolicy.NetworkOnly,
       },
     );
+  }
 
-    // Create HTTP link to Supabase GraphQL endpoint
-    final httpLink = HttpLink(
-      graphqlUrl,
-      defaultHeaders: {
-        'apikey': dotenv.env['SUPABASE_ANON_KEY'] ?? '',
-        'Content-Type': 'application/json',
-      },
-    );
+  static Future<String?> _getBearerToken() async {
+    var session = Supabase.instance.client.auth.currentSession;
+    if (session != null && session.isExpired) {
+      try {
+        final refreshed = await Supabase.instance.client.auth.refreshSession();
+        session = refreshed.session;
+      } catch (_) {
+        // Ignore refresh failures and let the backend reject stale tokens.
+      }
+    }
 
-    // Combine auth and HTTP links
-    final link = authLink.concat(httpLink);
+    if (session?.accessToken != null) {
+      return 'Bearer ${session!.accessToken}';
+    }
+    return null;
+  }
 
-    // Create the GraphQL client
-    _client = GraphQLClient(
-      link: link,
-      cache: GraphQLCache(store: InMemoryStore()),
-      defaultPolicies: DefaultPolicies(
-        query: Policies(
-          fetch: FetchPolicy.networkOnly, // Always fetch fresh data
-        ),
-        mutate: Policies(fetch: FetchPolicy.networkOnly),
+  static Future<Box<dynamic>> _openCacheBox() async {
+    if (Hive.isBoxOpen(cacheBoxName)) {
+      return Hive.box<dynamic>(cacheBoxName);
+    }
+    return Hive.openBox<dynamic>(cacheBoxName);
+  }
+
+  static Future<
+    ferry.OperationResponse<Map<String, dynamic>, Map<String, dynamic>>
+  >
+  ferryQuery(
+    String operationName, {
+    required String document,
+    Map<String, dynamic>? variables,
+    ferry.FetchPolicy fetchPolicy = ferry.FetchPolicy.NetworkOnly,
+    ferry.Client? clientOverride,
+  }) async {
+    final activeClient = clientOverride ?? ferryClient;
+    final request = ferry.JsonOperationRequest(
+      operation: Operation(
+        document: parseString(document),
+        operationName: operationName,
       ),
+      vars: variables ?? const <String, dynamic>{},
+      fetchPolicy: fetchPolicy,
     );
+
+    final networkResponse = await activeClient
+        .request<Map<String, dynamic>, Map<String, dynamic>>(request)
+        .first;
+
+    // Network-first behavior: fallback to cache if transport failed.
+    if (networkResponse.linkException != null && networkResponse.data == null) {
+      final cacheFallbackRequest = ferry.JsonOperationRequest(
+        operation: Operation(
+          document: parseString(document),
+          operationName: operationName,
+        ),
+        vars: variables ?? const <String, dynamic>{},
+        fetchPolicy: ferry.FetchPolicy.CacheFirst,
+      );
+
+      final cacheResponse = await activeClient
+          .request<Map<String, dynamic>, Map<String, dynamic>>(
+            cacheFallbackRequest,
+          )
+          .first;
+
+      if (cacheResponse.data != null) {
+        return cacheResponse;
+      }
+    }
+
+    return networkResponse;
   }
 
-  /// Create a new query request
-  static QueryOptions queryOptions({
+  static Future<
+    ferry.OperationResponse<Map<String, dynamic>, Map<String, dynamic>>
+  >
+  ferryMutate(
+    String operationName, {
     required String document,
     Map<String, dynamic>? variables,
-    FetchPolicy? fetchPolicy,
-  }) {
-    return QueryOptions(
-      document: gql(document),
-      variables: variables ?? {},
-      fetchPolicy: fetchPolicy ?? FetchPolicy.networkOnly,
-    );
-  }
-
-  /// Create a new mutation request
-  static MutationOptions mutationOptions({
-    required String document,
-    Map<String, dynamic>? variables,
-  }) {
-    return MutationOptions(document: gql(document), variables: variables ?? {});
-  }
-
-  /// Execute a query and return the result
-  static Future<QueryResult> query(
-    String document, {
-    Map<String, dynamic>? variables,
+    ferry.FetchPolicy fetchPolicy = ferry.FetchPolicy.NetworkOnly,
+    ferry.Client? clientOverride,
   }) async {
-    final result = await client.query(
-      queryOptions(document: document, variables: variables),
+    final activeClient = clientOverride ?? ferryClient;
+    final request = ferry.JsonOperationRequest(
+      operation: Operation(
+        document: parseString(document),
+        operationName: operationName,
+      ),
+      vars: variables ?? const <String, dynamic>{},
+      fetchPolicy: fetchPolicy,
     );
-    return result;
-  }
 
-  /// Execute a mutation and return the result
-  static Future<QueryResult> mutate(
-    String document, {
-    Map<String, dynamic>? variables,
-  }) async {
-    final result = await client.mutate(
-      mutationOptions(document: document, variables: variables),
-    );
-    return result;
+    return activeClient
+        .request<Map<String, dynamic>, Map<String, dynamic>>(request)
+        .first;
   }
 
   /// Dispose the client
   static void dispose() {
-    _client = null;
+    _ferryClient = null;
   }
 }

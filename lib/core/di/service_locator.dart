@@ -1,6 +1,5 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
 import 'package:vibi/core/theme/theme_cubit.dart';
 import 'package:vibi/features/auth/data/datasources/supabase_auth_datasource.dart';
@@ -81,7 +80,7 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   );
 
   getIt.registerLazySingleton<GraphQLFeedDataSource>(
-    () => GraphQLFeedDataSource(GraphQLConfig.client),
+    () => GraphQLFeedDataSource(GraphQLConfig.ferryClient),
   );
   getIt.registerLazySingleton<FeedRepository>(
     () => FeedRepositoryImpl(getIt<GraphQLFeedDataSource>()),
@@ -198,7 +197,7 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   );
 
   getIt.registerLazySingleton<GraphQLInboxDataSource>(
-    () => GraphQLInboxDataSource(graphQLClient: GraphQLConfig.client),
+    () => GraphQLInboxDataSource(ferryClient: GraphQLConfig.ferryClient),
   );
   getIt.registerFactory<InboxRepository>(
     () => InboxRepositoryImpl(getIt<GraphQLInboxDataSource>()),

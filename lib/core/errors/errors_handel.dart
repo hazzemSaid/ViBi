@@ -1,6 +1,6 @@
 // lib/services/supabase_error_handler.dart
+import 'package:ferry/ferry.dart';
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseErrorHandler {
@@ -8,8 +8,8 @@ class SupabaseErrorHandler {
   static String getErrorMessage(dynamic error) {
     if (error is AuthException) {
       return _handleAuthError(error);
-    } else if (error is OperationException) {
-      return _handleGraphQLError(error);
+    } else if (error is OperationResponse) {
+      return _handleFerryError(error);
     } else if (error is PostgrestException) {
       return _handlePostgrestError(error);
     } else if (error is Exception) {
@@ -62,9 +62,9 @@ class SupabaseErrorHandler {
     }
   }
 
-  static String _handleGraphQLError(OperationException error) {
-    if (error.graphqlErrors.isNotEmpty) {
-      final message = error.graphqlErrors.first.message;
+  static String _handleFerryError(OperationResponse<dynamic, dynamic> error) {
+    if (error.graphqlErrors != null && error.graphqlErrors!.isNotEmpty) {
+      final message = error.graphqlErrors!.first.message;
       if (message.isNotEmpty) {
         return message;
       }
@@ -78,4 +78,3 @@ class SupabaseErrorHandler {
     return 'GraphQL request failed. Please try again.';
   }
 }
-

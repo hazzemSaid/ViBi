@@ -47,9 +47,9 @@ dependencies:
   flutter_dotenv: ^6.0.0
   cached_network_image: ^3.4.1
   flutter_cache_manager: ^3.4.1
-  # GraphQL for efficient data fetching (avoid N+1 queries)
-  graphql_flutter: ^5.2.0-beta.7
+  # GraphQL for efficient data fetching
   gql: ^1.0.0
+  gql_exec: ^1.1.1-alpha+1699813812660
   # Instagram / social sharing — captures answer card and opens system share sheet
   share_plus: 12.0.1
   screenshot: 3.0.0
@@ -61,6 +61,10 @@ dependencies:
   dartz: ^0.10.1
   url_launcher: any
   flutter_svg: ^2.2.4
+  ferry: ^0.16.1+2
+  gql_http_link: ^1.2.0
+  hive: ^2.2.3
+  ferry_hive_store: ^0.6.0+1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -72,6 +76,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  ferry_generator: ^0.12.0+3
+  build_runner: ^2.13.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -146,7 +152,7 @@ flutter_launcher_icons:
   android: true
   remove_alpha_ios: true
   ios: true
-  image_path: "assets/images/app.icon.png"
+  image_path: "assets/images/iBi.png"
   min_sdk_android: 21
   adaptive_icon_background: "#990011"
-  adaptive_icon_foreground: "assets/images/app.icon.png"
+  adaptive_icon_foreground: "assets/images/iBi.png"

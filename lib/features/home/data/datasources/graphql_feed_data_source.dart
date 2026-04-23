@@ -1,14 +1,17 @@
 import 'dart:async';
 
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:ferry/ferry.dart' as ferry;
+import 'package:flutter/foundation.dart';
+import 'package:vibi/core/errors/errors_handel.dart';
+import 'package:vibi/core/graphql/graphql_config.dart';
 import 'package:vibi/features/home/data/datasources/feed_data_source_interface.dart';
 import 'package:vibi/features/home/data/models/feed_item_model.dart';
 
 class GraphQLFeedDataSource implements FeedDataSource {
-  final GraphQLClient client;
+  final ferry.Client _ferryClient;
   static const Duration _queryTimeout = Duration(seconds: 20);
 
-  GraphQLFeedDataSource(this.client);
+  GraphQLFeedDataSource(this._ferryClient);
 
   static const _globalFeedItemsQuery = r'''
      query GetGlobalFeedItems($limit: Int!, $offset: Int!) {
@@ -93,29 +96,37 @@ class GraphQLFeedDataSource implements FeedDataSource {
 
   Future<List<FeedItemModel>> _loadFeedFromAnswers({
     required String query,
+    required String operationName,
     required Map<String, dynamic> variables,
   }) async {
-    final options = QueryOptions(
-      document: gql(query),
-      variables: variables,
-      fetchPolicy: FetchPolicy.networkOnly,
-      queryRequestTimeout: _queryTimeout,
-    );
-
     try {
-      QueryResult result = await client.query(options);
+      ferry.OperationResponse<Map<String, dynamic>, Map<String, dynamic>>
+      result;
 
-      if (_isTimeoutResult(result)) {
+      try {
+        result = await GraphQLConfig.ferryQuery(
+          operationName,
+          document: query,
+          variables: variables,
+          clientOverride: _ferryClient,
+        ).timeout(_queryTimeout);
+      } on TimeoutException {
         // Retry once for transient network delays before surfacing an error.
-        result = await client.query(options);
+        result = await GraphQLConfig.ferryQuery(
+          operationName,
+          document: query,
+          variables: variables,
+          clientOverride: _ferryClient,
+        ).timeout(_queryTimeout);
       }
 
-      if (result.hasException) {
-        print('GraphQL exception: ${result.exception}');
-        throw Exception('GraphQL feed error: ${result.exception}');
+      if (result.hasErrors) {
+        throw Exception(
+          'GraphQL feed error: ${SupabaseErrorHandler.getErrorMessage(result)}',
+        );
       }
 
-      print('GraphQL response data: ${result.data}');
+      debugPrint('GraphQL response data: ${result.data}');
 
       // Handle both feed_itemsCollection and answersCollection responses
       final edges =
@@ -124,7 +135,7 @@ class GraphQLFeedDataSource implements FeedDataSource {
               as List? ??
           [];
 
-      print('Feed edges count: ${edges.length}');
+      debugPrint('Feed edges count: ${edges.length}');
       if (edges.isEmpty) return [];
 
       final items = <FeedItemModel>[];
@@ -135,26 +146,19 @@ class GraphQLFeedDataSource implements FeedDataSource {
         try {
           final item = FeedItemModel.fromGraphQL(node);
           items.add(item);
-          print('Added feed item: ${item.id}');
+          debugPrint('Added feed item: ${item.id}');
         } catch (e) {
-          print('Error creating FeedItemModel: $e');
-          print('Node data: $node');
+          debugPrint('Error creating FeedItemModel: $e');
+          debugPrint('Node data: $node');
         }
       }
 
-      print('Total items processed: ${items.length}');
+      debugPrint('Total items processed: ${items.length}');
       return items;
     } catch (e) {
-      print('Full error in _loadFeedFromAnswers: $e');
+      debugPrint('Full error in _loadFeedFromAnswers: $e');
       rethrow;
     }
-  }
-
-  bool _isTimeoutResult(QueryResult result) {
-    final exceptionText = result.exception.toString();
-    return result.hasException &&
-        (exceptionText.contains('TimeoutException') ||
-            exceptionText.contains('No stream event'));
   }
 
   @override
@@ -164,6 +168,7 @@ class GraphQLFeedDataSource implements FeedDataSource {
   }) async {
     return _loadFeedFromAnswers(
       query: _globalFeedItemsQuery,
+      operationName: 'GetGlobalFeedItems',
       variables: {'limit': limit, 'offset': offset},
     );
   }
@@ -176,6 +181,7 @@ class GraphQLFeedDataSource implements FeedDataSource {
   }) async {
     return _loadFeedFromAnswers(
       query: _followingFeedItemsQuery,
+      operationName: 'GetFollowingFeedItems',
       variables: {'userId': userId, 'limit': limit, 'offset': offset},
     );
   }

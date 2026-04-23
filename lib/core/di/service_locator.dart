@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
 import 'package:vibi/core/services/tmdb_service.dart';
 import 'package:vibi/core/theme/theme_cubit.dart';
@@ -210,7 +211,7 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   );
 
   getIt.registerLazySingleton<GraphQLInboxDataSource>(
-    () => GraphQLInboxDataSource(ferryClient: GraphQLConfig.ferryClient),
+    () => GraphQLInboxDataSource(graphQLClient: GraphQLConfig.ferryClient),
   );
   getIt.registerFactory<InboxRepository>(
     () => InboxRepositoryImpl(getIt<GraphQLInboxDataSource>()),

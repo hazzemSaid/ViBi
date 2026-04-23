@@ -7,15 +7,15 @@ import 'package:vibi/core/graphql/graphql_config.dart';
 import 'package:vibi/features/inbox/data/models/inbox_question_model.dart';
 
 class GraphQLInboxDataSource {
-  final GraphQLClient _graphQLClient;
+  final ferry.Client _ferryClient;
   final Future<Map<int, Map<String, dynamic>>> Function(Set<int> ids)
   _mediaRecommendationsLoader;
 
   GraphQLInboxDataSource({
-    GraphQLClient? graphQLClient,
+    ferry.Client? graphQLClient,
     Future<Map<int, Map<String, dynamic>>> Function(Set<int> ids)?
     mediaRecommendationsLoader,
-  }) : _graphQLClient = graphQLClient ?? GraphQLConfig.client,
+  }) : _ferryClient = graphQLClient ?? GraphQLConfig.ferryClient,
        _mediaRecommendationsLoader =
            mediaRecommendationsLoader ?? _defaultLoadMediaRecommendationsById;
 

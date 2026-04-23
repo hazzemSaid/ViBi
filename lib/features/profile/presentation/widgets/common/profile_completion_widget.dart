@@ -16,7 +16,7 @@ class ProfileCompletionWidget extends StatelessWidget {
     final tasks = <_CompletionTask>[
       _CompletionTask(
         title: 'Add Bio',
-        description: 'Tell the world about yourself',
+        description: 'Ask the world about yourself',
         icon: Icons.edit_note_outlined,
         isCompleted: p.bio != null && p.bio!.isNotEmpty,
       ),
@@ -80,8 +80,12 @@ class ProfileCompletionWidget extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           child: LinearProgressIndicator(
             value: progress,
-            backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.18),
-            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.secondary),
+            backgroundColor: Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.18),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Theme.of(context).colorScheme.secondary,
+            ),
             minHeight: 8,
           ),
         ),
@@ -101,9 +105,15 @@ class ProfileCompletionWidget extends StatelessWidget {
                   width: 160,
                   padding: EdgeInsets.all(AppSizes.s16),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(AppSizes.r20),
-                    border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.18)),
+                    border: Border.all(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.18),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,7 +121,9 @@ class ProfileCompletionWidget extends StatelessWidget {
                       Container(
                         padding: EdgeInsets.all(AppSizes.s8),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.secondary.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -120,7 +132,7 @@ class ProfileCompletionWidget extends StatelessWidget {
                           size: 20,
                         ),
                       ),
-Spacer(),
+                      Spacer(),
                       Text(
                         task.title,
                         style: TextStyle(
@@ -164,7 +176,3 @@ class _CompletionTask {
     required this.isCompleted,
   });
 }
-
-
-
-

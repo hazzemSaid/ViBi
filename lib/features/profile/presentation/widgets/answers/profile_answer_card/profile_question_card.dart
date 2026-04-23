@@ -23,7 +23,11 @@ class ProfileQuestionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05)),
+        border: Border.all(
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurface.withValues(alpha: 0.05),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,7 +35,7 @@ class ProfileQuestionCard extends StatelessWidget {
           ProfileSenderRow(answer: answer, displayName: displayName),
           const SizedBox(height: 12),
           Text(
-            'TELL',
+            'Ask',
             style: TextStyle(
               color: Theme.of(context).colorScheme.secondary,
               fontWeight: FontWeight.w900,
@@ -39,7 +43,7 @@ class ProfileQuestionCard extends StatelessWidget {
               letterSpacing: 1.5,
             ),
           ),
-SizedBox(height: 8),
+          SizedBox(height: 8),
           Text(
             answer.questionText,
             style: TextStyle(
@@ -53,4 +57,3 @@ SizedBox(height: 8),
     );
   }
 }
-

@@ -145,7 +145,8 @@ class _ShareActionButton extends StatelessWidget {
       String username,
       bool isAnonymous,
       bool canShare,
-    }) payload,
+    })
+    payload,
   ) async {
     if (!payload.canShare) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -236,16 +237,22 @@ class _SendTellButton extends StatelessWidget {
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(22),
           border: Border.all(
-            color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.35),
+            color: Theme.of(
+              context,
+            ).colorScheme.secondary.withValues(alpha: 0.35),
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.onSurface, size: 16),
+            Icon(
+              Icons.auto_awesome,
+              color: Theme.of(context).colorScheme.onSurface,
+              size: 16,
+            ),
             SizedBox(width: 7),
             Text(
-              'Send Tell',
+              'Send Ask',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.w700,
@@ -276,12 +283,17 @@ class _ActionIconButton extends StatelessWidget {
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.35),
+            color: Theme.of(
+              context,
+            ).colorScheme.secondary.withValues(alpha: 0.35),
           ),
         ),
-        child: Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 21),
+        child: Icon(
+          icon,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          size: 21,
+        ),
       ),
     );
   }
 }
-

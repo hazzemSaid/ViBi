@@ -41,12 +41,25 @@ class GraphQLFeedDataSource implements FeedDataSource {
               }
               questions {
                 question_text
+                question_type
+                media_rec_id
                 is_anonymous
                 sender_id
+                
                 profiles {
                   id
                   username
                   avatar_urls
+                }
+                media_recommendations {
+                  id
+                  tmdb_id
+                  media_type
+                  title
+                  poster_path
+                  overview
+                  release_date
+                  vote_average
                 }
               }
             }
@@ -86,7 +99,19 @@ class GraphQLFeedDataSource implements FeedDataSource {
             }
             questions {
               question_text
+              question_type
+              media_rec_id
               is_anonymous
+              media_recommendations {
+                id
+                tmdb_id
+                media_type
+                title
+                poster_path
+                overview
+                release_date
+                vote_average
+              }
             }
           }
         }

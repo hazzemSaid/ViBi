@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 
 class FeedItem extends Equatable {
   final String id;
@@ -10,6 +11,8 @@ class FeedItem extends Equatable {
   final String answerAuthorUsername;
   final String? answerAuthorAvatarUrl;
   final String questionText;
+  final String questionType;
+  final TmdbMedia? mediaRec;
   final String answerText;
   final int likesCount;
   final int commentsCount;
@@ -27,6 +30,8 @@ class FeedItem extends Equatable {
     required this.answerAuthorUsername,
     this.answerAuthorAvatarUrl,
     required this.questionText,
+    this.questionType = 'text',
+    this.mediaRec,
     required this.answerText,
     required this.likesCount,
     required this.commentsCount,
@@ -45,6 +50,8 @@ class FeedItem extends Equatable {
     String? answerAuthorUsername,
     String? answerAuthorAvatarUrl,
     String? questionText,
+    String? questionType,
+    TmdbMedia? mediaRec,
     String? answerText,
     int? likesCount,
     int? commentsCount,
@@ -63,6 +70,8 @@ class FeedItem extends Equatable {
       answerAuthorAvatarUrl:
           answerAuthorAvatarUrl ?? this.answerAuthorAvatarUrl,
       questionText: questionText ?? this.questionText,
+      questionType: questionType ?? this.questionType,
+      mediaRec: mediaRec ?? this.mediaRec,
       answerText: answerText ?? this.answerText,
       likesCount: likesCount ?? this.likesCount,
       commentsCount: commentsCount ?? this.commentsCount,
@@ -83,6 +92,8 @@ class FeedItem extends Equatable {
     answerAuthorUsername,
     answerAuthorAvatarUrl,
     questionText,
+    questionType,
+    mediaRec,
     answerText,
     likesCount,
     commentsCount,

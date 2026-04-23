@@ -222,7 +222,7 @@ class _ProfileEditorLinksTabState extends State<ProfileEditorLinksTab> {
                         EditorInputBlock(
                           label: 'Bio',
                           controller: widget.bioController,
-                          hintText: 'Tell people about yourself',
+                          hintText: 'Ask people about yourself',
                           maxLines: 3,
                         ),
                       ],
@@ -260,7 +260,7 @@ class _ProfileEditorLinksTabState extends State<ProfileEditorLinksTab> {
                             EditorInputBlock(
                               label: 'Bio',
                               controller: widget.bioController,
-                              hintText: 'Tell people about yourself',
+                              hintText: 'Ask people about yourself',
                               maxLines: 3,
                             ),
                           ],

@@ -8,9 +8,16 @@ import 'package:vibi/features/inbox/data/models/inbox_question_model.dart';
 
 class GraphQLInboxDataSource {
   final GraphQLClient _graphQLClient;
+  final Future<Map<int, Map<String, dynamic>>> Function(Set<int> ids)
+  _mediaRecommendationsLoader;
 
-  GraphQLInboxDataSource({GraphQLClient? graphQLClient})
-    : _graphQLClient = graphQLClient ?? GraphQLConfig.client;
+  GraphQLInboxDataSource({
+    GraphQLClient? graphQLClient,
+    Future<Map<int, Map<String, dynamic>>> Function(Set<int> ids)?
+    mediaRecommendationsLoader,
+  }) : _graphQLClient = graphQLClient ?? GraphQLConfig.client,
+       _mediaRecommendationsLoader =
+           mediaRecommendationsLoader ?? _defaultLoadMediaRecommendationsById;
 
   // ── Queries ────────────────────────────────────────────────────────────────
 
@@ -31,6 +38,8 @@ class GraphQLInboxDataSource {
             recipient_id
             sender_id
             question_text
+            question_type
+            media_rec_id
             is_anonymous
             status
             created_at
@@ -97,6 +106,9 @@ class GraphQLInboxDataSource {
           result.data?['questionsCollection']?['edges'] as List<dynamic>? ??
           const <dynamic>[];
 
+      final mediaIds = _extractRecommendationMediaIds(edges);
+      final mediaById = await _mediaRecommendationsLoader(mediaIds);
+
       final questions = <InboxQuestionModel>[];
       for (final edge in edges) {
         try {
@@ -112,13 +124,15 @@ class GraphQLInboxDataSource {
               rawProfile.first is Map) {
             senderProfile = Map<String, dynamic>.from(rawProfile.first as Map);
           }
-
           questions.add(
             InboxQuestionModel.fromMap({
               'id': node['id'],
               'recipient_id': node['recipient_id'],
               'sender_id': node['sender_id'],
               'question_text': node['question_text'],
+              'question_type': node['question_type'],
+              'media_rec_id': node['media_rec_id'],
+              'media_recommendations': mediaById[_asInt(node['media_rec_id'])],
               'is_anonymous': node['is_anonymous'],
               'status': node['status'],
               'created_at': node['created_at'],
@@ -136,6 +150,130 @@ class GraphQLInboxDataSource {
     } catch (e) {
       return left('Failed to fetch pending questions: $e');
     }
+  }
+
+  Set<int> _extractRecommendationMediaIds(List<dynamic> questionEdges) {
+    final ids = <int>{};
+
+    for (final edge in questionEdges) {
+      if (edge is! Map<String, dynamic>) continue;
+      final node = edge['node'];
+      if (node is! Map<String, dynamic>) continue;
+
+      final questionType = (node['question_type'] as String? ?? '')
+          .trim()
+          .toLowerCase();
+      if (questionType != 'recommendation') continue;
+
+      final mediaRecId = _asInt(node['media_rec_id']);
+      if (mediaRecId != null) {
+        ids.add(mediaRecId);
+      }
+    }
+
+    return ids;
+  }
+
+  static Future<Map<int, Map<String, dynamic>>>
+  _defaultLoadMediaRecommendationsById(Set<int> ids) async {
+    if (ids.isEmpty) return const {};
+
+    try {
+      final rows = await Supabase.instance.client
+          .from('media_recommendations')
+          .select('*')
+          .inFilter('id', ids.toList(growable: false));
+
+      final mediaById = <int, Map<String, dynamic>>{};
+      for (final row in rows.cast<Map<String, dynamic>>()) {
+        final map = _normalizeMediaRecommendationRow(row);
+        final id = _asIntStatic(map['id']);
+        if (id != null) {
+          mediaById[id] = map;
+        }
+      }
+
+      return mediaById;
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint(
+          'WARN: Failed to load media recommendations from Supabase: $e',
+        );
+      }
+      return const {};
+    }
+  }
+
+  int? _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  static int? _asIntStatic(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  static Map<String, dynamic> _normalizeMediaRecommendationRow(
+    Map<String, dynamic> row,
+  ) {
+    final map = Map<String, dynamic>.from(row);
+
+    final posterPath = _firstNonEmptyString([
+      map['poster_path'],
+      map['posterPath'],
+      map['poster_url'],
+      map['posterUrl'],
+      map['image_url'],
+      map['imageUrl'],
+    ]);
+
+    if (posterPath != null) {
+      map['poster_path'] = _normalizePosterPathValue(posterPath);
+    }
+
+    map['tmdb_id'] = _asIntStatic(map['tmdb_id'] ?? map['tmdbId']) ?? 0;
+    map['media_type'] =
+        _firstNonEmptyString([
+          map['media_type'],
+          map['mediaType'],
+        ])?.toLowerCase() ??
+        '';
+    map['title'] = _firstNonEmptyString([map['title'], map['name']]) ?? '';
+
+    return map;
+  }
+
+  static String? _firstNonEmptyString(List<dynamic> values) {
+    for (final value in values) {
+      final text = value?.toString().trim() ?? '';
+      if (text.isNotEmpty) return text;
+    }
+    return null;
+  }
+
+  static String _normalizePosterPathValue(String raw) {
+    final value = raw.trim();
+    if (value.isEmpty) return value;
+
+    if (!value.startsWith('http://') && !value.startsWith('https://')) {
+      return value.startsWith('/') ? value : '/$value';
+    }
+
+    final marker = '/t/p/';
+    final markerIndex = value.indexOf(marker);
+    if (markerIndex != -1) {
+      final lastSlash = value.lastIndexOf('/');
+      if (lastSlash != -1 && lastSlash + 1 < value.length) {
+        return '/${value.substring(lastSlash + 1)}';
+      }
+    }
+
+    return value;
   }
 
   Future<Either<String, Unit>> answerQuestion({

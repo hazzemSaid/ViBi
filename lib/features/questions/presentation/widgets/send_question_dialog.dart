@@ -4,6 +4,7 @@ import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/questions/presentation/providers/question_providers.dart';
+import 'package:vibi/features/recommendation/presentation/screens/recommend_search_screen.dart';
 
 class SendQuestionDialog extends StatefulWidget {
   final String recipientId;
@@ -60,6 +61,20 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
         );
       }
     }
+  }
+
+  Future<void> _openRecommendationSheet() async {
+    final didSend = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (_) => RecommendSearchScreen(
+          recipientId: widget.recipientId,
+          initialAnonymous: _isAnonymous,
+        ),
+      ),
+    );
+
+    if (!mounted || didSend != true) return;
+    Navigator.of(context).pop();
   }
 
   @override
@@ -191,6 +206,27 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
                       ),
                     ),
                     SizedBox(height: AppSizes.r20),
+
+                    OutlinedButton.icon(
+                      onPressed: isLoading ? null : _openRecommendationSheet,
+                      icon: const Icon(Icons.movie_creation_outlined),
+                      label: const Text('Recommend Movie/TV'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onSurface,
+                        side: BorderSide(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.16),
+                        ),
+                        minimumSize: const Size.fromHeight(48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppSizes.r12),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: AppSizes.r12),
 
                     // Error Message
                     if (sendState.hasError)

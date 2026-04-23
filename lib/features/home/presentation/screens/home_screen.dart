@@ -10,6 +10,7 @@ import 'package:vibi/features/home/presentation/widgets/feed_load_more_indicator
 import 'package:vibi/features/home/presentation/widgets/feed_loading_state.dart';
 import 'package:vibi/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:vibi/features/home/presentation/widgets/post_item.dart';
+import 'package:vibi/features/home/presentation/widgets/recommend_card.dart';
 import 'package:vibi/features/home/presentation/widgets/stories_section.dart';
 import 'package:vibi/features/home/presentation/widgets/suggested_section.dart';
 
@@ -101,14 +102,24 @@ class _HomeScreenState extends State<HomeScreen> {
                           }
 
                           final item = items[index];
+                          // Use RecommendCard for media recommendation posts,
+                          // otherwise fall back to the standard PostItem.
+                          final isRecommendation =
+                              item.questionType == 'recommendation' &&
+                              item.mediaRec != null;
                           return Column(
                             key: ValueKey('column_${item.id}'),
                             children: [
                               RepaintBoundary(
-                                child: PostItem(
-                                  key: ValueKey('post_${item.id}'),
-                                  item: item,
-                                ),
+                                child: isRecommendation
+                                    ? RecommendCard(
+                                        key: ValueKey('rec_${item.id}'),
+                                        item: item,
+                                      )
+                                    : PostItem(
+                                        key: ValueKey('post_${item.id}'),
+                                        item: item,
+                                      ),
                               ),
                               Divider(
                                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),

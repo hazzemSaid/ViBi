@@ -1,4 +1,5 @@
 import 'package:vibi/features/home/domain/entities/feed_item.dart';
+import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 
 class FeedItemModel extends FeedItem {
   const FeedItemModel({
@@ -11,6 +12,8 @@ class FeedItemModel extends FeedItem {
     required super.answerAuthorUsername,
     super.answerAuthorAvatarUrl,
     required super.questionText,
+    super.questionType,
+    super.mediaRec,
     required super.answerText,
     required super.likesCount,
     required super.commentsCount,
@@ -22,6 +25,11 @@ class FeedItemModel extends FeedItem {
   factory FeedItemModel.fromMap(Map<String, dynamic> map) {
     final profile = map['profiles'] as Map<String, dynamic>?;
     final question = map['questions'] as Map<String, dynamic>?;
+    final rawQuestionType = (question?['question_type'] as String? ?? 'text')
+        .trim()
+        .toLowerCase();
+    final questionType = rawQuestionType.isEmpty ? 'text' : rawQuestionType;
+    final mediaRec = _parseMediaRec(question?['media_recommendations']);
     final avatarUrls = _parseAvatarUrls(
       profile?['avatar_urls'] ?? profile?['avatar_url'],
     );
@@ -36,7 +44,10 @@ class FeedItemModel extends FeedItem {
       avatarUrl: avatarUrls.isNotEmpty ? avatarUrls.first : null,
       answerAuthorUsername: 'unknown',
       answerAuthorAvatarUrl: null,
-      questionText: question?['question_text'] as String? ?? '',
+      questionText:
+          question?['question_text'] as String? ?? mediaRec?.title ?? '',
+      questionType: questionType,
+      mediaRec: mediaRec,
       answerText: map['answer_text'] as String? ?? '',
       likesCount: map['likes_count'] as int? ?? 0,
       commentsCount: map['comments_count'] as int? ?? 0,
@@ -64,6 +75,11 @@ class FeedItemModel extends FeedItem {
     final question =
         (answersData?['questions'] as Map<String, dynamic>?) ??
         (node['questions'] as Map<String, dynamic>?);
+    final rawQuestionType = (question?['question_type'] as String? ?? 'text')
+        .trim()
+        .toLowerCase();
+    final questionType = rawQuestionType.isEmpty ? 'text' : rawQuestionType;
+    final mediaRec = _parseMediaRec(question?['media_recommendations']);
 
     // Get questioner's profile (who asked the question)
     // For anonymous questions, this will be null and we'll show "Anonymous User"
@@ -99,7 +115,10 @@ class FeedItemModel extends FeedItem {
       answerAuthorAvatarUrl: authorAvatarUrls.isNotEmpty
           ? authorAvatarUrls.first
           : null,
-      questionText: question?['question_text'] as String? ?? '',
+      questionText:
+          question?['question_text'] as String? ?? mediaRec?.title ?? '',
+      questionType: questionType,
+      mediaRec: mediaRec,
       answerText:
           answersData?['answer_text'] as String? ??
           node['answer_text'] as String? ??
@@ -132,6 +151,27 @@ class FeedItemModel extends FeedItem {
     }
     if (value is String) return [value];
     return const [];
+  }
+
+  static TmdbMedia? _parseMediaRec(dynamic value) {
+    if (value == null) return null;
+
+    Map<String, dynamic>? map;
+    if (value is Map<String, dynamic>) {
+      map = value;
+    } else if (value is Map) {
+      map = Map<String, dynamic>.from(value);
+    } else if (value is List && value.isNotEmpty && value.first is Map) {
+      map = Map<String, dynamic>.from(value.first as Map);
+    }
+
+    if (map == null) return null;
+
+    try {
+      return TmdbMedia.fromSupabaseMap(map);
+    } catch (_) {
+      return null;
+    }
   }
 
   Map<String, dynamic> toMap() {

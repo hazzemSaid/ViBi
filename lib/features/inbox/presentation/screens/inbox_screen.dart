@@ -16,6 +16,8 @@ import 'package:vibi/features/inbox/presentation/cubits/pending_questions_cubit.
 import 'package:vibi/features/inbox/presentation/screens/answer_screen.dart';
 import 'package:vibi/features/inbox/presentation/state/archive_question_state.dart';
 import 'package:vibi/features/inbox/presentation/state/pending_questions_state.dart';
+import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
+import 'package:vibi/features/recommendation/presentation/widgets/media_card.dart';
 
 /**
  * Available filters for pending inbox questions.
@@ -185,6 +187,8 @@ class _InboxScreenState extends State<InboxScreen> {
             questionId: question.id,
             questionText: question.questionText,
             isAnonymous: question.isAnonymous,
+            questionType: question.questionType,
+            mediaRec: question.mediaRec,
           ),
         ),
         transitionsBuilder: (_, animation, __, child) {
@@ -228,8 +232,7 @@ class _InboxScreenState extends State<InboxScreen> {
   String get _shareProfileUrl {
     final user = Supabase.instance.client.auth.currentUser;
     final rawUsername = (user?.userMetadata?['username'] as String?)?.trim();
-    final username =
-        rawUsername != null && rawUsername.isNotEmpty
+    final username = rawUsername != null && rawUsername.isNotEmpty
         ? rawUsername
         : user?.email?.split('@').first ?? 'user';
     final shareBaseUrl = dotenv.env['SHARE_BASE_URL'] ?? 'https://vibi.social';
@@ -947,6 +950,15 @@ class _InboxScreenState extends State<InboxScreen> {
         ? 'Anonymous'
         : '@${question.senderUsername ?? 'user'}';
     final isArchiving = _archivingQuestionIds.contains(question.id);
+    final recommendationMedia =
+        question.mediaRec ??
+        TmdbMedia(
+          tmdbId: question.mediaRecId ?? 0,
+          mediaType: 'movie',
+          title: question.questionText.trim().isEmpty
+              ? 'Movie Recommendation'
+              : question.questionText.trim(),
+        );
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
@@ -1106,15 +1118,32 @@ class _InboxScreenState extends State<InboxScreen> {
                   ],
                 ),
                 SizedBox(height: AppSizes.r12),
-                Text(
-                  question.questionText,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    height: 1.45,
+                if (question.isRecommendation) ...[
+                  Text(
+                    'Recommendation',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.72),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
+                    ),
                   ),
-                ),
+                  SizedBox(height: AppSizes.s8),
+                  MediaCard(
+                    media: recommendationMedia,
+                    compact: true,
+                    showOverview: true,
+                  ),
+                ] else
+                  Text(
+                    question.questionText,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      height: 1.45,
+                    ),
+                  ),
                 SizedBox(height: AppSizes.r12),
                 Row(
                   children: [

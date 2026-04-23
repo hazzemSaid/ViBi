@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/features/home/domain/entities/feed_item.dart';
 import 'package:vibi/features/home/presentation/providers/feed_providers.dart';
 import 'package:vibi/features/home/presentation/providers/feed_state.dart';
+import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 
 import 'post_item/action_row.dart';
 import 'post_item/answer_author_row.dart';
@@ -47,11 +48,16 @@ class PostItem extends StatelessWidget {
                 displayName: currentItem.displayName,
                 displayAvatar: currentItem.displayAvatar,
                 questionFontSize: questionFontSize,
+                questionType: currentItem.questionType,
+                mediaRec: currentItem.mediaRec,
               ),
-SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 currentItem.answerText,
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: bodyFontSize),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: bodyFontSize,
+                ),
               ),
               const SizedBox(height: 20),
               ActionRow(
@@ -77,6 +83,8 @@ class _PostBodyData extends Equatable {
     required this.answerAuthorUsername,
     required this.answerAuthorAvatarUrl,
     required this.questionText,
+    required this.questionType,
+    required this.mediaRec,
     required this.answerText,
     required this.isAnonymous,
   });
@@ -89,6 +97,8 @@ class _PostBodyData extends Equatable {
       answerAuthorUsername: item.answerAuthorUsername,
       answerAuthorAvatarUrl: item.answerAuthorAvatarUrl,
       questionText: item.questionText,
+      questionType: item.questionType,
+      mediaRec: item.mediaRec,
       answerText: item.answerText,
       isAnonymous: item.isAnonymous,
     );
@@ -100,6 +110,8 @@ class _PostBodyData extends Equatable {
   final String answerAuthorUsername;
   final String? answerAuthorAvatarUrl;
   final String questionText;
+  final String questionType;
+  final TmdbMedia? mediaRec;
   final String answerText;
   final bool isAnonymous;
 
@@ -114,8 +126,9 @@ class _PostBodyData extends Equatable {
     answerAuthorUsername,
     answerAuthorAvatarUrl,
     questionText,
+    questionType,
+    mediaRec,
     answerText,
     isAnonymous,
   ];
 }
-

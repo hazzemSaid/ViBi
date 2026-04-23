@@ -5,6 +5,8 @@ import 'package:vibi/features/inbox/presentation/cubits/answer_question_cubit.da
 import 'package:vibi/features/inbox/presentation/cubits/pending_questions_cubit.dart';
 import 'package:vibi/features/inbox/presentation/screens/share_answer_screen.dart';
 import 'package:vibi/features/inbox/presentation/state/answer_screen_visibility.dart';
+import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
+import 'package:vibi/features/recommendation/presentation/widgets/media_card.dart';
 
 /**
  * Full-screen answer composer for one inbox question.
@@ -24,11 +26,15 @@ class AnswerScreen extends StatefulWidget {
     required this.questionId,
     required this.questionText,
     this.isAnonymous = false,
+    this.questionType = 'text',
+    this.mediaRec,
   });
 
   final String questionId;
   final String questionText;
   final bool isAnonymous;
+  final String questionType;
+  final TmdbMedia? mediaRec;
 
   @override
   State<AnswerScreen> createState() => _AnswerScreenState();
@@ -94,6 +100,17 @@ class _AnswerScreenState extends State<AnswerScreen> {
    * - Post button visual/interaction state.
    */
   bool get _canPost => _answerController.text.trim().isNotEmpty && !_isPosting;
+  bool get _isRecommendationQuestion => widget.questionType == 'recommendation';
+  TmdbMedia get _recommendationMedia {
+    return widget.mediaRec ??
+        TmdbMedia(
+          tmdbId: 0,
+          mediaType: 'movie',
+          title: widget.questionText.trim().isEmpty
+              ? 'Movie Recommendation'
+              : widget.questionText.trim(),
+        );
+  }
 
   // ── Actions ────────────────────────────────────────────────────────────────
 
@@ -197,6 +214,18 @@ class _AnswerScreenState extends State<AnswerScreen> {
     if (!mounted) return;
 
     setState(() => _isPosting = false);
+
+    if (_isRecommendationQuestion) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: const Text('Answer posted'),
+          backgroundColor: Colors.green.shade700,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      Navigator.of(context).pop(true);
+      return;
+    }
 
     // Navigate to share screen
     final didShare = await Navigator.of(context).push<bool>(
@@ -360,6 +389,45 @@ class _AnswerScreenState extends State<AnswerScreen> {
    * - Providing question context while composing answer.
    */
   Widget _buildQuestionBubble() {
+    if (_isRecommendationQuestion) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: _pink,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.20),
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: const Text(
+                'RECOMMENDATION',
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.7,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            MediaCard(
+              media: _recommendationMedia,
+              compact: true,
+              showOverview: true,
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -520,7 +588,9 @@ class _AnswerScreenState extends State<AnswerScreen> {
                       ),
                     )
                   : Text(
-                      'Post & Share',
+                      _isRecommendationQuestion
+                          ? 'Post Answer'
+                          : 'Post & Share',
                       style: TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 14,

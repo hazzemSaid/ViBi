@@ -61,6 +61,7 @@ dependencies:
   dartz: ^0.10.1
   url_launcher: any
   flutter_svg: ^2.2.4
+  dio: ^5.9.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

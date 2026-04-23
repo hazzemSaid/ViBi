@@ -14,15 +14,21 @@ class PublicProfileActionsRow extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: FollowButton(profile: profile)),
-SizedBox(width: AppSizes.s12),
+        SizedBox(width: AppSizes.s12),
         Expanded(
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.1),
               foregroundColor: Theme.of(context).colorScheme.onSurface,
               shape: StadiumBorder(),
               minimumSize: Size.fromHeight(52),
-              side: BorderSide(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12)),
+              side: BorderSide(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.12),
+              ),
             ),
             onPressed: profile.allowAnonymousQuestions
                 ? () {
@@ -37,7 +43,7 @@ SizedBox(width: AppSizes.s12),
                 : null,
             child: Text(
               profile.allowAnonymousQuestions
-                  ? 'Ask Question'
+                  ? 'Ask or Recommend'
                   : 'Questions Off',
               style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             ),
@@ -47,6 +53,3 @@ SizedBox(width: AppSizes.s12),
     );
   }
 }
-
-
-

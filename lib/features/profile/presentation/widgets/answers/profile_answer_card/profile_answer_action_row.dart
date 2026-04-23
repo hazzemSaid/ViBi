@@ -119,16 +119,22 @@ class _ProfileAnswerActionRowState extends State<ProfileAnswerActionRow> {
                 color: Colors.transparent,
                 borderRadius: BorderRadius.circular(22),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.35),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.secondary.withValues(alpha: 0.35),
                 ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.onSurface, size: 16),
+                  Icon(
+                    Icons.auto_awesome,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    size: 16,
+                  ),
                   SizedBox(width: 7),
                   Text(
-                    'Send Tell',
+                    'Send Ask',
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
                       fontWeight: FontWeight.w700,
@@ -174,7 +180,9 @@ class _ProfileAnswerActionRowState extends State<ProfileAnswerActionRow> {
           onTap: widget.onShareTap,
           child: Icon(
             Icons.share_outlined,
-            color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
             size: 20,
           ),
         ),
@@ -188,10 +196,14 @@ class _ProfileAnswerActionRowState extends State<ProfileAnswerActionRow> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.auto_awesome, color: Theme.of(context).colorScheme.onSurface, size: 16),
+              Icon(
+                Icons.auto_awesome,
+                color: Theme.of(context).colorScheme.onSurface,
+                size: 16,
+              ),
               SizedBox(width: 6),
               Text(
-                'Send Tell',
+                'Send Ask',
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.bold,
@@ -223,12 +235,17 @@ class _ActionIconButton extends StatelessWidget {
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
-            color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.35),
+            color: Theme.of(
+              context,
+            ).colorScheme.secondary.withValues(alpha: 0.35),
           ),
         ),
-        child: Icon(icon, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 21),
+        child: Icon(
+          icon,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          size: 21,
+        ),
       ),
     );
   }
 }
-

@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
+import 'package:vibi/core/services/tmdb_service.dart';
 import 'package:vibi/core/theme/theme_cubit.dart';
 import 'package:vibi/features/auth/data/datasources/supabase_auth_datasource.dart';
 import 'package:vibi/features/auth/data/repositories/auth_repository_impl.dart';
@@ -50,6 +51,8 @@ import 'package:vibi/features/reactions/data/repositories/reactions_repository_i
 import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
 import 'package:vibi/features/reactions/presentation/providers/comments_cubit.dart';
 import 'package:vibi/features/reactions/presentation/providers/reaction_cubit.dart';
+import 'package:vibi/features/recommendation/data/repositories/recommendation_repository.dart';
+import 'package:vibi/features/recommendation/presentation/cubits/recommendation_flow_cubit.dart';
 import 'package:vibi/features/search/data/datasources/graphql_search_datasource.dart';
 import 'package:vibi/features/search/data/repositories/search_repository_impl.dart';
 import 'package:vibi/features/search/domain/repositories/search_repository.dart';
@@ -182,6 +185,16 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   );
   getIt.registerFactory<SendQuestionCubit>(
     () => SendQuestionCubit(getIt<QuestionRepository>()),
+  );
+  getIt.registerLazySingleton<TmdbService>(TmdbService.new);
+  getIt.registerLazySingleton<RecommendationRepository>(
+    () => RecommendationRepository(
+      Supabase.instance.client,
+      getIt<TmdbService>(),
+    ),
+  );
+  getIt.registerFactory<RecommendationFlowCubit>(
+    () => RecommendationFlowCubit(getIt<RecommendationRepository>()),
   );
 
   getIt.registerLazySingleton<ReactionsRemoteDataSource>(

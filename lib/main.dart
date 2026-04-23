@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive/hive.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/di/service_locator.dart';
@@ -23,6 +25,7 @@ void main() async {
   _configureImageMemoryCache();
 
   await _loadEnv();
+  await _initializeHive();
 
   // Initialize Supabase
   await Supabase.initialize(
@@ -39,7 +42,7 @@ void main() async {
 
   // Initialize GraphQL client
   // This sets up the GraphQL endpoint with authentication
-  GraphQLConfig.initialize();
+  await GraphQLConfig.initialize();
 
   // Initialize SharedPreferences
   final prefs = await SharedPreferences.getInstance();
@@ -53,6 +56,11 @@ void main() async {
   // We recommend removing this method after testing and instead use In-App Messages to prompt for notification permission.
   OneSignal.Notifications.requestPermission(false);
   runApp(const MyApp());
+}
+
+Future<void> _initializeHive() async {
+  final appSupportDir = await getApplicationSupportDirectory();
+  Hive.init(appSupportDir.path);
 }
 
 void _configureImageMemoryCache() {

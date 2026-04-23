@@ -1,15 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:ferry/ferry.dart' as ferry;
 import 'package:mocktail/mocktail.dart';
 import 'package:vibi/features/inbox/data/datasources/graphql_inbox_datasource.dart';
 
-class _MockGraphQLClient extends Mock implements GraphQLClient {}
+class _MockFerryClient extends Mock implements ferry.Client {}
 
-class _FakeQueryOptions extends Fake implements QueryOptions<Object?> {}
+class _FakeOperationRequest extends Fake
+    implements
+        ferry.OperationRequest<Map<String, dynamic>, Map<String, dynamic>> {}
 
 void main() {
   setUpAll(() {
-    registerFallbackValue(_FakeQueryOptions());
+    registerFallbackValue(_FakeOperationRequest());
   });
 
   group('GraphQLInboxDataSource', () {
@@ -109,7 +111,6 @@ QueryResult<Object?> _queryResult({
     options: options,
     source: QueryResultSource.network,
     data: data,
-    exception: exception,
   );
 }
 

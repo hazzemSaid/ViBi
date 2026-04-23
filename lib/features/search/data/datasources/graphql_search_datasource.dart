@@ -1,4 +1,5 @@
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:ferry/ferry.dart' as ferry;
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
 import 'package:vibi/features/search/data/models/content_search_result_model.dart';
@@ -6,11 +7,11 @@ import 'package:vibi/features/search/data/models/user_search_result_model.dart';
 
 class GraphQLSearchDataSource {
   final SupabaseClient _client;
+  final ferry.Client _ferryClient;
 
-  GraphQLSearchDataSource({SupabaseClient? client})
-    : _client = client ?? Supabase.instance.client;
-
-  GraphQLClient get _graphqlClient => GraphQLConfig.client;
+  GraphQLSearchDataSource({SupabaseClient? client, ferry.Client? ferryClient})
+    : _client = client ?? Supabase.instance.client,
+      _ferryClient = ferryClient ?? GraphQLConfig.ferryClient;
 
   static const _searchUsersQuery = r'''
     query SearchUsers($query: String!) {
@@ -81,16 +82,16 @@ class GraphQLSearchDataSource {
     final searchPattern = '%${query.trim()}%';
 
     try {
-      final result = await _graphqlClient.query(
-        QueryOptions(
-          document: gql(_searchUsersQuery),
-          variables: {'query': searchPattern},
-          fetchPolicy: FetchPolicy.networkOnly,
-        ),
+      final result = await GraphQLConfig.ferryQuery(
+        'SearchUsers',
+        document: _searchUsersQuery,
+        variables: {'query': searchPattern},
+        clientOverride: _ferryClient,
       );
 
-      if (result.hasException) {
-        print('GraphQL search users error: ${result.exception}');
+      if (result.hasErrors) {
+        debugPrint('GraphQL search users error: ${result.graphqlErrors}');
+        debugPrint('GraphQL search users link error: ${result.linkException}');
         return _searchUsersViaRest(query);
       }
 
@@ -111,7 +112,7 @@ class GraphQLSearchDataSource {
             blockedIds.add(row['blocked_id'] as String);
           }
         } catch (e) {
-          print('Failed to fetch blocked users: $e');
+          debugPrint('Failed to fetch blocked users: $e');
         }
       }
 
@@ -123,7 +124,7 @@ class GraphQLSearchDataSource {
           .where((user) => !blockedIds.contains(user.id))
           .toList();
     } catch (e) {
-      print('Search users exception: $e');
+      debugPrint('Search users exception: $e');
       return _searchUsersViaRest(query);
     }
   }
@@ -144,7 +145,7 @@ class GraphQLSearchDataSource {
           )
           .toList();
     } catch (e) {
-      print('REST search users error: $e');
+      debugPrint('REST search users error: $e');
       return [];
     }
   }
@@ -155,16 +156,18 @@ class GraphQLSearchDataSource {
     final searchPattern = '%${query.trim()}%';
 
     try {
-      final result = await _graphqlClient.query(
-        QueryOptions(
-          document: gql(_searchContentQuery),
-          variables: {'query': searchPattern},
-          fetchPolicy: FetchPolicy.networkOnly,
-        ),
+      final result = await GraphQLConfig.ferryQuery(
+        'SearchContent',
+        document: _searchContentQuery,
+        variables: {'query': searchPattern},
+        clientOverride: _ferryClient,
       );
 
-      if (result.hasException) {
-        print('GraphQL search content error: ${result.exception}');
+      if (result.hasErrors) {
+        debugPrint('GraphQL search content error: ${result.graphqlErrors}');
+        debugPrint(
+          'GraphQL search content link error: ${result.linkException}',
+        );
         return _searchContentViaRest(query);
       }
 
@@ -175,7 +178,7 @@ class GraphQLSearchDataSource {
         return ContentSearchResultModel.fromGraphQL(node);
       }).toList();
     } catch (e) {
-      print('Search content exception: $e');
+      debugPrint('Search content exception: $e');
       return _searchContentViaRest(query);
     }
   }
@@ -200,7 +203,7 @@ class GraphQLSearchDataSource {
           )
           .toList();
     } catch (e) {
-      print('REST search content error: $e');
+      debugPrint('REST search content error: $e');
       return [];
     }
   }

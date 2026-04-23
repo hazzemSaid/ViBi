@@ -1,12 +1,15 @@
 import 'package:dartz/dartz.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:ferry/ferry.dart' as ferry;
 import 'package:vibi/core/errors/errors_handel.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
 
 /// GraphQL-only Social Links data source.
 class GraphQLSocialLinksDataSource {
-  GraphQLClient get _graphqlClient => GraphQLConfig.client;
+  final ferry.Client _ferryClient;
+
+  GraphQLSocialLinksDataSource({ferry.Client? ferryClient})
+    : _ferryClient = ferryClient ?? GraphQLConfig.ferryClient;
 
   static const Set<String> _allowedPlatforms = {
     'instagram',
@@ -55,16 +58,15 @@ class GraphQLSocialLinksDataSource {
       }
     ''';
 
-    final result = await _graphqlClient.query(
-      QueryOptions(
-        document: gql(query),
-        variables: {'userId': userId},
-        fetchPolicy: FetchPolicy.networkOnly,
-      ),
+    final result = await GraphQLConfig.ferryQuery(
+      'GetSocialLinks',
+      document: query,
+      variables: {'userId': userId},
+      clientOverride: _ferryClient,
     );
 
-    if (result.hasException) {
-      return left(SupabaseErrorHandler.getErrorMessage(result.exception));
+    if (result.hasErrors) {
+      return left(SupabaseErrorHandler.getErrorMessage(result));
     }
 
     final edges =
@@ -126,22 +128,22 @@ class GraphQLSocialLinksDataSource {
       }
     ''';
 
-    final result = await _graphqlClient.mutate(
-      MutationOptions(
-        document: gql(mutation),
-        variables: {
-          'userId': userId,
-          'platform': normalizedPlatform,
-          'url': url,
-          'title': title,
-          'displayLabel': displayLabel,
-          'displayOrder': displayOrder,
-        },
-      ),
+    final result = await GraphQLConfig.ferryMutate(
+      'AddSocialLink',
+      document: mutation,
+      variables: {
+        'userId': userId,
+        'platform': normalizedPlatform,
+        'url': url,
+        'title': title,
+        'displayLabel': displayLabel,
+        'displayOrder': displayOrder,
+      },
+      clientOverride: _ferryClient,
     );
 
-    if (result.hasException) {
-      return left(SupabaseErrorHandler.getErrorMessage(result.exception));
+    if (result.hasErrors) {
+      return left(SupabaseErrorHandler.getErrorMessage(result));
     }
 
     final records =
@@ -203,23 +205,23 @@ class GraphQLSocialLinksDataSource {
       }
     ''';
 
-    final result = await _graphqlClient.mutate(
-      MutationOptions(
-        document: gql(mutation),
-        variables: {
-          'id': linkId,
-          'platform': normalizedPlatform,
-          'url': url,
-          'title': title,
-          'displayLabel': displayLabel,
-          'displayOrder': displayOrder,
-          'isActive': isActive,
-        },
-      ),
+    final result = await GraphQLConfig.ferryMutate(
+      'UpdateSocialLink',
+      document: mutation,
+      variables: {
+        'id': linkId,
+        'platform': normalizedPlatform,
+        'url': url,
+        'title': title,
+        'displayLabel': displayLabel,
+        'displayOrder': displayOrder,
+        'isActive': isActive,
+      },
+      clientOverride: _ferryClient,
     );
 
-    if (result.hasException) {
-      return left(SupabaseErrorHandler.getErrorMessage(result.exception));
+    if (result.hasErrors) {
+      return left(SupabaseErrorHandler.getErrorMessage(result));
     }
 
     final records =
@@ -241,12 +243,15 @@ class GraphQLSocialLinksDataSource {
       }
     ''';
 
-    final result = await _graphqlClient.mutate(
-      MutationOptions(document: gql(mutation), variables: {'id': linkId}),
+    final result = await GraphQLConfig.ferryMutate(
+      'DeleteSocialLink',
+      document: mutation,
+      variables: {'id': linkId},
+      clientOverride: _ferryClient,
     );
 
-    if (result.hasException) {
-      return left(SupabaseErrorHandler.getErrorMessage(result.exception));
+    if (result.hasErrors) {
+      return left(SupabaseErrorHandler.getErrorMessage(result));
     }
 
     final affectedCount =

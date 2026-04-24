@@ -2,9 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vibi/features/home/domain/entities/feed_item.dart';
-import 'package:vibi/features/home/presentation/providers/feed_providers.dart';
-import 'package:vibi/features/home/presentation/providers/feed_state.dart';
+import 'package:vibi/features/feed/domain/entities/feed_item.dart';
+import 'package:vibi/features/feed/presentation/view/cubit/feed_cubit.dart';
+import 'package:vibi/features/feed/presentation/view/cubit/feed_state.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 
 import 'post_item/action_row.dart';
@@ -93,7 +93,9 @@ class _RecommendQuestionCard extends StatelessWidget {
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+          color: Theme.of(
+            context,
+          ).colorScheme.onSurface.withValues(alpha: 0.05),
         ),
       ),
       clipBehavior: Clip.antiAlias,
@@ -190,7 +192,8 @@ class _PosterSection extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      if (media.year.isNotEmpty || media.voteAverage != null) ...[
+                      if (media.year.isNotEmpty ||
+                          media.voteAverage != null) ...[
                         const SizedBox(height: 5),
                         Row(
                           children: [
@@ -206,11 +209,21 @@ class _PosterSection extends StatelessWidget {
                               if (media.voteAverage != null)
                                 const Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 6),
-                                  child: Text('•', style: TextStyle(color: Colors.white54, fontSize: 12)),
+                                  child: Text(
+                                    '•',
+                                    style: TextStyle(
+                                      color: Colors.white54,
+                                      fontSize: 12,
+                                    ),
+                                  ),
                                 ),
                             ],
                             if (media.voteAverage != null) ...[
-                              const Icon(Icons.star, color: Colors.amber, size: 12),
+                              const Icon(
+                                Icons.star,
+                                color: Colors.amber,
+                                size: 12,
+                              ),
                               const SizedBox(width: 3),
                               Text(
                                 media.voteAverage!.toStringAsFixed(1),
@@ -301,15 +314,15 @@ class _PostBodyData extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        username,
-        avatarUrl,
-        answerAuthorUsername,
-        answerAuthorAvatarUrl,
-        questionText,
-        questionType,
-        mediaRec,
-        answerText,
-        isAnonymous,
-      ];
+    id,
+    username,
+    avatarUrl,
+    answerAuthorUsername,
+    answerAuthorAvatarUrl,
+    questionText,
+    questionType,
+    mediaRec,
+    answerText,
+    isAnonymous,
+  ];
 }

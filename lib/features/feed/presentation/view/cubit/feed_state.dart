@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:vibi/features/home/domain/entities/feed_item.dart';
+import 'package:vibi/features/feed/domain/entities/feed_item.dart';
 
 sealed class FeedState extends Equatable {
   const FeedState();
@@ -35,3 +35,20 @@ class FeedFailure extends FeedState {
   @override
   List<Object?> get props => [message, items];
 }
+
+extension FeedStateX on FeedState {
+  R when<R>({
+    required R Function() initial,
+    required R Function() loading,
+    required R Function(List<FeedItem> items, bool hasMore) loaded,
+    required R Function(String message, List<FeedItem>? items) failure,
+  }) {
+    return switch (this) {
+      FeedInitial() => initial(),
+      FeedLoading() => loading(),
+      FeedLoaded(:final items, :final hasMore) => loaded(items, hasMore),
+      FeedFailure(:final message, :final items) => failure(message, items),
+    };
+  }
+}
+

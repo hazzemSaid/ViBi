@@ -10,12 +10,12 @@ import 'package:vibi/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:vibi/features/auth/domain/repositories/auth_repository.dart';
 import 'package:vibi/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
-import 'package:vibi/features/home/data/datasources/graphql_feed_data_source.dart';
-import 'package:vibi/features/home/data/repositories/feed_repository_impl.dart';
-import 'package:vibi/features/home/domain/repositories/feed_repository.dart';
-import 'package:vibi/features/home/domain/usecases/get_following_feed_usecase.dart';
-import 'package:vibi/features/home/domain/usecases/get_global_feed_usecase.dart';
-import 'package:vibi/features/home/presentation/providers/feed_providers.dart';
+import 'package:vibi/features/feed/data/datasources/graphql_feed_data_source.dart';
+import 'package:vibi/features/feed/data/repositories/feed_repository_impl.dart';
+import 'package:vibi/features/feed/domain/repositories/feed_repository.dart';
+import 'package:vibi/features/feed/domain/usecases/get_following_feed_usecase.dart';
+import 'package:vibi/features/feed/domain/usecases/get_global_feed_usecase.dart';
+import 'package:vibi/features/feed/presentation/view/cubit/feed_cubit.dart';
 import 'package:vibi/features/inbox/data/datasources/graphql_inbox_datasource.dart';
 import 'package:vibi/features/inbox/data/repositories/inbox_repository_impl.dart';
 import 'package:vibi/features/inbox/domain/repositories/inbox_repository.dart';
@@ -90,20 +90,27 @@ void _initCore(SharedPreferences prefs) {
     () => ThemeCubit(getIt<SharedPreferences>()),
   );
   getIt.registerLazySingleton<TmdbService>(TmdbService.new);
-  getIt.registerLazySingleton<PushNotificationService>(PushNotificationService.new);
+  getIt.registerLazySingleton<PushNotificationService>(
+    PushNotificationService.new,
+  );
 }
 
 // -----------------------------------------------------------------------------
 // Auth Feature
 // -----------------------------------------------------------------------------
 void _initAuth() {
-  getIt.registerLazySingleton<SupabaseAuthDataSource>(SupabaseAuthDataSource.new);
+  getIt.registerLazySingleton<SupabaseAuthDataSource>(
+    SupabaseAuthDataSource.new,
+  );
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(getIt<SupabaseAuthDataSource>()),
   );
   getIt.registerFactory<AuthCubit>(() => AuthCubit(getIt<AuthRepository>()));
   getIt.registerFactory<AuthController>(
-    () => AuthController(getIt<AuthRepository>(), getIt<PushNotificationService>()),
+    () => AuthController(
+      getIt<AuthRepository>(),
+      getIt<PushNotificationService>(),
+    ),
   );
 }
 

@@ -1,20 +1,20 @@
 import 'dart:async';
 
+import 'package:dartz/dartz.dart';
 import 'package:ferry/ferry.dart' as ferry;
 import 'package:flutter/foundation.dart';
 import 'package:vibi/core/errors/errors_handel.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
 import 'package:vibi/core/graphql/queries/feed_queries.dart';
-import 'package:vibi/features/home/data/datasources/feed_data_source_interface.dart';
-import 'package:vibi/features/home/data/models/feed_item_model.dart';
+import 'package:vibi/features/feed/data/models/feed_item_model.dart';
+import 'package:vibi/features/feed/domain/repositories/feed_repository.dart';
+import 'package:vibi/core/constants/app_caching.dart';
 
-class GraphQLFeedDataSource implements FeedDataSource {
+class GraphQLFeedDataSource implements FeedRepository {
   final ferry.Client _ferryClient;
-  static const Duration _queryTimeout = Duration(seconds: 20);
+  static const Duration _queryTimeout = AppCaching.queryTimeout;
 
   GraphQLFeedDataSource(this._ferryClient);
-
-
 
   Future<List<FeedItemModel>> _loadFeedFromAnswers({
     required String query,
@@ -84,27 +84,37 @@ class GraphQLFeedDataSource implements FeedDataSource {
   }
 
   @override
-  Future<List<FeedItemModel>> getGlobalFeed({
-    int limit = 20,
+  Future<Either<String, List<FeedItemModel>>> getGlobalFeed({
+    int limit = AppCaching.feedPageLimit,
     int offset = 0,
   }) async {
-    return _loadFeedFromAnswers(
-      query: FeedQueries.getGlobalFeedItems,
-      operationName: 'GetGlobalFeedItems',
-      variables: {'limit': limit, 'offset': offset},
-    );
+    try {
+      final result = await _loadFeedFromAnswers(
+        query: FeedQueries.getGlobalFeedItems,
+        operationName: 'GetGlobalFeedItems',
+        variables: {'limit': limit, 'offset': offset},
+      );
+      return Right(result);
+    } catch (e) {
+      return Left(e.toString());
+    }
   }
 
   @override
-  Future<List<FeedItemModel>> getFollowingFeed(
+  Future<Either<String, List<FeedItemModel>>> getFollowingFeed(
     String userId, {
-    int limit = 20,
+    int limit = AppCaching.feedPageLimit,
     int offset = 0,
   }) async {
-    return _loadFeedFromAnswers(
-      query: FeedQueries.getFollowingFeedItems,
-      operationName: 'GetFollowingFeedItems',
-      variables: {'userId': userId, 'limit': limit, 'offset': offset},
-    );
+    try {
+      final result = await _loadFeedFromAnswers(
+        query: FeedQueries.getFollowingFeedItems,
+        operationName: 'GetFollowingFeedItems',
+        variables: {'userId': userId, 'limit': limit, 'offset': offset},
+      );
+      return Right(result);
+    } catch (e) {
+      return Left(e.toString());
+    }
   }
 }

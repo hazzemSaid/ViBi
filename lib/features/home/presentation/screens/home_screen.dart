@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibi/core/constants/app_caching.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/features/home/presentation/providers/feed_providers.dart';
-import 'package:vibi/features/home/presentation/providers/feed_state.dart';
+import 'package:vibi/features/feed/presentation/view/cubit/feed_cubit.dart';
+import 'package:vibi/features/feed/presentation/view/cubit/feed_state.dart';
 import 'package:vibi/features/home/presentation/widgets/feed_empty_state.dart';
 import 'package:vibi/features/home/presentation/widgets/feed_error_state.dart';
 import 'package:vibi/features/home/presentation/widgets/feed_load_more_indicator.dart';
@@ -11,7 +12,6 @@ import 'package:vibi/features/home/presentation/widgets/feed_loading_state.dart'
 import 'package:vibi/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:vibi/features/home/presentation/widgets/post_item.dart';
 import 'package:vibi/features/home/presentation/widgets/recommend_card.dart';
-import 'package:vibi/features/home/presentation/widgets/stories_section.dart';
 import 'package:vibi/features/home/presentation/widgets/suggested_section.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -34,6 +34,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _scrollController.addListener(_onScroll);
   }
 
+  /**
+   * Handles scroll events to show/hide the bottom navigation bar 
+   * based on the user's scroll direction.
+   */
   void _onScroll() {
     final direction = _scrollController.position.userScrollDirection;
     if (direction == ScrollDirection.reverse && _isBottomBarVisible) {
@@ -67,14 +71,17 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: Theme.of(context).colorScheme.surface,
           child: CustomScrollView(
             controller: _scrollController,
-            cacheExtent: 1500,
+            cacheExtent: AppCaching.feedCacheExtent,
             slivers: [
               const HomeAppBar(),
               SliverList(
                 delegate: SliverChildListDelegate(const [
                   SizedBox(height: 8),
-                  StoriesSection(),
-                  Divider(height: 1),
+                  // TODO: implement stories section
+                  // StoriesSection(),
+                  // TODO: implement suggested section
+                  // SuggestedSection(),
+                  // Divider(height: 1),
                 ]),
               ),
               BlocBuilder<GlobalFeedCubit, FeedState>(
@@ -86,71 +93,71 @@ class _HomeScreenState extends State<HomeScreen> {
                   return previous != current;
                 },
                 builder: (context, feedState) {
-                  if (feedState is FeedLoaded) {
-                    final items = feedState.items;
-                    if (items.isEmpty) return const FeedEmptyState();
-                    final hasMore = feedState.hasMore;
-                    final itemIndexById = <String, int>{
-                      for (var i = 0; i < items.length; i++) items[i].id: i,
-                    };
+                  return feedState.when(
+                    initial: () => const FeedLoadingState(),
+                    loading: () => const FeedLoadingState(),
+                    failure: (message, _) => FeedErrorState(message: message),
+                    loaded: (items, hasMore) {
+                      if (items.isEmpty) return const FeedEmptyState();
 
-                    return SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          if (index == items.length) {
-                            return const FeedLoadMoreIndicator();
-                          }
+                      final itemIndexById = <String, int>{
+                        for (var i = 0; i < items.length; i++) items[i].id: i,
+                      };
 
-                          final item = items[index];
-                          // Use RecommendCard for media recommendation posts,
-                          // otherwise fall back to the standard PostItem.
-                          final isRecommendation =
-                              item.questionType == 'recommendation' &&
-                              item.mediaRec != null;
-                          return Column(
-                            key: ValueKey('column_${item.id}'),
-                            children: [
-                              RepaintBoundary(
-                                child: isRecommendation
-                                    ? RecommendCard(
-                                        key: ValueKey('rec_${item.id}'),
-                                        item: item,
-                                      )
-                                    : PostItem(
-                                        key: ValueKey('post_${item.id}'),
-                                        item: item,
-                                      ),
-                              ),
-                              Divider(
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
-                                height: 1,
-                              ),
-                              if (index == 0) ...const [
-                                SuggestedSection(
-                                  key: ValueKey('suggested_section'),
+                      return SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            if (index == items.length) {
+                              return const FeedLoadMoreIndicator();
+                            }
+
+                            final item = items[index];
+                            final isRecommendation =
+                                item.questionType == 'recommendation' &&
+                                item.mediaRec != null;
+
+                            return Column(
+                              key: ValueKey('column_${item.id}'),
+                              children: [
+                                RepaintBoundary(
+                                  child: isRecommendation
+                                      ? RecommendCard(
+                                          key: ValueKey('rec_${item.id}'),
+                                          item: item,
+                                        )
+                                      : PostItem(
+                                          key: ValueKey('post_${item.id}'),
+                                          item: item,
+                                        ),
                                 ),
-                                Divider(height: 1),
+                                Divider(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurface
+                                      .withValues(alpha: 0.05),
+                                  height: 1,
+                                ),
+                                if (index == 0) ...const [
+                                  SuggestedSection(
+                                    key: ValueKey('suggested_section'),
+                                  ),
+                                  Divider(height: 1),
+                                ],
                               ],
-                            ],
-                          );
-                        },
-                        childCount: items.length + (hasMore ? 1 : 0),
-                        findChildIndexCallback: (Key key) {
-                          if (key is ValueKey<String> &&
-                              key.value.startsWith('column_')) {
-                            final id = key.value.substring(7);
-                            return itemIndexById[id];
-                          }
-                          return null;
-                        },
-                      ),
-                    );
-                  }
-                  if (feedState is FeedLoading || feedState is FeedInitial) {
-                    return const FeedLoadingState();
-                  }
-                  return FeedErrorState(
-                    message: (feedState as FeedFailure).message,
+                            );
+                          },
+                          childCount: items.length + (hasMore ? 1 : 0),
+                          findChildIndexCallback: (Key key) {
+                            if (key is ValueKey<String> &&
+                                key.value.startsWith('column_')) {
+                              final id = key.value.substring(7);
+                              return itemIndexById[id];
+                            }
+                            return null;
+                          },
+                        ),
+                      );
+                    },
                   );
                 },
               ),

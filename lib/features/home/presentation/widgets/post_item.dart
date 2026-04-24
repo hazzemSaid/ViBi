@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vibi/features/home/domain/entities/feed_item.dart';
-import 'package:vibi/features/home/presentation/providers/feed_providers.dart';
-import 'package:vibi/features/home/presentation/providers/feed_state.dart';
+import 'package:vibi/features/feed/domain/entities/feed_item.dart';
+import 'package:vibi/features/feed/presentation/view/cubit/feed_cubit.dart';
+import 'package:vibi/features/feed/presentation/view/cubit/feed_state.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 
 import 'post_item/action_row.dart';

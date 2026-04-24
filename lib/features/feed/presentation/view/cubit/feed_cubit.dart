@@ -1,10 +1,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:vibi/features/home/domain/entities/feed_item.dart';
-import 'package:vibi/features/home/domain/usecases/get_following_feed_usecase.dart';
-import 'package:vibi/features/home/domain/usecases/get_global_feed_usecase.dart';
-import 'package:vibi/features/home/presentation/providers/feed_state.dart';
+import 'package:vibi/features/feed/domain/entities/feed_item.dart';
+import 'package:vibi/features/feed/domain/usecases/get_following_feed_usecase.dart';
+import 'package:vibi/features/feed/domain/usecases/get_global_feed_usecase.dart';
+import 'package:vibi/features/feed/presentation/view/cubit/feed_state.dart';
+import 'package:vibi/core/constants/app_caching.dart';
 
+/**
+ * Manages the global feed state, including fetching, pagination, and refreshing.
+ */
 class GlobalFeedCubit extends Cubit<FeedState> {
   GlobalFeedCubit(this._getGlobalFeedUseCase) : super(const FeedLoading()) {
     _fetchInitial();
@@ -12,11 +16,14 @@ class GlobalFeedCubit extends Cubit<FeedState> {
 
   final GetGlobalFeedUseCase _getGlobalFeedUseCase;
   int _offset = 0;
-  final int _limit = 20;
+  final int _limit = AppCaching.feedPageLimit;
   bool _hasMore = true;
   bool _isLoadingMore = false;
   final Map<String, int> _itemIndexById = <String, int>{};
 
+  /**
+   * Refreshes the global feed by resetting pagination and fetching the initial batch.
+   */
   Future<void> refresh() async {
     _offset = 0;
     _hasMore = true;
@@ -53,43 +60,52 @@ class GlobalFeedCubit extends Cubit<FeedState> {
   }
 
   Future<void> _fetchInitial() async {
-    try {
-      final newItems = await _getGlobalFeedUseCase(limit: _limit, offset: 0);
-      _hasMore = newItems.length == _limit;
-      _emitLoaded(newItems);
-    } catch (e) {
-      if (!isClosed) {
-        emit(FeedFailure('$e'));
-      }
-    }
+    final result = await _getGlobalFeedUseCase(limit: _limit, offset: 0);
+
+    result.fold(
+      (error) {
+        if (!isClosed) emit(FeedFailure(error));
+      },
+      (newItems) {
+        _hasMore = newItems.length == _limit;
+        _emitLoaded(newItems);
+      },
+    );
   }
 
+  /**
+   * Fetches the next page of global feed items.
+   */
   Future<void> fetchMore() async {
     if (_isLoadingMore || !_hasMore) return;
 
     _isLoadingMore = true;
     _offset += _limit;
 
-    try {
-      final newItems = await _getGlobalFeedUseCase(
-        limit: _limit,
-        offset: _offset,
-      );
-      if (newItems.length < _limit) {
-        _hasMore = false;
-      }
-      final currentState = state;
-      final currentItems = currentState is FeedLoaded
-          ? currentState.items
-          : <FeedItem>[];
-      _emitLoaded([...currentItems, ...newItems]);
-    } catch (e) {
-      _offset -= _limit;
-    } finally {
-      _isLoadingMore = false;
-    }
+    final result = await _getGlobalFeedUseCase(limit: _limit, offset: _offset);
+
+    result.fold(
+      (error) {
+        _offset -= _limit;
+      },
+      (newItems) {
+        if (newItems.length < _limit) {
+          _hasMore = false;
+        }
+        final currentState = state;
+        final currentItems = currentState is FeedLoaded
+            ? currentState.items
+            : <FeedItem>[];
+        _emitLoaded([...currentItems, ...newItems]);
+      },
+    );
+
+    _isLoadingMore = false;
   }
 
+  /**
+   * Updates answer reaction and comment counts locally in the current feed state.
+   */
   void patchAnswerCounts({
     required String answerId,
     int? reactionsCount,
@@ -124,6 +140,9 @@ class GlobalFeedCubit extends Cubit<FeedState> {
   }
 }
 
+/**
+ * Manages the following feed state, containing items from followed users.
+ */
 class FollowingFeedCubit extends Cubit<FeedState> {
   FollowingFeedCubit(this._getFollowingFeedUseCase)
     : super(const FeedLoading()) {
@@ -132,10 +151,13 @@ class FollowingFeedCubit extends Cubit<FeedState> {
 
   final GetFollowingFeedUseCase _getFollowingFeedUseCase;
   int _offset = 0;
-  final int _limit = 20;
+  final int _limit = AppCaching.feedPageLimit;
   bool _hasMore = true;
   bool _isLoadingMore = false;
 
+  /**
+   * Refreshes the following feed.
+   */
   Future<void> refresh() async {
     _offset = 0;
     _hasMore = true;
@@ -148,60 +170,76 @@ class FollowingFeedCubit extends Cubit<FeedState> {
   bool get hasMore => _hasMore;
 
   Future<void> _fetchInitial() async {
-    try {
-      final userId = Supabase.instance.client.auth.currentUser?.id;
-      if (userId == null) {
-        if (!isClosed) emit(const FeedLoaded([], hasMore: false));
-        return;
-      }
-      final newItems = await _getFollowingFeedUseCase(
-        userId,
-        limit: _limit,
-        offset: 0,
-      );
-      _hasMore = newItems.length == _limit;
-      if (!isClosed) {
-        emit(FeedLoaded(newItems, hasMore: _hasMore));
-      }
-    } catch (e) {
-      if (!isClosed) {
-        emit(FeedFailure('$e'));
-      }
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      if (!isClosed) emit(const FeedLoaded([], hasMore: false));
+      return;
     }
+
+    final result = await _getFollowingFeedUseCase(
+      userId,
+      limit: _limit,
+      offset: 0,
+    );
+
+    result.fold(
+      (error) {
+        if (!isClosed) emit(FeedFailure(error));
+      },
+      (newItems) {
+        _hasMore = newItems.length == _limit;
+        if (!isClosed) {
+          emit(FeedLoaded(newItems, hasMore: _hasMore));
+        }
+      },
+    );
   }
 
+  /**
+   * Fetches the next page of the following feed.
+   */
   Future<void> fetchMore() async {
     if (_isLoadingMore || !_hasMore) return;
 
     _isLoadingMore = true;
     _offset += _limit;
 
-    try {
-      final userId = Supabase.instance.client.auth.currentUser?.id;
-      if (userId == null) return;
-
-      final newItems = await _getFollowingFeedUseCase(
-        userId,
-        limit: _limit,
-        offset: _offset,
-      );
-      if (newItems.length < _limit) {
-        _hasMore = false;
-      }
-      final currentState = state;
-      final currentItems = currentState is FeedLoaded
-          ? currentState.items
-          : <FeedItem>[];
-      if (!isClosed) {
-        emit(FeedLoaded([...currentItems, ...newItems], hasMore: _hasMore));
-      }
-    } catch (e) {
-      _offset -= _limit;
-    } finally {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
       _isLoadingMore = false;
+      return;
     }
+
+    final result = await _getFollowingFeedUseCase(
+      userId,
+      limit: _limit,
+      offset: _offset,
+    );
+
+    result.fold(
+      (error) {
+        _offset -= _limit;
+      },
+      (newItems) {
+        if (newItems.length < _limit) {
+          _hasMore = false;
+        }
+        final currentState = state;
+        final currentItems = currentState is FeedLoaded
+            ? currentState.items
+            : <FeedItem>[];
+        if (!isClosed) {
+          emit(FeedLoaded([...currentItems, ...newItems], hasMore: _hasMore));
+        }
+      },
+    );
+
+    _isLoadingMore = false;
   }
 
+  /**
+   * Updates answer counts locally for the following feed state.
+   */
   void patchAnswerCounts({
     required String answerId,
     int? reactionsCount,

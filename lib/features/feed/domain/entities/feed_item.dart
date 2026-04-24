@@ -1,66 +1,104 @@
-class FeedItem {
+import 'package:equatable/equatable.dart';
+import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
+
+class FeedItem extends Equatable {
   final String id;
-  final String answerText;
   final String userId;
+  final String? answerAuthorId;
+  final String? questionSenderId;
+  final String username;
+  final String? avatarUrl;
+  final String answerAuthorUsername;
+  final String? answerAuthorAvatarUrl;
+  final String questionText;
+  final String questionType;
+  final TmdbMedia? mediaRec;
+  final String answerText;
   final int likesCount;
   final int commentsCount;
   final int sharesCount;
   final DateTime createdAt;
-  final String? username;
-  final String? avatarUrl;
-  final String? answerAuthorUsername;
-  final String? answerAuthorAvatarUrl;
-  final String? questionText;
   final bool isAnonymous;
 
-  FeedItem({
+  const FeedItem({
     required this.id,
-    required this.answerText,
     required this.userId,
+    this.answerAuthorId,
+    this.questionSenderId,
+    required this.username,
+    this.avatarUrl,
+    required this.answerAuthorUsername,
+    this.answerAuthorAvatarUrl,
+    required this.questionText,
+    this.questionType = 'text',
+    this.mediaRec,
+    required this.answerText,
     required this.likesCount,
     required this.commentsCount,
     required this.sharesCount,
     required this.createdAt,
-    this.username,
-    this.avatarUrl,
-    this.answerAuthorUsername,
-    this.answerAuthorAvatarUrl,
-    this.questionText,
-    this.isAnonymous = false,
+    required this.isAnonymous,
   });
 
-  factory FeedItem.fromMap(Map<String, dynamic> map) {
-    final avatarUrls = map['avatar_urls'] as List? ?? [];
+  FeedItem copyWith({
+    String? id,
+    String? userId,
+    String? answerAuthorId,
+    String? questionSenderId,
+    String? username,
+    String? avatarUrl,
+    String? answerAuthorUsername,
+    String? answerAuthorAvatarUrl,
+    String? questionText,
+    String? questionType,
+    TmdbMedia? mediaRec,
+    String? answerText,
+    int? likesCount,
+    int? commentsCount,
+    int? sharesCount,
+    DateTime? createdAt,
+    bool? isAnonymous,
+  }) {
     return FeedItem(
-      id: map['id'] as String,
-      answerText: map['answer_text'] as String? ?? '',
-      userId: map['user_id'] as String,
-      likesCount: map['likes_count'] as int? ?? 0,
-      commentsCount: map['comments_count'] as int? ?? 0,
-      sharesCount: map['shares_count'] as int? ?? 0,
-      createdAt: DateTime.parse(map['created_at'] as String),
-      username: map['username'] as String?,
-      avatarUrl: avatarUrls.isNotEmpty
-          ? avatarUrls.first.toString()
-          : map['avatar_url'] as String?,
-      questionText: map['question_text'] as String?,
-      isAnonymous: map['is_anonymous'] as bool? ?? false,
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      answerAuthorId: answerAuthorId ?? this.answerAuthorId,
+      questionSenderId: questionSenderId ?? this.questionSenderId,
+      username: username ?? this.username,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      answerAuthorUsername: answerAuthorUsername ?? this.answerAuthorUsername,
+      answerAuthorAvatarUrl:
+          answerAuthorAvatarUrl ?? this.answerAuthorAvatarUrl,
+      questionText: questionText ?? this.questionText,
+      questionType: questionType ?? this.questionType,
+      mediaRec: mediaRec ?? this.mediaRec,
+      answerText: answerText ?? this.answerText,
+      likesCount: likesCount ?? this.likesCount,
+      commentsCount: commentsCount ?? this.commentsCount,
+      sharesCount: sharesCount ?? this.sharesCount,
+      createdAt: createdAt ?? this.createdAt,
+      isAnonymous: isAnonymous ?? this.isAnonymous,
     );
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'answer_text': answerText,
-      'user_id': userId,
-      'likes_count': likesCount,
-      'comments_count': commentsCount,
-      'shares_count': sharesCount,
-      'created_at': createdAt.toIso8601String(),
-      'username': username,
-      'avatar_urls': avatarUrl != null ? [avatarUrl] : [],
-      'question_text': questionText,
-      'is_anonymous': isAnonymous,
-    };
-  }
+  @override
+  List<Object?> get props => [
+    id,
+    userId,
+    answerAuthorId,
+    questionSenderId,
+    username,
+    avatarUrl,
+    answerAuthorUsername,
+    answerAuthorAvatarUrl,
+    questionText,
+    questionType,
+    mediaRec,
+    answerText,
+    likesCount,
+    commentsCount,
+    sharesCount,
+    createdAt,
+    isAnonymous,
+  ];
 }

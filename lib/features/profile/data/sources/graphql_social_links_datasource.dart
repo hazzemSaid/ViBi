@@ -2,6 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:ferry/ferry.dart' as ferry;
 import 'package:vibi/core/errors/errors_handel.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
+import 'package:vibi/core/graphql/mutations/social_links_mutations.dart';
+import 'package:vibi/core/graphql/queries/social_links_queries.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
 
 /// GraphQL-only Social Links data source.
@@ -34,33 +36,9 @@ class GraphQLSocialLinksDataSource {
   Future<Either<String, List<SocialLink>>> fetchSocialLinks(
     String userId,
   ) async {
-    const query = r'''
-      query GetSocialLinks($userId: UUID!) {
-        social_linksCollection(
-          filter: { user_id: { eq: $userId } }
-          orderBy: [{ display_order: AscNullsLast }]
-        ) {
-          edges {
-            node {
-              id
-              user_id
-              platform
-              url
-              title
-              display_label
-              display_order
-              is_active
-              created_at
-              updated_at
-            }
-          }
-        }
-      }
-    ''';
-
     final result = await GraphQLConfig.ferryQuery(
       'GetSocialLinks',
-      document: query,
+      document: SocialLinksQueries.getSocialLinks,
       variables: {'userId': userId},
       clientOverride: _ferryClient,
     );
@@ -92,45 +70,9 @@ class GraphQLSocialLinksDataSource {
   }) async {
     final normalizedPlatform = _normalizePlatform(platform);
 
-    const mutation = r'''
-      mutation AddSocialLink(
-        $userId: UUID!
-        $platform: String!
-        $url: String!
-        $title: String
-        $displayLabel: String
-        $displayOrder: Int!
-      ) {
-        insertIntosocial_linksCollection(
-          objects: [{
-            user_id: $userId
-            platform: $platform
-            url: $url
-            title: $title
-            display_label: $displayLabel
-            display_order: $displayOrder
-            is_active: true
-          }]
-        ) {
-          records {
-            id
-            user_id
-            platform
-            url
-            title
-            display_label
-            display_order
-            is_active
-            created_at
-            updated_at
-          }
-        }
-      }
-    ''';
-
     final result = await GraphQLConfig.ferryMutate(
       'AddSocialLink',
-      document: mutation,
+      document: SocialLinksMutations.addSocialLink,
       variables: {
         'userId': userId,
         'platform': normalizedPlatform,
@@ -168,46 +110,9 @@ class GraphQLSocialLinksDataSource {
   }) async {
     final normalizedPlatform = _normalizePlatform(platform);
 
-    const mutation = r'''
-      mutation UpdateSocialLink(
-        $id: UUID!
-        $platform: String!
-        $url: String!
-        $title: String
-        $displayLabel: String
-        $displayOrder: Int!
-        $isActive: Boolean!
-      ) {
-        updatesocial_linksCollection(
-          set: {
-            platform: $platform
-            url: $url
-            title: $title
-            display_label: $displayLabel
-            display_order: $displayOrder
-            is_active: $isActive
-          }
-          filter: { id: { eq: $id } }
-        ) {
-          records {
-            id
-            user_id
-            platform
-            url
-            title
-            display_label
-            display_order
-            is_active
-            created_at
-            updated_at
-          }
-        }
-      }
-    ''';
-
     final result = await GraphQLConfig.ferryMutate(
       'UpdateSocialLink',
-      document: mutation,
+      document: SocialLinksMutations.updateSocialLink,
       variables: {
         'id': linkId,
         'platform': normalizedPlatform,
@@ -235,17 +140,9 @@ class GraphQLSocialLinksDataSource {
   }
 
   Future<Either<String, Unit>> deleteSocialLink(String linkId) async {
-    const mutation = r'''
-      mutation DeleteSocialLink($id: UUID!) {
-        deleteFromsocial_linksCollection(filter: { id: { eq: $id } }) {
-          affectedCount
-        }
-      }
-    ''';
-
     final result = await GraphQLConfig.ferryMutate(
       'DeleteSocialLink',
-      document: mutation,
+      document: SocialLinksMutations.deleteSocialLink,
       variables: {'id': linkId},
       clientOverride: _ferryClient,
     );

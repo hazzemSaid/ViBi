@@ -4,6 +4,7 @@ import 'package:ferry/ferry.dart' as ferry;
 import 'package:flutter/foundation.dart';
 import 'package:vibi/core/errors/errors_handel.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
+import 'package:vibi/core/graphql/queries/feed_queries.dart';
 import 'package:vibi/features/home/data/datasources/feed_data_source_interface.dart';
 import 'package:vibi/features/home/data/models/feed_item_model.dart';
 
@@ -13,111 +14,7 @@ class GraphQLFeedDataSource implements FeedDataSource {
 
   GraphQLFeedDataSource(this._ferryClient);
 
-  static const _globalFeedItemsQuery = r'''
-     query GetGlobalFeedItems($limit: Int!, $offset: Int!) {
-      feed_itemsCollection(
-        orderBy: [{ created_at: DescNullsLast }]
-        first: $limit
-        offset: $offset
-      ) {
-        edges {
-          node {
-            id
-            user_id
-            answer_id
-            created_at
-            answers {
-              id
-              answer_text
-              likes_count
-              comments_count
-              shares_count
-              created_at
-              user_id
-              profiles {
-                id
-                username
-                avatar_urls
-              }
-              questions {
-                question_text
-                question_type
-                media_rec_id
-                is_anonymous
-                sender_id
-                
-                profiles {
-                  id
-                  username
-                  avatar_urls
-                }
-                media_recommendations {
-                  id
-                  tmdb_id
-                  media_type
-                  title
-                  poster_path
-                  overview
-                  release_date
-                  vote_average
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  ''';
 
-  static const _followingFeedItemsQuery = r'''
-    query GetFollowingFeedItems($userId: UUID!, $limit: Int!, $offset: Int!) {
-      answersCollection(
-        filter: {
-          user: {
-            followers: {
-              follower_id: { eq: $userId }
-            }
-          }
-        }
-        orderBy: [{ created_at: DescNullsLast }]
-        first: $limit
-        offset: $offset
-      ) {
-        edges {
-          node {
-            id
-            answer_text
-            likes_count
-            comments_count
-            shares_count
-            created_at
-            user_id
-            profiles {
-              id
-              username
-              avatar_urls
-            }
-            questions {
-              question_text
-              question_type
-              media_rec_id
-              is_anonymous
-              media_recommendations {
-                id
-                tmdb_id
-                media_type
-                title
-                poster_path
-                overview
-                release_date
-                vote_average
-              }
-            }
-          }
-        }
-      }
-    }
-  ''';
 
   Future<List<FeedItemModel>> _loadFeedFromAnswers({
     required String query,
@@ -192,7 +89,7 @@ class GraphQLFeedDataSource implements FeedDataSource {
     int offset = 0,
   }) async {
     return _loadFeedFromAnswers(
-      query: _globalFeedItemsQuery,
+      query: FeedQueries.getGlobalFeedItems,
       operationName: 'GetGlobalFeedItems',
       variables: {'limit': limit, 'offset': offset},
     );
@@ -205,7 +102,7 @@ class GraphQLFeedDataSource implements FeedDataSource {
     int offset = 0,
   }) async {
     return _loadFeedFromAnswers(
-      query: _followingFeedItemsQuery,
+      query: FeedQueries.getFollowingFeedItems,
       operationName: 'GetFollowingFeedItems',
       variables: {'userId': userId, 'limit': limit, 'offset': offset},
     );

@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/errors/errors_handel.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
+import 'package:vibi/core/graphql/mutations/inbox_mutations.dart';
+import 'package:vibi/core/graphql/queries/inbox_queries.dart';
 import 'package:vibi/features/inbox/data/models/inbox_question_model.dart';
 
 class GraphQLInboxDataSource {
@@ -21,53 +23,7 @@ class GraphQLInboxDataSource {
 
   // ── Queries ────────────────────────────────────────────────────────────────
 
-  static const _pendingQuestionsQuery = r'''
-    query GetPendingQuestions($currentUserId: UUID!, $limit: Int!, $offset: Int!, $statuses: [String!]!) {
-      questionsCollection(
-        filter: {
-          recipient_id: { eq: $currentUserId }
-          status: { in: $statuses }
-        }
-        orderBy: [{ created_at: DescNullsLast }]
-        first: $limit
-        offset: $offset
-      ) {
-        edges {
-          node {
-            id
-            recipient_id
-            sender_id
-            question_text
-            question_type
-            media_rec_id
-            is_anonymous
-            status
-            created_at
-            profiles {
-              username
-              avatar_urls
-            }
-          }
-        }
-      }
-    }
-  ''';
 
-  static const _handleQuestionActionMutation = r'''
-    mutation HandleQuestionAction(
-      $questionId: UUID!
-      $userId: UUID!
-      $action: String!
-      $answerText: String
-    ) {
-      handle_question_action(
-        p_question_id: $questionId
-        p_user_id: $userId
-        p_action: $action
-        p_answer_text: $answerText
-      )
-    }
-  ''';
 
   Future<ferry.OperationResponse<Map<String, dynamic>, Map<String, dynamic>>>
   _runNetworkFirstQuery({
@@ -115,7 +71,7 @@ class GraphQLInboxDataSource {
 
       final result = await _runNetworkFirstQuery(
         operationName: 'GetPendingQuestions',
-        document: _pendingQuestionsQuery,
+        document: InboxQueries.getPendingQuestions,
         variables: {
           'currentUserId': currentUserId,
           'limit': limit,
@@ -314,7 +270,7 @@ class GraphQLInboxDataSource {
 
       final result = await _runMutation(
         operationName: 'HandleQuestionAction',
-        document: _handleQuestionActionMutation,
+        document: InboxMutations.handleQuestionAction,
         variables: {
           'questionId': questionId,
           'userId': userId,
@@ -354,7 +310,7 @@ class GraphQLInboxDataSource {
 
       final result = await _runMutation(
         operationName: 'HandleQuestionAction',
-        document: _handleQuestionActionMutation,
+        document: InboxMutations.handleQuestionAction,
         variables: {
           'questionId': questionId,
           'userId': userId,
@@ -393,7 +349,7 @@ class GraphQLInboxDataSource {
 
       final result = await _runMutation(
         operationName: 'HandleQuestionAction',
-        document: _handleQuestionActionMutation,
+        document: InboxMutations.handleQuestionAction,
         variables: {
           'questionId': questionId,
           'userId': userId,
@@ -431,7 +387,7 @@ class GraphQLInboxDataSource {
 
       final result = await _runMutation(
         operationName: 'HandleQuestionAction',
-        document: _handleQuestionActionMutation,
+        document: InboxMutations.handleQuestionAction,
         variables: {
           'questionId': questionId,
           'userId': userId,

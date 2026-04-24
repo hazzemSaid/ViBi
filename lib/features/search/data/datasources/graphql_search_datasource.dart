@@ -2,6 +2,7 @@ import 'package:ferry/ferry.dart' as ferry;
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
+import 'package:vibi/core/graphql/queries/search_queries.dart';
 import 'package:vibi/features/search/data/models/content_search_result_model.dart';
 import 'package:vibi/features/search/data/models/user_search_result_model.dart';
 
@@ -13,68 +14,7 @@ class GraphQLSearchDataSource {
     : _client = client ?? Supabase.instance.client,
       _ferryClient = ferryClient ?? GraphQLConfig.ferryClient;
 
-  static const _searchUsersQuery = r'''
-    query SearchUsers($query: String!) {
-      profilesCollection(
-        filter: {
-          or: [
-            { username: { ilike: $query } }
-            { full_name: { ilike: $query } }
-          ]
-        }
-        first: 50
-      ) {
-        edges {
-          node {
-            id
-            full_name
-            username
-            bio
-            avatar_urls
-            followersCount: followsByFollowingId {
-              totalCount
-            }
-            answersCount: answersCollection {
-              totalCount
-            }
-            is_private
-          }
-        }
-      }
-    }
-  ''';
 
-  static const _searchContentQuery = r'''
-    query SearchContent($query: String!) {
-      answersCollection(
-        filter: {
-          or: [
-            { answer_text: { ilike: $query } }
-          ]
-        }
-        orderBy: [{ created_at: DescNullsLast }]
-        first: 50
-      ) {
-        edges {
-          node {
-            id
-            user_id
-            answer_text
-            likes_count
-            created_at
-            questions {
-              question_text
-              is_anonymous
-            }
-            profiles {
-              username
-              avatar_urls
-            }
-          }
-        }
-      }
-    }
-  ''';
 
   Future<List<UserSearchResultModel>> searchUsers(String query) async {
     if (query.trim().isEmpty) return [];
@@ -84,7 +24,7 @@ class GraphQLSearchDataSource {
     try {
       final result = await GraphQLConfig.ferryQuery(
         'SearchUsers',
-        document: _searchUsersQuery,
+        document: SearchQueries.searchUsers,
         variables: {'query': searchPattern},
         clientOverride: _ferryClient,
       );
@@ -158,7 +98,7 @@ class GraphQLSearchDataSource {
     try {
       final result = await GraphQLConfig.ferryQuery(
         'SearchContent',
-        document: _searchContentQuery,
+        document: SearchQueries.searchContent,
         variables: {'query': searchPattern},
         clientOverride: _ferryClient,
       );

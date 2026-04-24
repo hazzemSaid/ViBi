@@ -5,7 +5,8 @@ import 'package:ferry/ferry.dart' as ferry;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/errors/errors_handel.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
-import 'package:vibi/core/graphql/mutations/graphql_mutations.dart';
+import 'package:vibi/core/graphql/mutations/profile_mutations.dart';
+import 'package:vibi/core/graphql/queries/profile_queries.dart';
 import 'package:vibi/features/profile/data/models/answered_question_model.dart';
 import 'package:vibi/features/profile/data/models/follower_user_model.dart';
 import 'package:vibi/features/profile/data/models/following_user_model.dart';
@@ -37,59 +38,9 @@ class GraphQLProfileDataSource {
 
   /// Fetch user profile using GraphQL query
   Future<Either<String, UserProfileModel?>> fetchProfile(String uid) async {
-    const query = r'''
-      query GetProfile($id: UUID!) {
-        profilesCollection(filter: { id: { eq: $id } }) {
-          edges {
-            node {
-              id
-              full_name
-              username
-              bio
-              avatar_urls
-              is_private
-              allow_anonymous_questions
-              public_profile_enabled
-              public_cta_text
-              fav_color
-              question_placeholder
-              show_social_icons
-              status_text
-              public_font_family
-              is_verified
-              backgroundcolor
-              followersCount: followsByFollowingId(first: 1000) {
-                edges {
-                  node {
-                    id
-                  }
-                }
-              }
-              followingCount: followsByFollowerId(first: 1000) {
-                edges {
-                  node {
-                    id
-                  }
-                }
-              }
-              answersCount: answersCollection(first: 1000) {
-                edges {
-                  node {
-                    id
-                  }
-                }
-              }
-              updated_at
-              created_at
-            }
-          }
-        }
-      }
-    ''';
-
     final result = await GraphQLConfig.ferryQuery(
       'GetProfile',
-      document: query,
+      document: ProfileQueries.getProfile,
       variables: {'id': uid},
       clientOverride: _ferryClient,
     );
@@ -111,7 +62,7 @@ class GraphQLProfileDataSource {
   Future<void> updateProfile(UserProfileModel profile) async {
     final result = await GraphQLConfig.ferryMutate(
       'UpdateProfile',
-      document: GraphQLMutations.updateProfile,
+      document: ProfileMutations.updateProfile,
       variables: {
         'userId': profile.uid,
         'username': profile.username,
@@ -175,22 +126,9 @@ class GraphQLProfileDataSource {
       uploadedUrl,
     ];
 
-    const mutation = r'''
-      mutation UpdateAvatarUrls($userId: UUID!, $avatarUrls: [String!], $updatedAt: Datetime!) {
-        updateprofilesCollection(
-          filter: { id: { eq: $userId } }
-          set: { avatar_urls: $avatarUrls, updated_at: $updatedAt }
-        ) {
-          records {
-            id
-          }
-        }
-      }
-    ''';
-
     final result = await GraphQLConfig.ferryMutate(
       'UpdateAvatarUrls',
-      document: mutation,
+      document: ProfileMutations.updateAvatarUrls,
       variables: {
         'userId': uid,
         'avatarUrls': updatedUrls,
@@ -241,58 +179,9 @@ class GraphQLProfileDataSource {
     String userId,
     String? currentUserId,
   ) async {
-    const query = r'''
-      query GetPublicProfile($id: UUID!) {
-        profilesCollection(filter: { id: { eq: $id } }) {
-          edges {
-            node {
-              id
-              full_name
-              username
-              bio
-              avatar_urls
-              is_private
-              allow_anonymous_questions
-              public_profile_enabled
-              public_cta_text
-              fav_color
-              question_placeholder
-              show_social_icons
-              status_text
-              public_font_family
-              is_verified
-              backgroundcolor
-              followersCount: followsByFollowingId(first: 1000) {
-                edges {
-                  node {
-                    id
-                  }
-                }
-              }
-              followingCount: followsByFollowerId(first: 1000) {
-                edges {
-                  node {
-                    id
-                  }
-                }
-              }
-              answersCount: answersCollection(first: 1000) {
-                edges {
-                  node {
-                    id
-                  }
-                }
-              }
-              updated_at
-            }
-          }
-        }
-      }
-    ''';
-
     final result = await GraphQLConfig.ferryQuery(
       'GetPublicProfile',
-      document: query,
+      document: ProfileQueries.getPublicProfile,
       variables: {'id': userId},
       clientOverride: _ferryClient,
     );
@@ -316,58 +205,9 @@ class GraphQLProfileDataSource {
     String username,
     String? currentUserId,
   ) async {
-    const query = r'''
-      query GetPublicProfileByUsername($username: String!) {
-        profilesCollection(filter: { username: { eq: $username } }) {
-          edges {
-            node {
-              id
-              full_name
-              username
-              bio
-              avatar_urls
-              is_private
-              allow_anonymous_questions
-              public_profile_enabled
-              public_cta_text
-              fav_color
-              question_placeholder
-              show_social_icons
-              status_text
-              public_font_family
-              is_verified
-              backgroundcolor
-              followersCount: followsByFollowingId(first: 1000) {
-                edges {
-                  node {
-                    id
-                  }
-                }
-              }
-              followingCount: followsByFollowerId(first: 1000) {
-                edges {
-                  node {
-                    id
-                  }
-                }
-              }
-              answersCount: answersCollection(first: 1000) {
-                edges {
-                  node {
-                    id
-                  }
-                }
-              }
-              updated_at
-            }
-          }
-        }
-      }
-    ''';
-
     final result = await GraphQLConfig.ferryQuery(
       'GetPublicProfileByUsername',
-      document: query,
+      document: ProfileQueries.getPublicProfileByUsername,
       variables: {'username': username},
       clientOverride: _ferryClient,
     );
@@ -412,24 +252,9 @@ class GraphQLProfileDataSource {
   }
 
   Future<bool> _checkIsFollowing(String followerId, String followingId) async {
-    const query = r'''
-      query CheckIsFollowing($followerId: UUID!, $followingId: UUID!) {
-        followsCollection(
-          filter: { follower_id: { eq: $followerId }, following_id: { eq: $followingId } }
-          first: 1
-        ) {
-          edges {
-            node {
-              id
-            }
-          }
-        }
-      }
-    ''';
-
     final result = await GraphQLConfig.ferryQuery(
       'CheckIsFollowing',
-      document: query,
+      document: ProfileQueries.checkIsFollowing,
       variables: {'followerId': followerId, 'followingId': followingId},
       clientOverride: _ferryClient,
     );
@@ -446,28 +271,9 @@ class GraphQLProfileDataSource {
     String requesterId,
     String targetId,
   ) async {
-    const query = r'''
-      query CheckHasRequestedFollow($requesterId: UUID!, $targetId: UUID!) {
-        follow_requestsCollection(
-          filter: {
-            requester_id: { eq: $requesterId }
-            target_id: { eq: $targetId }
-            status: { eq: "pending" }
-          }
-          first: 1
-        ) {
-          edges {
-            node {
-              id
-            }
-          }
-        }
-      }
-    ''';
-
     final result = await GraphQLConfig.ferryQuery(
       'CheckHasRequestedFollow',
-      document: query,
+      document: ProfileQueries.checkHasRequestedFollow,
       variables: {'requesterId': requesterId, 'targetId': targetId},
       clientOverride: _ferryClient,
     );
@@ -483,51 +289,9 @@ class GraphQLProfileDataSource {
 
   /// Get user's answered questions.
   Future<List<AnsweredQuestionModel>> getUserAnswers(String userId) async {
-    const query = r'''
-      query GetUserAnswers($userId: UUID!) {
-        answersCollection(
-          filter: { user_id: { eq: $userId } }
-          orderBy: [{ created_at: DescNullsLast }]
-          first: 50
-        ) {
-          edges {
-            node {
-              id
-              user_id
-              answer_text
-              likes_count
-              comments_count
-              shares_count
-              created_at
-              questions {
-                id
-                question_text
-                is_anonymous
-                sender_id
-                profiles {
-                  id
-                  username
-                  avatar_urls
-                }
-              }
-            }
-          }
-        }
-        answererProfile: profilesCollection(filter: { id: { eq: $userId } }) {
-          edges {
-            node {
-              id
-              username
-              avatar_urls
-            }
-          }
-        }
-      }
-    ''';
-
     final result = await GraphQLConfig.ferryQuery(
       'GetUserAnswers',
-      document: query,
+      document: ProfileQueries.getUserAnswers,
       variables: {'userId': userId},
       clientOverride: _ferryClient,
     );
@@ -597,33 +361,9 @@ class GraphQLProfileDataSource {
     int limit = 50,
     int offset = 0,
   }) async {
-    const query = r'''
-      query GetFollowers($userId: UUID!, $limit: Int!, $offset: Int!) {
-        followsCollection(
-          filter: { following_id: { eq: $userId } }
-          orderBy: [{ created_at: DescNullsLast }]
-          first: $limit
-          offset: $offset
-        ) {
-          edges {
-            node {
-              id
-              created_at
-              follower {
-                id
-                username
-                avatar_urls
-                bio
-              }
-            }
-          }
-        }
-      }
-    ''';
-
     final result = await GraphQLConfig.ferryQuery(
       'GetFollowers',
-      document: query,
+      document: ProfileQueries.getFollowers,
       variables: {'userId': userId, 'limit': limit, 'offset': offset},
       clientOverride: _ferryClient,
     );
@@ -658,33 +398,9 @@ class GraphQLProfileDataSource {
     int limit = 50,
     int offset = 0,
   }) async {
-    const query = r'''
-      query GetFollowing($userId: UUID!, $limit: Int!, $offset: Int!) {
-        followsCollection(
-          filter: { follower_id: { eq: $userId } }
-          orderBy: [{ created_at: DescNullsLast }]
-          first: $limit
-          offset: $offset
-        ) {
-          edges {
-            node {
-              id
-              created_at
-              following {
-                id
-                username
-                avatar_urls
-                bio
-              }
-            }
-          }
-        }
-      }
-    ''';
-
     final result = await GraphQLConfig.ferryQuery(
       'GetFollowing',
-      document: query,
+      document: ProfileQueries.getFollowing,
       variables: {'userId': userId, 'limit': limit, 'offset': offset},
       clientOverride: _ferryClient,
     );

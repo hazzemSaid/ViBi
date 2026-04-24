@@ -22,23 +22,13 @@ class RecommendationFlowCubit extends Cubit<RecommendationFlowState> {
 
   void setSelectedMedia(TmdbMedia media) {
     emit(
-      state.copyWith(
-        selectedMedia: media,
-        clearError: true,
-        isSuccess: false,
-      ),
+      state.copyWith(selectedMedia: media, clearError: true, isSuccess: false),
     );
   }
 
   void onQueryChanged(String value) {
     final query = value.trim();
-    emit(
-      state.copyWith(
-        query: value,
-        clearError: true,
-        isSuccess: false,
-      ),
-    );
+    emit(state.copyWith(query: value, clearError: true, isSuccess: false));
 
     _debounce?.cancel();
 
@@ -59,19 +49,24 @@ class RecommendationFlowCubit extends Cubit<RecommendationFlowState> {
   }
 
   Future<void> search(String query) async {
-    emit(
-      state.copyWith(
-        isSearching: true,
-        clearError: true,
-        isSuccess: false,
-      ),
-    );
+    emit(state.copyWith(isSearching: true, clearError: true, isSuccess: false));
 
     try {
       final results = await _repository.search(query);
+      if (results.isLeft()) {
+        emit(
+          state.copyWith(
+            results: const <TmdbMedia>[],
+            isSearching: false,
+            errorMessage:
+                'Could not load recommendations. Check your connection and TMDB key.',
+          ),
+        );
+        return;
+      }
       emit(
         state.copyWith(
-          results: results,
+          results: results.getOrElse(() => const []),
           isSearching: false,
           clearError: true,
         ),
@@ -91,13 +86,7 @@ class RecommendationFlowCubit extends Cubit<RecommendationFlowState> {
   Future<void> sendRecommendation({required String recipientId}) async {
     if (state.selectedMedia == null || state.isSending) return;
 
-    emit(
-      state.copyWith(
-        isSending: true,
-        clearError: true,
-        isSuccess: false,
-      ),
-    );
+    emit(state.copyWith(isSending: true, clearError: true, isSuccess: false));
 
     try {
       await _repository.send(
@@ -106,13 +95,7 @@ class RecommendationFlowCubit extends Cubit<RecommendationFlowState> {
         isAnonymous: state.isAnonymous,
       );
 
-      emit(
-        state.copyWith(
-          isSending: false,
-          isSuccess: true,
-          clearError: true,
-        ),
-      );
+      emit(state.copyWith(isSending: false, isSuccess: true, clearError: true));
     } catch (_) {
       emit(
         state.copyWith(

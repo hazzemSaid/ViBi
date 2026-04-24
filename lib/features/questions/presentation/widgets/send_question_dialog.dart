@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/questions/presentation/providers/question_providers.dart';
+import 'package:vibi/features/questions/presentation/providers/question_state.dart';
 import 'package:vibi/features/recommendation/presentation/screens/recommend_search_screen.dart';
 
 class SendQuestionDialog extends StatefulWidget {
@@ -51,7 +51,7 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
 
     if (mounted) {
       final state = _sendQuestionCubit.state;
-      if (!state.hasError) {
+      if (state is! SendQuestionFailure) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -81,9 +81,9 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
   Widget build(BuildContext context) {
     return BlocProvider<SendQuestionCubit>.value(
       value: _sendQuestionCubit,
-      child: BlocBuilder<SendQuestionCubit, ViewState<void>>(
+      child: BlocBuilder<SendQuestionCubit, SendQuestionState>(
         builder: (context, sendState) {
-          final isLoading = sendState.isLoading;
+          final isLoading = sendState is SendQuestionLoading;
 
           return Dialog(
             backgroundColor: Theme.of(context).colorScheme.surface,
@@ -229,7 +229,7 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
                     SizedBox(height: AppSizes.r12),
 
                     // Error Message
-                    if (sendState.hasError)
+                    if (sendState is SendQuestionFailure)
                       Padding(
                         padding: EdgeInsets.only(bottom: AppSizes.r12),
                         child: Text(

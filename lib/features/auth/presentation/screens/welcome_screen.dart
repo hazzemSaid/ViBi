@@ -80,7 +80,7 @@ class WelcomeScreen extends StatelessWidget {
                 Spacer(flex: isShort ? 2 : 4),
 
                 // Buttons Section
-                if (authState.isLoading)
+                if (authState is AuthActionLoading)
                   Center(
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 40),
@@ -221,11 +221,11 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ],
 
-                if (authState.hasError)
+                if (authState is AuthActionFailure)
                   Padding(
                     padding: const EdgeInsets.only(top: AppSizes.s16),
                     child: Text(
-                      authState.errorMessage ?? 'Authentication failed',
+                      authState is AuthActionFailure ? (authState as AuthActionFailure).message : '',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.error,

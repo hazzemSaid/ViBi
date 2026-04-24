@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/reactions/presentation/providers/comments_cubit.dart';
 
 class CommentSheet extends StatefulWidget {
@@ -91,15 +90,13 @@ class _CommentSheetState extends State<CommentSheet> {
                     Expanded(
                       child: BlocBuilder<CommentsCubit, CommentsState>(
                         builder: (context, state) {
-                          if (state.viewState.status == ViewStatus.loading &&
-                              (state.viewState.data == null ||
-                                  state.viewState.data!.isEmpty)) {
+                          if (state is CommentsLoading && state.comments.isEmpty) {
                             return const Center(
                               child: CircularProgressIndicator(),
                             );
                           }
 
-                          final comments = state.viewState.data ?? [];
+                          final comments = state.comments;
                           if (comments.isEmpty) {
                             return Center(
                               child: Text(

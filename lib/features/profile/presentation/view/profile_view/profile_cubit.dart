@@ -2,18 +2,14 @@ import 'dart:io';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/profile/data/sources/graphql_profile_datasource.dart';
-import 'package:vibi/features/profile/domain/entities/answered_question.dart';
-import 'package:vibi/features/profile/domain/entities/follower_user.dart';
-import 'package:vibi/features/profile/domain/entities/following_user.dart';
-import 'package:vibi/features/profile/domain/entities/public_profile.dart';
 import 'package:vibi/features/profile/domain/entities/user_profile.dart';
 import 'package:vibi/features/profile/domain/repositories/profile_repository.dart';
 import 'package:vibi/features/profile/domain/repositories/public_profile_repository.dart';
 import 'package:vibi/features/profile/domain/usecases/fetch_user_profile_usecase.dart';
 import 'package:vibi/features/profile/domain/usecases/update_user_profile_usecase.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit_state.dart';
+import 'package:vibi/features/profile/presentation/view/profile_view/public_profile_state.dart';
 
 class ProfileCubit extends Cubit<ProfileState> {
   ProfileCubit(
@@ -67,47 +63,47 @@ class ProfileCubit extends Cubit<ProfileState> {
   }
 }
 
-class PublicProfileCubit extends Cubit<ViewState<PublicProfile?>> {
-  PublicProfileCubit(this._repository) : super(const ViewState());
+class PublicProfileCubit extends Cubit<PublicProfileState> {
+  PublicProfileCubit(this._repository) : super(const PublicProfileInitial());
   final PublicProfileRepository _repository;
 
   Future<void> loadById(String userId) async {
-    emit(const ViewState(status: ViewStatus.loading));
+    emit(const PublicProfileLoading());
     try {
       final currentUserId = Supabase.instance.client.auth.currentUser?.id;
       final profile = await _repository.getPublicProfile(userId, currentUserId);
-      emit(ViewState(status: ViewStatus.success, data: profile));
+      emit(PublicProfileLoaded(profile));
     } catch (e) {
-      emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
+      emit(PublicProfileFailure('$e'));
     }
   }
 
   Future<void> loadByUsername(String username) async {
-    emit(const ViewState(status: ViewStatus.loading));
+    emit(const PublicProfileLoading());
     try {
       final currentUserId = Supabase.instance.client.auth.currentUser?.id;
       final profile = await _repository.getPublicProfileByUsername(
         username,
         currentUserId,
       );
-      emit(ViewState(status: ViewStatus.success, data: profile));
+      emit(PublicProfileLoaded(profile));
     } catch (e) {
-      emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
+      emit(PublicProfileFailure('$e'));
     }
   }
 }
 
-class UserAnswersCubit extends Cubit<ViewState<List<AnsweredQuestion>>> {
-  UserAnswersCubit(this._repository) : super(const ViewState());
+class UserAnswersCubit extends Cubit<UserAnswersState> {
+  UserAnswersCubit(this._repository) : super(const UserAnswersInitial());
   final PublicProfileRepository _repository;
 
   Future<void> load(String userId) async {
-    emit(const ViewState(status: ViewStatus.loading));
+    emit(const UserAnswersLoading());
     try {
       final answers = await _repository.getUserAnswers(userId);
-      emit(ViewState(status: ViewStatus.success, data: answers));
+      emit(UserAnswersLoaded(answers));
     } catch (e) {
-      emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
+      emit(UserAnswersFailure('$e'));
     }
   }
 
@@ -116,8 +112,11 @@ class UserAnswersCubit extends Cubit<ViewState<List<AnsweredQuestion>>> {
     int? reactionsCount,
     int? commentsCount,
   }) {
-    final currentAnswers = state.data;
-    if (currentAnswers == null || currentAnswers.isEmpty) return;
+    final currentState = state;
+    if (currentState is! UserAnswersLoaded) return;
+    
+    final currentAnswers = currentState.answers;
+    if (currentAnswers.isEmpty) return;
 
     final updated = currentAnswers
         .map(
@@ -130,44 +129,36 @@ class UserAnswersCubit extends Cubit<ViewState<List<AnsweredQuestion>>> {
         )
         .toList(growable: false);
 
-    emit(ViewState(status: ViewStatus.success, data: updated));
+    emit(UserAnswersLoaded(updated));
   }
 }
 
-class FollowersCubit extends Cubit<ViewState<List<FollowerUser>>> {
-  FollowersCubit(this._dataSource) : super(const ViewState());
+class FollowersCubit extends Cubit<FollowersState> {
+  FollowersCubit(this._dataSource) : super(const FollowersInitial());
   final GraphQLProfileDataSource _dataSource;
 
   Future<void> load(String userId) async {
-    emit(const ViewState(status: ViewStatus.loading));
+    emit(const FollowersLoading());
     try {
-      emit(
-        ViewState(
-          status: ViewStatus.success,
-          data: await _dataSource.getFollowers(userId),
-        ),
-      );
+      final followers = await _dataSource.getFollowers(userId);
+      emit(FollowersLoaded(followers));
     } catch (e) {
-      emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
+      emit(FollowersFailure('$e'));
     }
   }
 }
 
-class FollowingCubit extends Cubit<ViewState<List<FollowingUser>>> {
-  FollowingCubit(this._dataSource) : super(const ViewState());
+class FollowingCubit extends Cubit<FollowingState> {
+  FollowingCubit(this._dataSource) : super(const FollowingInitial());
   final GraphQLProfileDataSource _dataSource;
 
   Future<void> load(String userId) async {
-    emit(const ViewState(status: ViewStatus.loading));
+    emit(const FollowingLoading());
     try {
-      emit(
-        ViewState(
-          status: ViewStatus.success,
-          data: await _dataSource.getFollowing(userId),
-        ),
-      );
+      final following = await _dataSource.getFollowing(userId);
+      emit(FollowingLoaded(following));
     } catch (e) {
-      emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
+      emit(FollowingFailure('$e'));
     }
   }
 }

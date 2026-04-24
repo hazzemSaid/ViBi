@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/profile/domain/entities/follower_user.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
+import 'package:vibi/features/profile/presentation/view/profile_view/public_profile_state.dart';
 import 'package:vibi/features/social/domain/repositories/follow_repository.dart';
 
 class FollowersListScreen extends StatefulWidget {
@@ -61,10 +61,10 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
             ),
           ),
         ),
-        body: BlocBuilder<FollowersCubit, ViewState<List<FollowerUser>>>(
-          builder: (context, followersAsync) {
-            if (followersAsync.status == ViewStatus.success) {
-              final followers = followersAsync.data ?? [];
+        body: BlocBuilder<FollowersCubit, FollowersState>(
+          builder: (context, state) {
+            if (state is FollowersLoaded) {
+              final followers = state.followers;
               if (followers.isEmpty) {
                 return Center(
                   child: Text(
@@ -145,17 +145,20 @@ class _FollowersListScreenState extends State<FollowersListScreen> {
                 },
               );
             }
-            if (followersAsync.status == ViewStatus.loading) {
+            if (state is FollowersLoading) {
               return const Center(child: CircularProgressIndicator());
             }
-            return Center(
-              child: Text(
-                'Error: ${followersAsync.errorMessage}',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+            if (state is FollowersFailure) {
+              return Center(
+                child: Text(
+                  'Error: ${state.message}',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-            );
+              );
+            }
+            return const SizedBox.shrink();
           },
         ),
       ),

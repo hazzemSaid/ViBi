@@ -216,7 +216,7 @@ GoRouter createAppRouter(AuthCubit authCubit) {
           return '/welcome';
         }
       }
-      if (authCubit.state.isLoading || authControllerState.isLoading) {
+      if (authCubit.state.isLoading || authControllerState is AuthActionLoading) {
         return null;
       }
       return null;

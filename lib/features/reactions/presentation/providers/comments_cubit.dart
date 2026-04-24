@@ -1,63 +1,31 @@
-import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/reactions/domain/entities/comment_item.dart';
 import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
+import 'package:vibi/features/reactions/presentation/providers/comments_state.dart';
 
-class CommentsState extends Equatable {
-  const CommentsState({
-    this.viewState = const ViewState(status: ViewStatus.loading),
-    this.isSending = false,
-  });
-
-  final ViewState<List<CommentItem>> viewState;
-  final bool isSending;
-
-  CommentsState copyWith({
-    ViewState<List<CommentItem>>? viewState,
-    bool? isSending,
-  }) {
-    return CommentsState(
-      viewState: viewState ?? this.viewState,
-      isSending: isSending ?? this.isSending,
-    );
-  }
-
-  @override
-  List<Object?> get props => [viewState, isSending];
-}
+export 'package:vibi/features/reactions/presentation/providers/comments_state.dart';
 
 class CommentsCubit extends Cubit<CommentsState> {
   CommentsCubit(this._repository, {String? Function()? currentUserIdProvider})
     : _currentUserIdProvider =
           currentUserIdProvider ??
           (() => Supabase.instance.client.auth.currentUser?.id),
-      super(const CommentsState());
+      super(const CommentsInitial());
 
   final ReactionsRepository _repository;
   final String? Function() _currentUserIdProvider;
 
   Future<void> load(String answerId) async {
     try {
-      emit(
-        state.copyWith(viewState: const ViewState(status: ViewStatus.loading)),
-      );
+      emit(CommentsLoading(comments: state.comments, isSending: state.isSending));
 
       final comments = await _repository.getComments(answerId);
-      emit(
-        state.copyWith(
-          viewState: ViewState(status: ViewStatus.success, data: comments),
-        ),
-      );
+      emit(CommentsLoaded(comments: comments));
     } catch (e) {
       debugPrint('[CommentsCubit] load failed for answerId=$answerId: $e');
-      emit(
-        state.copyWith(
-          viewState: ViewState(status: ViewStatus.failure, errorMessage: '$e'),
-        ),
-      );
+      emit(CommentsFailure('$e', comments: state.comments));
     }
   }
 
@@ -77,7 +45,7 @@ class CommentsCubit extends Cubit<CommentsState> {
       return;
     }
 
-    final current = List<CommentItem>.from(state.viewState.data ?? []);
+    final currentComments = state.comments;
     final optimistic = CommentItem(
       id: 'temp-${DateTime.now().microsecondsSinceEpoch}',
       answerId: answerId,
@@ -89,18 +57,15 @@ class CommentsCubit extends Cubit<CommentsState> {
     );
 
     emit(
-      state.copyWith(
+      CommentsLoaded(
+        comments: [...currentComments, optimistic],
         isSending: true,
-        viewState: ViewState(
-          status: ViewStatus.success,
-          data: [...current, optimistic],
-        ),
       ),
     );
 
     if (kDebugMode) {
       debugPrint(
-        '[CommentsCubit][optimistic] answerId=$answerId, optimisticCount=${current.length + 1}',
+        '[CommentsCubit][optimistic] answerId=$answerId, optimisticCount=${currentComments.length + 1}',
       );
     }
 
@@ -112,25 +77,17 @@ class CommentsCubit extends Cubit<CommentsState> {
       );
 
       final fresh = await _repository.getComments(answerId);
-      emit(
-        state.copyWith(
-          isSending: false,
-          viewState: ViewState(status: ViewStatus.success, data: fresh),
-        ),
-      );
+      emit(CommentsLoaded(comments: fresh, isSending: false));
       debugPrint(
         '[CommentsCubit][confirmed] answerId=$answerId, count=${fresh.length}',
       );
     } catch (e) {
       debugPrint('[CommentsCubit][rollback] answerId=$answerId: $e');
       emit(
-        state.copyWith(
+        CommentsFailure(
+          '$e',
+          comments: currentComments,
           isSending: false,
-          viewState: ViewState(
-            status: ViewStatus.failure,
-            errorMessage: '$e',
-            data: current,
-          ),
         ),
       );
     }

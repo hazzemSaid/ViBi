@@ -96,7 +96,7 @@ class VerifyEmailScreen extends StatelessWidget {
 
 SizedBox(height: 48),
 
-                if (authState.isLoading)
+                if (authState is AuthActionLoading)
                   CircularProgressIndicator(color: Theme.of(context).colorScheme.primary)
                 else if (hasSession) ...[
                   // Case 1: session exists — can refresh to pick up confirmation
@@ -146,11 +146,11 @@ SizedBox(height: 48),
                   ),
                 ],
 
-                if (authState.hasError)
+                if (authState is AuthActionFailure)
                   Padding(
                     padding: EdgeInsets.only(top: 20),
                     child: Text(
-                      authState.errorMessage ?? 'Action failed',
+                      (authState as AuthActionFailure).message,
                       style: TextStyle(color: Theme.of(context).colorScheme.error),
                       textAlign: TextAlign.center,
                     ),

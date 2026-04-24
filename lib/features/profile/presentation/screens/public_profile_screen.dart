@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/profile/domain/entities/answered_question.dart';
 import 'package:vibi/features/profile/domain/entities/public_profile.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
+import 'package:vibi/features/profile/presentation/view/profile_view/public_profile_state.dart';
 import 'package:vibi/features/profile/presentation/widgets/profile/profile_stats_card.dart';
 import 'package:vibi/features/profile/presentation/widgets/public_profile/public_profile_widgets.dart';
 import 'package:vibi/features/social/presentation/providers/follow_providers.dart';
@@ -84,19 +84,19 @@ class _PublicProfileBody extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: BlocBuilder<PublicProfileCubit, ViewState<PublicProfile?>>(
-        builder: (context, profileAsync) {
-          if (profileAsync.status == ViewStatus.loading) {
+      body: BlocBuilder<PublicProfileCubit, PublicProfileState>(
+        builder: (context, state) {
+          if (state is PublicProfileLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (profileAsync.status == ViewStatus.failure) {
+          if (state is PublicProfileFailure) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Error: ${profileAsync.errorMessage}',
+                    'Error: ${state.message}',
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.error,
                     ),
@@ -111,7 +111,7 @@ class _PublicProfileBody extends StatelessWidget {
             );
           }
 
-          final profile = profileAsync.data;
+          final PublicProfile? profile = (state is PublicProfileLoaded) ? state.profile : null;
           if (profile == null) {
             return Center(
               child: Text(
@@ -204,23 +204,23 @@ class _PublicProfileBody extends StatelessWidget {
                               PublicProfilePrivateContent(
                                 isFollowing: profile.isFollowing,
                               )
-                            else
-                              BlocProvider(
-                                create: (_) =>
-                                    getIt<UserAnswersCubit>()..load(profile.id),
-                                child:
-                                    BlocBuilder<
-                                      UserAnswersCubit,
-                                      ViewState<List<AnsweredQuestion>>
-                                    >(
-                                      builder: (context, answersAsync) {
-                                        return PublicProfileAnswersSection(
-                                          answersAsync: answersAsync,
-                                          compactActions: true,
-                                        );
-                                      },
-                                    ),
-                              ),
+                              else
+                                BlocProvider(
+                                  create: (_) =>
+                                      getIt<UserAnswersCubit>()..load(profile.id),
+                                  child:
+                                      BlocBuilder<
+                                        UserAnswersCubit,
+                                        UserAnswersState
+                                      >(
+                                        builder: (context, answersState) {
+                                          return PublicProfileAnswersSection(
+                                            answersState: answersState,
+                                            compactActions: true,
+                                          );
+                                        },
+                                      ),
+                                ),
                           ],
                         ),
                       ),

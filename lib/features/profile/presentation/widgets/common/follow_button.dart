@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/profile/domain/entities/public_profile.dart';
 import 'package:vibi/features/social/presentation/providers/follow_providers.dart';
+import 'package:vibi/features/social/presentation/providers/follow_state.dart';
 
 class FollowButton extends StatelessWidget {
   final PublicProfile profile;
@@ -48,7 +49,7 @@ class FollowButton extends StatelessWidget {
       );
     }
 
-    final isLoading = followNotifier.isLoading;
+    final isLoading = followNotifier is FollowActionLoading;
 
     if (profile.hasRequestedFollow) {
       return buildButton(

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/reactions/domain/entities/reaction_summary.dart';
 import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
 import 'package:vibi/features/reactions/presentation/providers/reaction_cubit.dart';
+import 'package:vibi/features/reactions/presentation/providers/reaction_state.dart';
 import 'package:vibi/features/reactions/presentation/widgets/comment_sheet.dart';
 
 const Map<String, String> _emojis = {'love': '❤️', 'sad': '😢', 'haha': '😂'};
@@ -69,7 +69,10 @@ class _ReactionBarState extends State<ReactionBar> {
       final count = await _repository.getCommentsCount(widget.answerId);
       if (!mounted) return;
       setState(() => _commentCount = count);
-      _notifyCounts(reactionsCount: _reactionCubit.state.data?.total ?? 0);
+      
+      final currentState = _reactionCubit.state;
+      final reactionsCount = (currentState is ReactionLoaded) ? currentState.summary.total : 0;
+      _notifyCounts(reactionsCount: reactionsCount);
     } catch (_) {
       // Keep existing count if refresh fails.
     }
@@ -100,19 +103,21 @@ class _ReactionBarState extends State<ReactionBar> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          BlocConsumer<ReactionCubit, ViewState<ReactionSummary>>(
+          BlocConsumer<ReactionCubit, ReactionState>(
             listenWhen: (previous, current) {
-              final previousTotal = previous.data?.total;
-              final currentTotal = current.data?.total;
+              final previousTotal = (previous is ReactionLoaded) ? previous.summary.total : null;
+              final currentTotal = (current is ReactionLoaded) ? current.summary.total : null;
               return previousTotal != currentTotal;
             },
             listener: (_, state) {
-              _notifyCounts(reactionsCount: state.data?.total ?? 0);
+              if (state is ReactionLoaded) {
+                _notifyCounts(reactionsCount: state.summary.total);
+              }
             },
             builder: (context, state) {
-              final data =
-                  state.data ??
-                  const ReactionSummary(
+              final data = (state is ReactionLoaded)
+                  ? state.summary
+                  : const ReactionSummary(
                     counts: {'love': 0, 'sad': 0, 'haha': 0},
                   );
 

@@ -1,43 +1,43 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/search/domain/entities/content_search_result.dart';
 import 'package:vibi/features/search/domain/entities/user_search_result.dart';
 import 'package:vibi/features/search/domain/repositories/search_repository.dart';
+import 'package:vibi/features/search/presentation/providers/search_state.dart';
 
-class UserSearchCubit extends Cubit<ViewState<List<UserSearchResult>>> {
-  UserSearchCubit(this._repository) : super(const ViewState());
+class UserSearchCubit extends Cubit<UserSearchState> {
+  UserSearchCubit(this._repository) : super(const UserSearchInitial());
   final SearchRepository _repository;
 
   Future<void> search(String query) async {
     if (query.trim().isEmpty) {
-      emit(const ViewState(status: ViewStatus.success, data: []));
+      emit(const UserSearchLoaded([]));
       return;
     }
-    emit(const ViewState(status: ViewStatus.loading));
+    emit(const UserSearchLoading());
     try {
       final result = await _repository.searchUsers(query);
-      emit(ViewState(status: ViewStatus.success, data: result));
+      emit(UserSearchLoaded(result));
     } catch (e) {
-      emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
+      emit(UserSearchFailure('$e'));
     }
   }
 }
 
-class ContentSearchCubit extends Cubit<ViewState<List<ContentSearchResult>>> {
-  ContentSearchCubit(this._repository) : super(const ViewState());
+class ContentSearchCubit extends Cubit<ContentSearchState> {
+  ContentSearchCubit(this._repository) : super(const ContentSearchInitial());
   final SearchRepository _repository;
 
   Future<void> search(String query) async {
     if (query.trim().isEmpty) {
-      emit(const ViewState(status: ViewStatus.success, data: []));
+      emit(const ContentSearchLoaded([]));
       return;
     }
-    emit(const ViewState(status: ViewStatus.loading));
+    emit(const ContentSearchLoading());
     try {
       final result = await _repository.searchContent(query);
-      emit(ViewState(status: ViewStatus.success, data: result));
+      emit(ContentSearchLoaded(result));
     } catch (e) {
-      emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
+      emit(ContentSearchFailure('$e'));
     }
   }
 }

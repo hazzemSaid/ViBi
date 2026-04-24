@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/services/tmdb_service.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
@@ -12,7 +13,8 @@ class RecommendationRepository {
   }) : _supabase = supabase,
        _tmdb = tmdb;
 
-  Future<List<TmdbMedia>> search(String query) => _tmdb.search(query);
+  Future<Either<Exception, List<TmdbMedia>>> search(String query) =>
+      _tmdb.search(query);
 
   Future<void> send({
     required String recipientId,

@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/state/view_state.dart';
-import 'package:vibi/features/profile/domain/entities/answered_question.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
+import 'package:vibi/features/profile/presentation/view/profile_view/public_profile_state.dart';
 import 'package:vibi/features/profile/presentation/widgets/answers/profile_answer_card.dart';
 
 class ProfileLatestAnswersSection extends StatelessWidget {
@@ -20,8 +19,8 @@ class ProfileLatestAnswersSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<UserAnswersCubit>()..load(userId),
-      child: BlocBuilder<UserAnswersCubit, ViewState<List<AnsweredQuestion>>>(
-        builder: (context, answersAsync) {
+      child: BlocBuilder<UserAnswersCubit, UserAnswersState>(
+        builder: (context, state) {
           final answersCubit = context.read<UserAnswersCubit>();
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,10 +37,10 @@ class ProfileLatestAnswersSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSizes.s16),
-              if (answersAsync.status == ViewStatus.success) ...[
+              if (state is UserAnswersLoaded) ...[
                 Builder(
                   builder: (context) {
-                    final answers = answersAsync.data ?? [];
+                    final answers = state.answers;
                     if (answers.isEmpty) {
                       return Container(
                         width: double.infinity,
@@ -97,7 +96,7 @@ class ProfileLatestAnswersSection extends StatelessWidget {
                     );
                   },
                 ),
-              ] else if (answersAsync.status == ViewStatus.loading)
+              ] else if (state is UserAnswersLoading)
                 SizedBox(
                   width: double.infinity,
                   child: const Center(
@@ -107,7 +106,7 @@ class ProfileLatestAnswersSection extends StatelessWidget {
                     ),
                   ),
                 )
-              else
+              else if (state is UserAnswersFailure)
                 Container(
                   padding: EdgeInsets.all(AppSizes.s16),
                   decoration: BoxDecoration(

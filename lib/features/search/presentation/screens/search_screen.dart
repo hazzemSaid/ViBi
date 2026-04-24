@@ -3,10 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_assets.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/state/view_state.dart';
-import 'package:vibi/features/search/domain/entities/content_search_result.dart';
-import 'package:vibi/features/search/domain/entities/user_search_result.dart';
 import 'package:vibi/features/search/presentation/providers/search_providers.dart';
+import 'package:vibi/features/search/presentation/providers/search_state.dart';
 import 'package:vibi/features/search/presentation/widgets/search_content_tile.dart';
 import 'package:vibi/features/search/presentation/widgets/search_user_tile.dart';
 
@@ -101,6 +99,8 @@ class _SearchScreenState extends State<SearchScreen>
                                 setState(() {
                                   _searchQuery = '';
                                 });
+                                _userSearchCubit.search('');
+                                _contentSearchCubit.search('');
                               },
                             )
                           : null,
@@ -132,7 +132,7 @@ class _SearchScreenState extends State<SearchScreen>
                   unselectedLabelColor: Theme.of(
                     context,
                   ).colorScheme.onSurfaceVariant,
-                  labelStyle: TextStyle(
+                  labelStyle: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -162,10 +162,10 @@ class _SearchScreenState extends State<SearchScreen>
       );
     }
 
-    return BlocBuilder<UserSearchCubit, ViewState<List<UserSearchResult>>>(
-      builder: (context, usersAsync) {
-        if (usersAsync.status == ViewStatus.success) {
-          final users = usersAsync.data ?? [];
+    return BlocBuilder<UserSearchCubit, UserSearchState>(
+      builder: (context, state) {
+        if (state is UserSearchLoaded) {
+          final users = state.results;
           if (users.isEmpty) {
             return _buildEmptyState(
               icon: Icons.person_off_outlined,
@@ -181,7 +181,7 @@ class _SearchScreenState extends State<SearchScreen>
             color: Theme.of(context).colorScheme.secondary,
             backgroundColor: Theme.of(context).colorScheme.surface,
             child: ListView.separated(
-              padding: EdgeInsets.symmetric(vertical: AppSizes.s8),
+              padding: const EdgeInsets.symmetric(vertical: AppSizes.s8),
               itemCount: users.length,
               separatorBuilder: (context, index) => Divider(
                 color: Theme.of(
@@ -195,38 +195,41 @@ class _SearchScreenState extends State<SearchScreen>
             ),
           );
         }
-        if (usersAsync.status == ViewStatus.loading) {
+        if (state is UserSearchLoading) {
           return Center(
             child: CircularProgressIndicator(
               color: Theme.of(context).colorScheme.secondary,
             ),
           );
         }
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 48,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              SizedBox(height: AppSizes.s16),
-              Text(
-                'Error: ${usersAsync.errorMessage}',
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSizes.s16),
-              ElevatedButton(
-                onPressed: () {
-                  _userSearchCubit.search(_searchQuery);
-                },
-                child: Text('Retry'),
-              ),
-            ],
-          ),
-        );
+        if (state is UserSearchFailure) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                const SizedBox(height: AppSizes.s16),
+                Text(
+                  'Error: ${state.message}',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSizes.s16),
+                ElevatedButton(
+                  onPressed: () {
+                    _userSearchCubit.search(_searchQuery);
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
+        }
+        return const SizedBox.shrink();
       },
     );
   }
@@ -240,13 +243,10 @@ class _SearchScreenState extends State<SearchScreen>
       );
     }
 
-    return BlocBuilder<
-      ContentSearchCubit,
-      ViewState<List<ContentSearchResult>>
-    >(
-      builder: (context, contentAsync) {
-        if (contentAsync.status == ViewStatus.success) {
-          final content = contentAsync.data ?? [];
+    return BlocBuilder<ContentSearchCubit, ContentSearchState>(
+      builder: (context, state) {
+        if (state is ContentSearchLoaded) {
+          final content = state.results;
           if (content.isEmpty) {
             return _buildEmptyState(
               icon: Icons.search_off,
@@ -270,38 +270,41 @@ class _SearchScreenState extends State<SearchScreen>
             ),
           );
         }
-        if (contentAsync.status == ViewStatus.loading) {
+        if (state is ContentSearchLoading) {
           return Center(
             child: CircularProgressIndicator(
               color: Theme.of(context).colorScheme.secondary,
             ),
           );
         }
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 48,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              SizedBox(height: AppSizes.s16),
-              Text(
-                'Error: ${contentAsync.errorMessage}',
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: AppSizes.s16),
-              ElevatedButton(
-                onPressed: () {
-                  context.read<ContentSearchCubit>().search(_searchQuery);
-                },
-                child: Text('Retry'),
-              ),
-            ],
-          ),
-        );
+        if (state is ContentSearchFailure) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+                const SizedBox(height: AppSizes.s16),
+                Text(
+                  'Error: ${state.message}',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSizes.s16),
+                ElevatedButton(
+                  onPressed: () {
+                    _contentSearchCubit.search(_searchQuery);
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
+        }
+        return const SizedBox.shrink();
       },
     );
   }
@@ -316,7 +319,7 @@ class _SearchScreenState extends State<SearchScreen>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Theme.of(
@@ -331,7 +334,7 @@ class _SearchScreenState extends State<SearchScreen>
               ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
             ),
           ),
-          SizedBox(height: AppSizes.s24),
+          const SizedBox(height: AppSizes.s24),
           Text(
             title,
             style: TextStyle(
@@ -340,7 +343,7 @@ class _SearchScreenState extends State<SearchScreen>
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: AppSizes.s8),
+          const SizedBox(height: AppSizes.s8),
           Text(
             subtitle,
             style: TextStyle(

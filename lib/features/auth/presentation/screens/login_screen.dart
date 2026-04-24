@@ -145,7 +145,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 48),
 
-                  if (authState.isLoading)
+                  if (authState is AuthActionLoading)
                     Center(
                       child: CircularProgressIndicator(
                         color: Theme.of(context).colorScheme.primary,
@@ -154,11 +154,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   else
                     ElevatedButton(onPressed: _submit, child: Text('Login')),
 
-                  if (authState.hasError)
+                  if (authState is AuthActionFailure)
                     Padding(
                       padding: const EdgeInsets.only(top: 20),
                       child: Text(
-                        authState.errorMessage ?? 'Authentication failed',
+                        (authState as AuthActionFailure).message,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.error,

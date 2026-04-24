@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:vibi/features/auth/presentation/controllers/auth_state.dart';
 import 'package:vibi/features/auth/presentation/widgets/auth_video_background.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -50,16 +50,18 @@ class _SignupScreenState extends State<SignupScreen> {
     // After a successful signup, navigate to the email verification screen.
     // With Supabase email confirmation enabled, no session is created immediately
     // so the router's redirect won't fire — we navigate explicitly here.
-    return BlocListener<AuthController, ViewState<void>>(
-      listener: (context, next) {
+    return BlocListener<AuthController, AuthActionState>(
+      listener: (context, state) {
         if (!_submitted) return;
-        if (next.isLoading) return;
-        if (next.hasError) {
+        if (state is AuthActionLoading) return;
+        if (state is AuthActionFailure) {
           setState(() => _submitted = false);
           return;
         }
-        setState(() => _submitted = false);
-        context.go('/verify-email');
+        if (state is AuthActionSuccess) {
+          setState(() => _submitted = false);
+          context.go('/verify-email');
+        }
       },
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -220,7 +222,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     const SizedBox(height: 48),
 
-                    if (authState.isLoading)
+                    if (authState is AuthActionLoading)
                       Center(
                         child: CircularProgressIndicator(
                           color: Theme.of(context).colorScheme.primary,
@@ -232,11 +234,11 @@ class _SignupScreenState extends State<SignupScreen> {
                         child: Text('Sign Up'),
                       ),
 
-                    if (authState.hasError)
+                    if (authState is AuthActionFailure)
                       Padding(
                         padding: const EdgeInsets.only(top: 20),
                         child: Text(
-                          authState.errorMessage ?? 'Signup failed',
+                          authState.message,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.error,

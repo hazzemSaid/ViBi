@@ -1,16 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/reactions/domain/entities/reaction_summary.dart';
 import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
+import 'package:vibi/features/reactions/presentation/providers/reaction_state.dart';
 
-class ReactionCubit extends Cubit<ViewState<ReactionSummary>> {
+class ReactionCubit extends Cubit<ReactionState> {
   ReactionCubit(this._repository, {String? Function()? currentUserIdProvider})
     : _currentUserIdProvider =
           currentUserIdProvider ??
           (() => Supabase.instance.client.auth.currentUser?.id),
-      super(const ViewState(status: ViewStatus.loading));
+      super(const ReactionInitial());
 
   final ReactionsRepository _repository;
   final String? Function() _currentUserIdProvider;
@@ -18,18 +18,18 @@ class ReactionCubit extends Cubit<ViewState<ReactionSummary>> {
 
   Future<void> load(String answerId) async {
     try {
-      emit(const ViewState(status: ViewStatus.loading));
+      emit(const ReactionLoading());
       final userId = _currentUserIdProvider();
       final summary = await _repository.getReactionSummary(
         answerId: answerId,
         userId: userId,
       );
       if (isClosed) return;
-      emit(ViewState(status: ViewStatus.success, data: summary));
+      emit(ReactionLoaded(summary));
     } catch (e) {
       debugPrint('[ReactionCubit] load failed for answerId=$answerId: $e');
       if (isClosed) return;
-      emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
+      emit(ReactionFailure('$e'));
     }
   }
 
@@ -47,10 +47,12 @@ class ReactionCubit extends Cubit<ViewState<ReactionSummary>> {
 
     _isToggling = true;
 
-    ReactionSummary? currentSummary = state.data;
+    final currentState = state;
+    ReactionSummary? currentSummary = (currentState is ReactionLoaded) ? currentState.summary : null;
+    
     if (currentSummary == null) {
       debugPrint(
-        '[ReactionCubit] state.data is null on toggle; status=${state.status}, error=${state.errorMessage}. Fetching summary first.',
+        '[ReactionCubit] currentState is not Loaded on toggle; state=$currentState. Fetching summary first.',
       );
       try {
         currentSummary = await _repository.getReactionSummary(
@@ -58,11 +60,11 @@ class ReactionCubit extends Cubit<ViewState<ReactionSummary>> {
           userId: userId,
         );
         if (isClosed) return;
-        emit(ViewState(status: ViewStatus.success, data: currentSummary));
+        emit(ReactionLoaded(currentSummary));
       } catch (e) {
         debugPrint('[ReactionCubit] pre-toggle summary fetch failed: $e');
         if (!isClosed) {
-          emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
+          emit(ReactionFailure('$e'));
         }
         _isToggling = false;
         return;
@@ -91,9 +93,8 @@ class ReactionCubit extends Cubit<ViewState<ReactionSummary>> {
       );
     }
     emit(
-      ViewState(
-        status: ViewStatus.success,
-        data: ReactionSummary(counts: nextCounts, myReaction: nextMyReaction),
+      ReactionLoaded(
+        ReactionSummary(counts: nextCounts, myReaction: nextMyReaction),
       ),
     );
 
@@ -110,7 +111,7 @@ class ReactionCubit extends Cubit<ViewState<ReactionSummary>> {
       );
 
       if (isClosed) return;
-      emit(ViewState(status: ViewStatus.success, data: fresh));
+      emit(ReactionLoaded(fresh));
       debugPrint(
         '[ReactionCubit][confirmed] answerId=$answerId, myReaction=${fresh.myReaction}, total=${fresh.total}',
       );
@@ -118,10 +119,9 @@ class ReactionCubit extends Cubit<ViewState<ReactionSummary>> {
       debugPrint('[ReactionCubit][rollback] answerId=$answerId: $e');
       if (isClosed) return;
       emit(
-        ViewState(
-          status: ViewStatus.failure,
-          errorMessage: '$e',
-          data: ReactionSummary(
+        ReactionFailure(
+          '$e',
+          fallbackSummary: ReactionSummary(
             counts: previousCounts,
             myReaction: previousReaction,
           ),

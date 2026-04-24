@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/profile/domain/entities/following_user.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
+import 'package:vibi/features/profile/presentation/view/profile_view/public_profile_state.dart';
 import 'package:vibi/features/social/presentation/providers/follow_providers.dart';
 
 class FollowingListScreen extends StatefulWidget {
@@ -67,10 +67,10 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
             ),
           ),
         ),
-        body: BlocBuilder<FollowingCubit, ViewState<List<FollowingUser>>>(
-          builder: (context, followingAsync) {
-            if (followingAsync.status == ViewStatus.success) {
-              final following = followingAsync.data ?? [];
+        body: BlocBuilder<FollowingCubit, FollowingState>(
+          builder: (context, state) {
+            if (state is FollowingLoaded) {
+              final following = state.following;
               if (following.isEmpty) {
                 return Center(
                   child: Text(
@@ -153,17 +153,20 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
                 },
               );
             }
-            if (followingAsync.status == ViewStatus.loading) {
+            if (state is FollowingLoading) {
               return const Center(child: CircularProgressIndicator());
             }
-            return Center(
-              child: Text(
-                'Error: ${followingAsync.errorMessage}',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+            if (state is FollowingFailure) {
+              return Center(
+                child: Text(
+                  'Error: ${state.message}',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-            );
+              );
+            }
+            return const SizedBox.shrink();
           },
         ),
       ),

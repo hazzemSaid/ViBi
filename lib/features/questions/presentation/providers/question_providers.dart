@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/questions/domain/repositories/question_repository.dart';
+import 'package:vibi/features/questions/presentation/providers/question_state.dart';
 
-class SendQuestionCubit extends Cubit<ViewState<void>> {
-  SendQuestionCubit(this._repository) : super(const ViewState());
+class SendQuestionCubit extends Cubit<SendQuestionState> {
+  SendQuestionCubit(this._repository) : super(const SendQuestionInitial());
   final QuestionRepository _repository;
 
   Future<void> sendQuestion({
@@ -12,7 +12,7 @@ class SendQuestionCubit extends Cubit<ViewState<void>> {
     required String questionText,
     required bool isAnonymous,
   }) async {
-    emit(const ViewState(status: ViewStatus.loading));
+    emit(const SendQuestionLoading());
     try {
       final currentUserId = Supabase.instance.client.auth.currentUser?.id;
       await _repository.sendQuestion(
@@ -21,9 +21,9 @@ class SendQuestionCubit extends Cubit<ViewState<void>> {
         isAnonymous: isAnonymous,
         senderId: isAnonymous ? null : currentUserId,
       );
-      emit(const ViewState(status: ViewStatus.success));
+      emit(const SendQuestionSuccess());
     } catch (e) {
-      emit(ViewState(status: ViewStatus.failure, errorMessage: '$e'));
+      emit(SendQuestionFailure('$e'));
     }
   }
 }

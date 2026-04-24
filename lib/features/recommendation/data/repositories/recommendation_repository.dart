@@ -6,7 +6,11 @@ class RecommendationRepository {
   final SupabaseClient _supabase;
   final TmdbService _tmdb;
 
-  RecommendationRepository(this._supabase, this._tmdb);
+  RecommendationRepository({
+    required SupabaseClient supabase,
+    required TmdbService tmdb,
+  }) : _supabase = supabase,
+       _tmdb = tmdb;
 
   Future<List<TmdbMedia>> search(String query) => _tmdb.search(query);
 

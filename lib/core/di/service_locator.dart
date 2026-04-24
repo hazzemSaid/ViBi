@@ -103,7 +103,7 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   );
 
   getIt.registerLazySingleton<GraphQLProfileDataSource>(
-    GraphQLProfileDataSource.new,
+    () => GraphQLProfileDataSource(ferryClient: GraphQLConfig.ferryClient),
   );
   getIt.registerLazySingleton<ProfileRepository>(
     () => ProfileRepositoryImpl(getIt<GraphQLProfileDataSource>()),
@@ -137,7 +137,7 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
     () => FollowingCubit(getIt<GraphQLProfileDataSource>()),
   );
   getIt.registerLazySingleton<GraphQLSocialLinksDataSource>(
-    GraphQLSocialLinksDataSource.new,
+    () => GraphQLSocialLinksDataSource(ferryClient: GraphQLConfig.ferryClient),
   );
   getIt.registerLazySingleton<SocialLinksRepository>(
     () => SocialLinksRepositoryImpl(getIt<GraphQLSocialLinksDataSource>()),
@@ -165,7 +165,7 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   );
 
   getIt.registerLazySingleton<GraphQLSearchDataSource>(
-    GraphQLSearchDataSource.new,
+    () => GraphQLSearchDataSource(ferryClient: GraphQLConfig.ferryClient),
   );
   getIt.registerLazySingleton<SearchRepository>(
     () => SearchRepositoryImpl(getIt<GraphQLSearchDataSource>()),
@@ -178,7 +178,7 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   );
 
   getIt.registerLazySingleton<GraphQLQuestionDataSource>(
-    GraphQLQuestionDataSource.new,
+    () => GraphQLQuestionDataSource(),
   );
   getIt.registerLazySingleton<QuestionRepository>(
     () => QuestionRepositoryImpl(getIt<GraphQLQuestionDataSource>()),
@@ -189,8 +189,8 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   getIt.registerLazySingleton<TmdbService>(TmdbService.new);
   getIt.registerLazySingleton<RecommendationRepository>(
     () => RecommendationRepository(
-      Supabase.instance.client,
-      getIt<TmdbService>(),
+      tmdb: getIt<TmdbService>(),
+      supabase: Supabase.instance.client,
     ),
   );
   getIt.registerFactory<RecommendationFlowCubit>(
@@ -198,7 +198,7 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   );
 
   getIt.registerLazySingleton<ReactionsRemoteDataSource>(
-    ReactionsRemoteDataSource.new,
+    () => ReactionsRemoteDataSource(),
   );
   getIt.registerLazySingleton<ReactionsRepository>(
     () => ReactionsRepositoryImpl(getIt<ReactionsRemoteDataSource>()),
@@ -243,7 +243,7 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
     ),
   );
   getIt.registerLazySingleton<GraphQLFollowDataSource>(
-    GraphQLFollowDataSource.new,
+    () => GraphQLFollowDataSource(),
   );
   getIt.registerLazySingleton<FollowRepository>(
     () => FollowRepositoryImpl(getIt<GraphQLFollowDataSource>()),

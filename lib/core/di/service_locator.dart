@@ -2,6 +2,7 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
+import 'package:vibi/core/services/push_notification_service.dart';
 import 'package:vibi/core/services/tmdb_service.dart';
 import 'package:vibi/core/theme/theme_cubit.dart';
 import 'package:vibi/features/auth/data/datasources/supabase_auth_datasource.dart';
@@ -89,6 +90,7 @@ void _initCore(SharedPreferences prefs) {
     () => ThemeCubit(getIt<SharedPreferences>()),
   );
   getIt.registerLazySingleton<TmdbService>(TmdbService.new);
+  getIt.registerLazySingleton<PushNotificationService>(PushNotificationService.new);
 }
 
 // -----------------------------------------------------------------------------
@@ -101,7 +103,7 @@ void _initAuth() {
   );
   getIt.registerFactory<AuthCubit>(() => AuthCubit(getIt<AuthRepository>()));
   getIt.registerFactory<AuthController>(
-    () => AuthController(getIt<AuthRepository>()),
+    () => AuthController(getIt<AuthRepository>(), getIt<PushNotificationService>()),
   );
 }
 

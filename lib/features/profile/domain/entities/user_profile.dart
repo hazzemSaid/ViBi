@@ -19,7 +19,6 @@ class UserProfile {
   final String? statusText;
   final String publicFontFamily;
   final bool isVerified;
-  final String? backgroundcolor;
   UserProfile({
     required this.uid,
     required this.name,
@@ -41,7 +40,6 @@ class UserProfile {
     this.statusText,
     this.publicFontFamily = 'inter',
     this.isVerified = false,
-    this.backgroundcolor,
   });
 
   UserProfile copyWith({
@@ -89,7 +87,6 @@ class UserProfile {
       statusText: statusText ?? this.statusText,
       publicFontFamily: publicFontFamily ?? this.publicFontFamily,
       isVerified: isVerified ?? this.isVerified,
-      backgroundcolor: backgroundcolor ?? this.backgroundcolor,
     );
   }
 }

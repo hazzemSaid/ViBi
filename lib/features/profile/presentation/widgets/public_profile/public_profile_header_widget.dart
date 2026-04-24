@@ -104,12 +104,14 @@ SizedBox(width: AppSizes.s8),
 
   String? _fontFamilyFor(String key) {
     switch (key) {
+      case 'google_sans':
+        return 'GoogleSans';
       case 'serif':
         return 'serif';
       case 'mono':
         return 'monospace';
       default:
-        return null;
+        return null; // Defaults to app-wide font (likely GoogleSans or Inter)
     }
   }
 }

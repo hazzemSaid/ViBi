@@ -22,7 +22,6 @@ class UserProfileModel extends UserProfile {
     super.statusText,
     super.publicFontFamily,
     super.isVerified,
-    super.backgroundcolor,
   });
 
   factory UserProfileModel.fromMap(Map<String, dynamic> map) {
@@ -50,7 +49,6 @@ class UserProfileModel extends UserProfile {
       statusText: map['status_text'] as String?,
       publicFontFamily: map['public_font_family'] as String? ?? 'inter',
       isVerified: map['is_verified'] as bool? ?? false,
-      backgroundcolor: map['backgroundcolor'] as String?,
     );
   }
 
@@ -90,7 +88,6 @@ class UserProfileModel extends UserProfile {
       statusText: node['status_text'] as String?,
       publicFontFamily: node['public_font_family'] as String? ?? 'inter',
       isVerified: node['is_verified'] as bool? ?? false,
-      backgroundcolor: node['backgroundcolor'] as String?,
     );
   }
 
@@ -136,7 +133,6 @@ class UserProfileModel extends UserProfile {
       'status_text': statusText,
       'public_font_family': publicFontFamily,
       'is_verified': isVerified,
-      'backgroundcolor': backgroundcolor,
     };
   }
 }

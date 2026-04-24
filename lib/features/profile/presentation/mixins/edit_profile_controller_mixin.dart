@@ -496,6 +496,8 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
 
   String? fontFamilyFor(String key) {
     switch (key) {
+      case 'google_sans':
+        return 'GoogleSans';
       case 'serif':
         return 'serif';
       case 'mono':

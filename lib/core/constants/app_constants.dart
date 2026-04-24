@@ -85,16 +85,18 @@ class ProfileConstants {
 
   static const List<String> publicFontFamilyOptions = [
     'inter',
-    'system',
+    'google_sans',
     'serif',
     'mono',
+    'system',
   ];
 
   static const Map<String, String> publicFontFamilyLabels = {
-    'inter': 'Inter',
-    'system': 'System',
-    'serif': 'Serif',
-    'mono': 'Mono',
+    'inter': 'Modern Chic',
+    'google_sans': 'Smooth & Round',
+    'serif': 'Fancy Vintage',
+    'mono': 'Cyber Geek',
+    'system': 'Friendly Native',
   };
 
   static String normalizeThemeKey(String? key) {

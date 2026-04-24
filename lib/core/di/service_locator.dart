@@ -67,14 +67,35 @@ final GetIt getIt = GetIt.instance;
 Future<void> setupServiceLocator(SharedPreferences prefs) async {
   if (getIt.isRegistered<SharedPreferences>()) return;
 
+  _initCore(prefs);
+  _initAuth();
+  _initFeed();
+  _initProfile();
+  _initSocialLinks();
+  _initSearch();
+  _initQuestions();
+  _initRecommendation();
+  _initReactions();
+  _initInbox();
+  _initFollow();
+}
+
+// -----------------------------------------------------------------------------
+// Core & External Services
+// -----------------------------------------------------------------------------
+void _initCore(SharedPreferences prefs) {
   getIt.registerSingleton<SharedPreferences>(prefs);
   getIt.registerLazySingleton<ThemeCubit>(
     () => ThemeCubit(getIt<SharedPreferences>()),
   );
+  getIt.registerLazySingleton<TmdbService>(TmdbService.new);
+}
 
-  getIt.registerLazySingleton<SupabaseAuthDataSource>(
-    SupabaseAuthDataSource.new,
-  );
+// -----------------------------------------------------------------------------
+// Auth Feature
+// -----------------------------------------------------------------------------
+void _initAuth() {
+  getIt.registerLazySingleton<SupabaseAuthDataSource>(SupabaseAuthDataSource.new);
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(getIt<SupabaseAuthDataSource>()),
   );
@@ -82,7 +103,12 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   getIt.registerFactory<AuthController>(
     () => AuthController(getIt<AuthRepository>()),
   );
+}
 
+// -----------------------------------------------------------------------------
+// Feed Feature
+// -----------------------------------------------------------------------------
+void _initFeed() {
   getIt.registerLazySingleton<GraphQLFeedDataSource>(
     () => GraphQLFeedDataSource(GraphQLConfig.ferryClient),
   );
@@ -101,7 +127,12 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   getIt.registerFactory<FollowingFeedCubit>(
     () => FollowingFeedCubit(getIt<GetFollowingFeedUseCase>()),
   );
+}
 
+// -----------------------------------------------------------------------------
+// Profile Feature
+// -----------------------------------------------------------------------------
+void _initProfile() {
   getIt.registerLazySingleton<GraphQLProfileDataSource>(
     () => GraphQLProfileDataSource(ferryClient: GraphQLConfig.ferryClient),
   );
@@ -136,6 +167,12 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   getIt.registerFactory<FollowingCubit>(
     () => FollowingCubit(getIt<GraphQLProfileDataSource>()),
   );
+}
+
+// -----------------------------------------------------------------------------
+// Social Links Feature
+// -----------------------------------------------------------------------------
+void _initSocialLinks() {
   getIt.registerLazySingleton<GraphQLSocialLinksDataSource>(
     () => GraphQLSocialLinksDataSource(ferryClient: GraphQLConfig.ferryClient),
   );
@@ -163,7 +200,12 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
       deleteSocialLinkUseCase: getIt<DeleteSocialLinkUseCase>(),
     ),
   );
+}
 
+// -----------------------------------------------------------------------------
+// Search Feature
+// -----------------------------------------------------------------------------
+void _initSearch() {
   getIt.registerLazySingleton<GraphQLSearchDataSource>(
     () => GraphQLSearchDataSource(ferryClient: GraphQLConfig.ferryClient),
   );
@@ -176,7 +218,12 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   getIt.registerFactory<ContentSearchCubit>(
     () => ContentSearchCubit(getIt<SearchRepository>()),
   );
+}
 
+// -----------------------------------------------------------------------------
+// Questions Feature
+// -----------------------------------------------------------------------------
+void _initQuestions() {
   getIt.registerLazySingleton<GraphQLQuestionDataSource>(
     () => GraphQLQuestionDataSource(),
   );
@@ -186,7 +233,12 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   getIt.registerFactory<SendQuestionCubit>(
     () => SendQuestionCubit(getIt<QuestionRepository>()),
   );
-  getIt.registerLazySingleton<TmdbService>(TmdbService.new);
+}
+
+// -----------------------------------------------------------------------------
+// Recommendation Feature
+// -----------------------------------------------------------------------------
+void _initRecommendation() {
   getIt.registerLazySingleton<RecommendationRepository>(
     () => RecommendationRepository(
       tmdb: getIt<TmdbService>(),
@@ -196,7 +248,12 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   getIt.registerFactory<RecommendationFlowCubit>(
     () => RecommendationFlowCubit(getIt<RecommendationRepository>()),
   );
+}
 
+// -----------------------------------------------------------------------------
+// Reactions Feature
+// -----------------------------------------------------------------------------
+void _initReactions() {
   getIt.registerLazySingleton<ReactionsRemoteDataSource>(
     () => ReactionsRemoteDataSource(),
   );
@@ -209,7 +266,12 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   getIt.registerFactory<CommentsCubit>(
     () => CommentsCubit(getIt<ReactionsRepository>()),
   );
+}
 
+// -----------------------------------------------------------------------------
+// Inbox Feature
+// -----------------------------------------------------------------------------
+void _initInbox() {
   getIt.registerLazySingleton<GraphQLInboxDataSource>(
     () => GraphQLInboxDataSource(graphQLClient: GraphQLConfig.ferryClient),
   );
@@ -242,6 +304,12 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
       archiveQuestionUseCase: getIt<ArchiveQuestionUseCase>(),
     ),
   );
+}
+
+// -----------------------------------------------------------------------------
+// Social (Follow) Feature
+// -----------------------------------------------------------------------------
+void _initFollow() {
   getIt.registerLazySingleton<GraphQLFollowDataSource>(
     () => GraphQLFollowDataSource(),
   );

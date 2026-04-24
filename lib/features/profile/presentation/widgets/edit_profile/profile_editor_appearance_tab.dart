@@ -31,22 +31,6 @@ class ProfileEditorAppearanceTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        EditorSectionCard(
-          title: 'Background',
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              for (final colorHex in ProfileConstants.backgroundColorOptions)
-                EditorColorSwatch(
-                  color: parseHexColor(colorHex),
-                  selected: backgroundColor == colorHex,
-                  onTap: () => onBackgroundColorChanged(colorHex),
-                ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
         // TODOs : for now we're only offering one button style, so this section is hidden until we add this feature
         // EditorSectionCard(
         //   title: 'Button Style',

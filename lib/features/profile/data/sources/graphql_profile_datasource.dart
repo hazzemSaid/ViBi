@@ -127,7 +127,6 @@ class GraphQLProfileDataSource {
         'showSocialIcons': profile.showSocialIcons,
         'statusText': profile.statusText,
         'publicFontFamily': profile.publicFontFamily,
-        'backgroundcolor': profile.backgroundcolor,
       },
       clientOverride: _ferryClient,
     );

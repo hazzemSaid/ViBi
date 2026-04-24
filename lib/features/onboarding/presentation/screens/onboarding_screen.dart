@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vibi/core/constants/app_assets.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/providers/shared_prefs_provider.dart';
+import 'package:vibi/core/di/service_locator.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -34,6 +35,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   ];
 
   void _finishOnboarding() {
+    final sharedPrefs = getIt<SharedPreferences>();
     sharedPrefs.setBool('has_seen_onboarding', true);
     context.go('/welcome');
   }
@@ -51,7 +53,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 onPressed: _finishOnboarding,
                 child: Text(
                   'Skip',
-                  style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ),
@@ -78,12 +82,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             onboardingData[index]['image']!,
                             height: 250,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                Icon(
-                                  Icons.image,
-                                  size: 250,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              Icons.image,
+                              size: 250,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                           ),
                         ),
                         const SizedBox(height: AppSizes.s48),
@@ -102,7 +105,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 18,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                             height: 1.4,
                           ),
                         ),
@@ -128,7 +133,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         decoration: BoxDecoration(
                           color: _currentPage == index
                               ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72).withValues(alpha: 0.3),
+                              : Theme.of(context).colorScheme.onSurfaceVariant
+                                    .withValues(alpha: 0.72)
+                                    .withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -166,6 +173,3 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 }
-
-
-

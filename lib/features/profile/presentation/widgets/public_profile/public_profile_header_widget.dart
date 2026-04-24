@@ -111,7 +111,7 @@ SizedBox(width: AppSizes.s8),
       case 'mono':
         return 'monospace';
       default:
-        return null; // Defaults to app-wide font (likely GoogleSans or Inter)
+        return 'Inter'; // Default to a specific font for consistency
     }
   }
 }

@@ -494,12 +494,16 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
 
   String? fontFamilyFor(String key) {
     switch (key) {
+      case 'google_sans':
+        return 'GoogleSans';
+      case 'inter':
+        return 'Inter';
       case 'serif':
         return 'serif';
       case 'mono':
         return 'monospace';
       default:
-        return null;
+        return 'Inter';
     }
   }
 

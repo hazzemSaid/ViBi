@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/home/presentation/widgets/story_card.dart';
 
 class AnswerAuthorRow extends StatelessWidget {
@@ -17,20 +18,27 @@ class AnswerAuthorRow extends StatelessWidget {
     return Row(
       children: [
         CircleAvatar(
-          radius: 20,
+          radius: 21,
           backgroundImage: answerAuthorAvatarUrl != null
               ? ResizeImage(
                   CachedNetworkImageProvider(
                     answerAuthorAvatarUrl!,
                     cacheManager: customCacheManager,
                   ),
-                  width: 120,
-                  height: 120,
+                  width: 126,
+                  height: 126,
                 )
               : null,
-          backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+          backgroundColor: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
           child: answerAuthorAvatarUrl == null
-              ? Icon(Icons.person, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.35))
+              ? Icon(
+                  Icons.person,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
+                )
               : null,
         ),
         const SizedBox(width: 12),
@@ -43,24 +51,42 @@ class AnswerAuthorRow extends StatelessWidget {
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.bold,
-                  fontSize: 15,
+                  fontSize: AppSizes.s16,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-Text(
+              Text(
                 'Answered',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72), fontSize: 12),
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+                  fontSize: AppSizes.s12,
+                ),
               ),
             ],
           ),
         ),
         IconButton(
-          icon: Icon(Icons.more_horiz, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72)),
-          onPressed: () {},
+          icon: Icon(
+            Icons.more_horiz,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+          ),
+          onPressed: () {
+            //TODO: implement more options like ->{
+            // - report
+            // - block
+            // - share
+            // - copy
+            // - save
+            // - etc
+            // }
+          },
         ),
       ],
     );
   }
 }
-

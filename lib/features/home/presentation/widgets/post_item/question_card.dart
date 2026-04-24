@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 import 'package:vibi/features/recommendation/presentation/widgets/media_card.dart';
 
@@ -31,10 +32,10 @@ class QuestionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(AppSizes.r16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppSizes.r16),
         border: Border.all(
           color: Theme.of(
             context,
@@ -55,7 +56,7 @@ class QuestionCard extends StatelessWidget {
             style: TextStyle(
               color: Theme.of(context).colorScheme.secondary,
               fontWeight: FontWeight.w900,
-              fontSize: 10,
+              fontSize: AppSizes.r16,
               letterSpacing: 1.5,
             ),
           ),

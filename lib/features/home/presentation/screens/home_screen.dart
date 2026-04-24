@@ -3,15 +3,16 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_caching.dart';
 import 'package:vibi/core/di/service_locator.dart';
+import 'package:vibi/features/feed/domain/entities/feed_item.dart';
 import 'package:vibi/features/feed/presentation/view/cubit/feed_cubit.dart';
 import 'package:vibi/features/feed/presentation/view/cubit/feed_state.dart';
-import 'package:vibi/features/home/presentation/widgets/feed_empty_state.dart';
-import 'package:vibi/features/home/presentation/widgets/feed_error_state.dart';
-import 'package:vibi/features/home/presentation/widgets/feed_load_more_indicator.dart';
-import 'package:vibi/features/home/presentation/widgets/feed_loading_state.dart';
+import 'package:vibi/features/home/presentation/widgets/feed_state_widgets/feed_empty_state.dart';
+import 'package:vibi/features/home/presentation/widgets/feed_state_widgets/feed_error_state.dart';
+import 'package:vibi/features/home/presentation/widgets/feed_state_widgets/feed_load_more_indicator.dart';
+import 'package:vibi/features/home/presentation/widgets/feed_state_widgets/feed_loading_state.dart';
 import 'package:vibi/features/home/presentation/widgets/home_app_bar.dart';
-import 'package:vibi/features/home/presentation/widgets/post_item.dart';
-import 'package:vibi/features/home/presentation/widgets/recommend_card.dart';
+import 'package:vibi/features/home/presentation/widgets/post_item/post_item.dart';
+import 'package:vibi/features/home/presentation/widgets/post_item/recommend_card.dart';
 import 'package:vibi/features/home/presentation/widgets/suggested_section.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -55,7 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _globalFeedCubit.close();
     super.dispose();
   }
 
@@ -99,8 +99,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     failure: (message, _) => FeedErrorState(message: message),
                     loaded: (items, hasMore) {
                       if (items.isEmpty) return const FeedEmptyState();
-
-                      final itemIndexById = <String, int>{
+                      // Create a map of item ids to their indices for efficient lookup
+                      final Map<String, int> itemIndexById = <String, int>{
                         for (var i = 0; i < items.length; i++) items[i].id: i,
                       };
 
@@ -111,8 +111,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               return const FeedLoadMoreIndicator();
                             }
 
-                            final item = items[index];
-                            final isRecommendation =
+                            final FeedItem item = items[index];
+                            final bool isRecommendation =
                                 item.questionType == 'recommendation' &&
                                 item.mediaRec != null;
 
@@ -131,13 +131,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                         ),
                                 ),
                                 Divider(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurface
+                                  color: Theme.of(context).colorScheme.onSurface
                                       .withValues(alpha: 0.05),
                                   height: 1,
                                 ),
-                                if (index == 0) ...const [
+                                //TODO : implement suggested users section
+                                if (index == 0 && false) ...const [
                                   SuggestedSection(
                                     key: ValueKey('suggested_section'),
                                   ),

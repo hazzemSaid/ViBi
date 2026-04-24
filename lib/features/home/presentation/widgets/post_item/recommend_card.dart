@@ -7,9 +7,9 @@ import 'package:vibi/features/feed/presentation/view/cubit/feed_cubit.dart';
 import 'package:vibi/features/feed/presentation/view/cubit/feed_state.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 
-import 'post_item/action_row.dart';
-import 'post_item/answer_author_row.dart';
-import 'post_item/sender_row.dart';
+import 'action_row.dart';
+import 'answer_author_row.dart';
+import 'sender_row.dart';
 
 class RecommendCard extends StatelessWidget {
   const RecommendCard({super.key, required this.item});

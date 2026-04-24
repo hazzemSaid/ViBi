@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/home/presentation/widgets/story_card.dart';
 
 class SenderRow extends StatelessWidget {
@@ -19,7 +20,7 @@ class SenderRow extends StatelessWidget {
     return Row(
       children: [
         CircleAvatar(
-          radius: 16,
+          radius: 18,
           backgroundImage: displayAvatar != null
               ? ResizeImage(
                   CachedNetworkImageProvider(
@@ -31,19 +32,21 @@ class SenderRow extends StatelessWidget {
                 )
               : null,
           backgroundColor: isAnonymous
-                ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3)
+              ? Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3)
               : Theme.of(context).colorScheme.onSurfaceVariant,
           child: displayAvatar == null
               ? Icon(
                   Icons.person,
                   color: isAnonymous
-                    ? Theme.of(context).colorScheme.secondary
-                    : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
+                      ? Theme.of(context).colorScheme.secondary
+                      : Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
                   size: 16,
                 )
               : null,
         ),
-        const SizedBox(width: 10),
+        const SizedBox(width: AppSizes.s12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,38 +59,21 @@ class SenderRow extends StatelessWidget {
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
-                        fontSize: 12,
+                        fontSize: AppSizes.r16,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (isAnonymous)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 6.0),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 1,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          'Anon',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.secondary,
-                            fontSize: 9,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
                 ],
               ),
-Text(
+              Text(
                 'Asked',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72), fontSize: 10),
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+                  fontSize: 10,
+                ),
               ),
             ],
           ),
@@ -96,4 +82,3 @@ Text(
     );
   }
 }
-

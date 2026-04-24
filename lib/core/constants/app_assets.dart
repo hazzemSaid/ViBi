@@ -2,6 +2,11 @@ class AppAssets {
   static const String _imagesPath = 'assets/images/';
   static const String _iconsPath = 'assets/icons/';
   static const String _videosPath = 'assets/videos/';
+  static const String _animationsPath = 'assets/animation/';
+
+  // Animations
+  static const String feedEmptyState = '${_animationsPath}feed_empty_state.json';
+  static const String feedErrorState = '${_animationsPath}404error.json';
 
   // Images
   static const String appIcon = '${_imagesPath}app.icon.png';

@@ -1,14 +1,15 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/feed/domain/entities/feed_item.dart';
 import 'package:vibi/features/feed/presentation/view/cubit/feed_cubit.dart';
 import 'package:vibi/features/feed/presentation/view/cubit/feed_state.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 
-import 'post_item/action_row.dart';
-import 'post_item/answer_author_row.dart';
-import 'post_item/question_card.dart';
+import 'action_row.dart';
+import 'answer_author_row.dart';
+import 'question_card.dart';
 
 class PostItem extends StatelessWidget {
   const PostItem({super.key, required this.item});
@@ -20,9 +21,10 @@ class PostItem extends StatelessWidget {
     final feedCubit = context.read<GlobalFeedCubit>();
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isTablet = screenWidth >= 600;
-    final padding = isTablet ? 16.0 : 20.0;
-    final bodyFontSize = isTablet ? 20.0 : 12.0;
-    final questionFontSize = isTablet ? 20.0 : 18.0;
+
+    final padding = isTablet ? AppSizes.s16 : AppSizes.s20;
+    final bodyFontSize = isTablet ? AppSizes.s20 : AppSizes.s12;
+    final questionFontSize = isTablet ? AppSizes.s20 : AppSizes.s16;
 
     return BlocSelector<GlobalFeedCubit, FeedState, _PostBodyData>(
       selector: (state) {
@@ -41,7 +43,7 @@ class PostItem extends StatelessWidget {
                 answerAuthorUsername: currentItem.answerAuthorUsername,
                 answerAuthorAvatarUrl: currentItem.answerAuthorAvatarUrl,
               ),
-              const SizedBox(height: 12),
+              AppSizes.gapH12,
               QuestionCard(
                 isAnonymous: currentItem.isAnonymous,
                 questionText: currentItem.questionText,
@@ -51,7 +53,7 @@ class PostItem extends StatelessWidget {
                 questionType: currentItem.questionType,
                 mediaRec: currentItem.mediaRec,
               ),
-              const SizedBox(height: 16),
+              AppSizes.gapH16,
               Text(
                 currentItem.answerText,
                 style: TextStyle(
@@ -59,7 +61,7 @@ class PostItem extends StatelessWidget {
                   fontSize: bodyFontSize,
                 ),
               ),
-              const SizedBox(height: 20),
+              AppSizes.gapH20,
               ActionRow(
                 answerId: currentItem.id,
                 fallbackAnswerText: currentItem.answerText,

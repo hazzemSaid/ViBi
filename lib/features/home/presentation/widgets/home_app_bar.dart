@@ -35,25 +35,20 @@ class HomeAppBar extends StatelessWidget {
       actions: [
         IconButton(
           icon: Icon(
-            Icons.notifications_none,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: Icon(
-            Icons.search,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: Icon(
             Icons.logout,
             color: Theme.of(context).colorScheme.error,
             size: 20,
           ),
           onPressed: () => context.read<AuthController>().signOut(),
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.notifications_none,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+          onPressed: () {
+            // TODO : implement notifications
+          },
         ),
       ],
     );

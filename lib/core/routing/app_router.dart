@@ -23,6 +23,7 @@ import 'package:vibi/features/profile/presentation/screens/profile_screen.dart';
 import 'package:vibi/features/profile/presentation/screens/public_profile_screen.dart';
 import 'package:vibi/features/search/presentation/screens/search_screen.dart';
 import 'package:vibi/features/splash/presentation/screens/splash_screen.dart';
+import 'package:vibi/features/inbox/presentation/screens/share_answer_screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
@@ -80,6 +81,19 @@ GoRouter createAppRouter(AuthCubit authCubit) {
         path: '/edit-profile/public-web',
         name: 'edit-profile-public-web',
         builder: (context, state) => const EditProfilePublicWebScreen(),
+      ),
+      GoRoute(
+        path: '/share-answer',
+        name: 'share-answer',
+        builder: (context, state) {
+          final Map<String, dynamic>? extra = state.extra as Map<String, dynamic>?;
+          return ShareAnswerScreen(
+            questionText: extra?['questionText'] ?? '',
+            answerText: extra?['answerText'] ?? '',
+            username: extra?['username'] ?? '',
+            isAnonymous: extra?['isAnonymous'] ?? false,
+          );
+        },
       ),
       // Public profile route with user ID parameter
       GoRoute(

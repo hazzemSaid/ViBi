@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/features/inbox/presentation/cubits/answer_question_cubit.dart';
 import 'package:vibi/features/inbox/presentation/cubits/pending_questions_cubit.dart';
-import 'package:vibi/features/inbox/presentation/screens/share_answer_screen.dart';
 import 'package:vibi/features/inbox/presentation/state/answer_screen_visibility.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 import 'package:vibi/features/recommendation/presentation/widgets/media_card.dart';
@@ -228,15 +228,14 @@ class _AnswerScreenState extends State<AnswerScreen> {
     }
 
     // Navigate to share screen
-    final didShare = await Navigator.of(context).push<bool>(
-      MaterialPageRoute<bool>(
-        builder: (_) => ShareAnswerScreen(
-          questionText: widget.questionText,
-          answerText: text,
-          isAnonymous: widget.isAnonymous,
-          username: _username,
-        ),
-      ),
+    final didShare = await context.pushNamed<bool>(
+      'share-answer',
+      extra: {
+        'questionText': widget.questionText,
+        'answerText': text,
+        'isAnonymous': widget.isAnonymous,
+        'username': _username,
+      },
     );
 
     if (mounted) Navigator.of(context).pop(didShare ?? true);

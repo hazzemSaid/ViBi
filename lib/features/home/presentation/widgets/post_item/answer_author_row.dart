@@ -41,7 +41,7 @@ class AnswerAuthorRow extends StatelessWidget {
                 )
               : null,
         ),
-        const SizedBox(width: 12),
+        AppSizes.gapW12,
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

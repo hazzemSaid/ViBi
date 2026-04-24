@@ -50,17 +50,17 @@ class QuestionCard extends StatelessWidget {
             displayName: displayName,
             displayAvatar: displayAvatar,
           ),
-          const SizedBox(height: 12),
+          AppSizes.gapH12,
           Text(
             _isRecommendation ? 'RECOMMENDATION' : 'Tell',
             style: TextStyle(
               color: Theme.of(context).colorScheme.secondary,
               fontWeight: FontWeight.w900,
-              fontSize: AppSizes.r16,
+              fontSize: AppSizes.s10,
               letterSpacing: 1.5,
             ),
           ),
-          const SizedBox(height: 8),
+          AppSizes.gapH8,
           if (_isRecommendation)
             MediaCard(media: mediaRec!, compact: true, showOverview: true)
           else

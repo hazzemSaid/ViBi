@@ -5,6 +5,7 @@ import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/feed/domain/entities/feed_item.dart';
 import 'package:vibi/features/feed/presentation/view/cubit/feed_cubit.dart';
 import 'package:vibi/features/feed/presentation/view/cubit/feed_state.dart';
+import 'package:vibi/features/home/presentation/widgets/post_item/UserAnswerText.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 
 import 'action_row.dart';
@@ -54,13 +55,7 @@ class PostItem extends StatelessWidget {
                 mediaRec: currentItem.mediaRec,
               ),
               AppSizes.gapH16,
-              Text(
-                currentItem.answerText,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: bodyFontSize,
-                ),
-              ),
+              UserAnswerText(answerText: currentItem.answerText),
               AppSizes.gapH20,
               ActionRow(
                 answerId: currentItem.id,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:vibi/core/constants/app_assets.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
 
 class FeedErrorState extends StatelessWidget {
   const FeedErrorState({super.key, required this.message});
@@ -9,49 +10,70 @@ class FeedErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.sizeOf(context);
+    final isSmallScreen = screenSize.width < 360;
+    final isTablet = screenSize.width >= 600;
+
+    // Adaptive sizes
+    final animationSize = isTablet
+        ? 350.0
+        : isSmallScreen
+        ? 200.0
+        : 250.0;
+    final titleFontSize = isTablet ? AppSizes.s28 : AppSizes.s20;
+    final messageFontSize = isTablet ? AppSizes.s16 : AppSizes.s14;
+    final horizontalPadding = isTablet ? screenSize.width * 0.15 : AppSizes.s40;
+
     return SliverFillRemaining(
       hasScrollBody: false,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Lottie.asset(
-                AppAssets.feedErrorState,
-                width: 250,
-                height: 250,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Oops! Something went wrong',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Lottie.asset(
+                  AppAssets.feedErrorState,
+                  width: animationSize,
+                  height: animationSize,
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                message,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 14,
+                const SizedBox(height: AppSizes.s16),
+                Text(
+                  'Oops! Something went wrong',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    fontSize: titleFontSize,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () {
-                  // In a real app, we might trigger a refresh here via the cubit
-                },
-                icon: const Icon(Icons.refresh),
-                label: const Text('Try Again'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                AppSizes.gapH8,
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: messageFontSize,
+                  ),
                 ),
-              ),
-            ],
+                AppSizes.gapH24,
+                ElevatedButton.icon(
+                  onPressed: () {
+                    // todo : refresh
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Try Again'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSizes.s24,
+                      vertical: AppSizes.s12,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

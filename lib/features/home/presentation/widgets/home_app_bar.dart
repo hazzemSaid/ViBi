@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/auth/presentation/controllers/auth_controller.dart';
 
 class HomeAppBar extends StatelessWidget {
@@ -17,16 +18,16 @@ class HomeAppBar extends StatelessWidget {
             'ViBi',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 24,
+              fontSize: AppSizes.s24,
               color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
-          SizedBox(width: 16),
+          AppSizes.gapW16,
           Text(
             'FEED',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 12,
+              fontSize: AppSizes.s12,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
@@ -37,7 +38,7 @@ class HomeAppBar extends StatelessWidget {
           icon: Icon(
             Icons.logout,
             color: Theme.of(context).colorScheme.error,
-            size: 20,
+            size: AppSizes.s20,
           ),
           onPressed: () => context.read<AuthController>().signOut(),
         ),
@@ -45,6 +46,7 @@ class HomeAppBar extends StatelessWidget {
           icon: Icon(
             Icons.notifications_none,
             color: Theme.of(context).colorScheme.onSurface,
+            size: AppSizes.s20,
           ),
           onPressed: () {
             // TODO : implement notifications

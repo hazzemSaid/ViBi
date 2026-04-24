@@ -20,15 +20,15 @@ class SenderRow extends StatelessWidget {
     return Row(
       children: [
         CircleAvatar(
-          radius: 18,
+          radius: AppSizes.s18,
           backgroundImage: displayAvatar != null
               ? ResizeImage(
                   CachedNetworkImageProvider(
                     displayAvatar!,
                     cacheManager: customCacheManager,
                   ),
-                  width: 96,
-                  height: 96,
+                  width: AppSizes.s96.toInt(),
+                  height: AppSizes.s96.toInt(),
                 )
               : null,
           backgroundColor: isAnonymous
@@ -39,14 +39,15 @@ class SenderRow extends StatelessWidget {
                   Icons.person,
                   color: isAnonymous
                       ? Theme.of(context).colorScheme.secondary
-                      : Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
-                  size: 16,
+                      : Theme.of(context)
+                          .colorScheme
+                          .onSurfaceVariant
+                          .withValues(alpha: 0.35),
+                  size: AppSizes.iconSmall,
                 )
               : null,
         ),
-        const SizedBox(width: AppSizes.s12),
+        AppSizes.gapW12,
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +60,7 @@ class SenderRow extends StatelessWidget {
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
-                        fontSize: AppSizes.r16,
+                        fontSize: AppSizes.s14,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -69,10 +70,11 @@ class SenderRow extends StatelessWidget {
               Text(
                 'Asked',
                 style: TextStyle(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
-                  fontSize: 10,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurfaceVariant
+                      .withValues(alpha: 0.72),
+                  fontSize: AppSizes.s10,
                 ),
               ),
             ],

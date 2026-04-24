@@ -2,9 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/feed/domain/entities/feed_item.dart';
 import 'package:vibi/features/feed/presentation/view/cubit/feed_cubit.dart';
 import 'package:vibi/features/feed/presentation/view/cubit/feed_state.dart';
+import 'package:vibi/features/home/presentation/widgets/post_item/UserAnswerText.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 
 import 'action_row.dart';
@@ -21,8 +23,8 @@ class RecommendCard extends StatelessWidget {
     final feedCubit = context.read<GlobalFeedCubit>();
     final screenWidth = MediaQuery.sizeOf(context).width;
     final isTablet = screenWidth >= 600;
-    final padding = isTablet ? 16.0 : 20.0;
-    final bodyFontSize = isTablet ? 20.0 : 12.0;
+    final padding = isTablet ? AppSizes.s16 : AppSizes.s20;
+    final bodyFontSize = isTablet ? AppSizes.s20 : AppSizes.s12;
 
     return BlocSelector<GlobalFeedCubit, FeedState, _PostBodyData>(
       selector: (state) {
@@ -41,22 +43,16 @@ class RecommendCard extends StatelessWidget {
                 answerAuthorUsername: currentItem.answerAuthorUsername,
                 answerAuthorAvatarUrl: currentItem.answerAuthorAvatarUrl,
               ),
-              const SizedBox(height: 12),
+              AppSizes.gapH12,
               _RecommendQuestionCard(
                 isAnonymous: currentItem.isAnonymous,
                 displayName: currentItem.displayName,
                 displayAvatar: currentItem.displayAvatar,
                 mediaRec: currentItem.mediaRec,
               ),
-              const SizedBox(height: 16),
-              Text(
-                currentItem.answerText,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: bodyFontSize,
-                ),
-              ),
-              const SizedBox(height: 20),
+              AppSizes.gapH16,
+              UserAnswerText(answerText: currentItem.answerText),
+              AppSizes.gapH12,
               ActionRow(
                 answerId: currentItem.id,
                 fallbackAnswerText: currentItem.answerText,
@@ -91,7 +87,7 @@ class _RecommendQuestionCard extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppSizes.r16),
         border: Border.all(
           color: Theme.of(
             context,
@@ -103,7 +99,7 @@ class _RecommendQuestionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: AppSizes.p16,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -112,13 +108,13 @@ class _RecommendQuestionCard extends StatelessWidget {
                   displayName: displayName,
                   displayAvatar: displayAvatar,
                 ),
-                const SizedBox(height: 12),
+                AppSizes.gapH12,
                 Text(
                   'RECOMMENDATION',
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.secondary,
                     fontWeight: FontWeight.w900,
-                    fontSize: 10,
+                    fontSize: AppSizes.s10,
                     letterSpacing: 1.5,
                   ),
                 ),
@@ -170,7 +166,7 @@ class _PosterSection extends StatelessWidget {
           ),
           // Bottom meta
           Positioned(
-            bottom: 12,
+            bottom: AppSizes.s12,
             left: 14,
             right: 14,
             child: Row(
@@ -194,7 +190,7 @@ class _PosterSection extends StatelessWidget {
                       ),
                       if (media.year.isNotEmpty ||
                           media.voteAverage != null) ...[
-                        const SizedBox(height: 5),
+                        AppSizes.gapH4, // using gapH4 as closest to 5
                         Row(
                           children: [
                             if (media.year.isNotEmpty) ...[
@@ -202,7 +198,7 @@ class _PosterSection extends StatelessWidget {
                                 media.year,
                                 style: const TextStyle(
                                   color: Colors.white70,
-                                  fontSize: 12,
+                                  fontSize: AppSizes.s12,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -213,7 +209,7 @@ class _PosterSection extends StatelessWidget {
                                     '•',
                                     style: TextStyle(
                                       color: Colors.white54,
-                                      fontSize: 12,
+                                      fontSize: AppSizes.s12,
                                     ),
                                   ),
                                 ),
@@ -222,14 +218,14 @@ class _PosterSection extends StatelessWidget {
                               const Icon(
                                 Icons.star,
                                 color: Colors.amber,
-                                size: 12,
+                                size: AppSizes.s12,
                               ),
                               const SizedBox(width: 3),
                               Text(
                                 media.voteAverage!.toStringAsFixed(1),
                                 style: const TextStyle(
                                   color: Colors.white70,
-                                  fontSize: 12,
+                                  fontSize: AppSizes.s12,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -240,7 +236,7 @@ class _PosterSection extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
+                AppSizes.gapW8,
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -254,7 +250,7 @@ class _PosterSection extends StatelessWidget {
                     media.mediaType == 'tv' ? 'TV Series' : 'Movie',
                     style: const TextStyle(
                       color: Colors.white70,
-                      fontSize: 10,
+                      fontSize: AppSizes.s10,
                       fontWeight: FontWeight.w500,
                       letterSpacing: 0.4,
                     ),

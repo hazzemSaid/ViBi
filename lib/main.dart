@@ -36,8 +36,6 @@ void main() async {
   // Initialize Firebase — gracefully handles missing config (Appetizer / CI without secrets).
   await _initFirebase();
 
-
-
   // Initialize GraphQL client
   // This sets up the GraphQL endpoint with authentication
   await GraphQLConfig.initialize();
@@ -49,7 +47,7 @@ void main() async {
   // Initialize Push Notifications via Service Locator
   await getIt<PushNotificationService>().initialize();
 
-  // Enable verbose logging for debugging (remove in production)
+  // Enable verbose logging for debugging (rem  ove in production)
   OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
   // Initialize with your OneSignal App ID
   OneSignal.initialize(dotenv.env['ONESIGNAL_APP_ID'] ?? '');

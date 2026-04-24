@@ -27,6 +27,8 @@ class AppSizes {
   static const double s72 = 72.0;
   static const double s80 = 80.0;
   static const double s96 = 96.0;
+  static const double s100 = 100.0;
+  static const double s280 = 280.0;
 
   // Radius
   static const double r4 = 4.0;
@@ -34,7 +36,9 @@ class AppSizes {
   static const double r12 = 12.0;
   static const double r14 = 14.0;
   static const double r16 = 16.0;
+  static const double r18 = 18.0;
   static const double r20 = 20.0;
+  static const double r22 = 22.0;
   static const double r24 = 24.0;
   static const double r32 = 32.0;
   static const double rMax = 999.0;
@@ -81,7 +85,9 @@ class AppSizes {
 
   // Gaps (SizedBox)
   static const SizedBox gapW4 = SizedBox(width: s4);
+  static const SizedBox gapW6 = SizedBox(width: s6);
   static const SizedBox gapW8 = SizedBox(width: s8);
+  static const SizedBox gapW10 = SizedBox(width: s10);
   static const SizedBox gapW12 = SizedBox(width: s12);
   static const SizedBox gapW16 = SizedBox(width: s16);
   static const SizedBox gapW20 = SizedBox(width: s20);

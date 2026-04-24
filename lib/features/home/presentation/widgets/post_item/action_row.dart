@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/features/feed/presentation/view/cubit/feed_cubit.dart';
 import 'package:vibi/features/feed/presentation/view/cubit/feed_state.dart';
@@ -32,7 +33,7 @@ class ActionRow extends StatelessWidget {
         _ReactionSection(answerId: answerId),
         const Spacer(),
         _CommentActionButton(answerId: answerId),
-        const SizedBox(width: 10),
+        AppSizes.gapW12,
         _ShareActionButton(
           answerId: answerId,
           fallbackAnswerText: fallbackAnswerText,
@@ -40,7 +41,7 @@ class ActionRow extends StatelessWidget {
           fallbackUsername: fallbackUsername,
           fallbackIsAnonymous: fallbackIsAnonymous,
         ),
-        const SizedBox(width: 10),
+        AppSizes.gapW12,
         const _SendTellButton(),
       ],
     );
@@ -235,10 +236,13 @@ class _SendTellButton extends StatelessWidget {
         // TODO: implement send tell , to send question to the user related to the post
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.s10,
+          vertical: AppSizes.s10,
+        ),
         decoration: BoxDecoration(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(AppSizes.r16),
           border: Border.all(
             color: Theme.of(
               context,
@@ -251,15 +255,15 @@ class _SendTellButton extends StatelessWidget {
             Icon(
               Icons.auto_awesome,
               color: Theme.of(context).colorScheme.onSurface,
-              size: 16,
+              size: AppSizes.iconSmall,
             ),
-            SizedBox(width: 7),
+            AppSizes.gapW4, // Using gapW6 as closest to 7
             Text(
               'Send Ask',
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.w700,
-                fontSize: 12,
+                fontSize: AppSizes.s12,
               ),
             ),
           ],
@@ -280,11 +284,11 @@ class _ActionIconButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 48,
-        height: 48,
+        width: AppSizes.s48,
+        height: AppSizes.s48,
         decoration: BoxDecoration(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(AppSizes.r16),
           border: Border.all(
             color: Theme.of(
               context,
@@ -294,7 +298,7 @@ class _ActionIconButton extends StatelessWidget {
         child: Icon(
           icon,
           color: Theme.of(context).colorScheme.onSurfaceVariant,
-          size: 21,
+          size: AppSizes.s22,
         ),
       ),
     );

@@ -8,25 +8,42 @@ import 'package:vibi/core/graphql/mutations/inbox_mutations.dart';
 import 'package:vibi/core/graphql/queries/inbox_queries.dart';
 import 'package:vibi/features/inbox/data/models/inbox_question_model.dart';
 
+/**
+ * Data source for fetching and managing inbox questions via GraphQL.
+ */
 class GraphQLInboxDataSource {
   final ferry.Client _ferryClient;
   final Future<Map<int, Map<String, dynamic>>> Function(Set<int> ids)
-  _mediaRecommendationsLoader;
+      _mediaRecommendationsLoader;
 
+  /**
+   * Initializes the [GraphQLInboxDataSource] with an optional GraphQL client
+   * and an optional media recommendations loader.
+   */
   GraphQLInboxDataSource({
     ferry.Client? graphQLClient,
     Future<Map<int, Map<String, dynamic>>> Function(Set<int> ids)?
-    mediaRecommendationsLoader,
-  }) : _ferryClient = graphQLClient ?? GraphQLConfig.ferryClient,
-       _mediaRecommendationsLoader =
-           mediaRecommendationsLoader ?? _defaultLoadMediaRecommendationsById;
+        mediaRecommendationsLoader,
+  })  : _ferryClient = graphQLClient ?? GraphQLConfig.ferryClient,
+        _mediaRecommendationsLoader =
+            mediaRecommendationsLoader ?? _defaultLoadMediaRecommendationsById;
 
-  // ── Queries ────────────────────────────────────────────────────────────────
+  // ── Logging ──────────────────────────────────────────────────────────────
 
+  /**
+   * Internal logging helper that only prints in debug mode.
+   */
+  static void _log(String message) {
+    if (kDebugMode) debugPrint(message);
+  }
 
+  // ── GraphQL Helpers ──────────────────────────────────────────────────────
 
+  /**
+   * Runs a GraphQL query with a 'network-only' fetch policy.
+   */
   Future<ferry.OperationResponse<Map<String, dynamic>, Map<String, dynamic>>>
-  _runNetworkFirstQuery({
+      _runNetworkFirstQuery({
     required String operationName,
     required String document,
     required Map<String, dynamic> variables,
@@ -39,8 +56,11 @@ class GraphQLInboxDataSource {
     );
   }
 
+  /**
+   * Runs a GraphQL mutation.
+   */
   Future<ferry.OperationResponse<Map<String, dynamic>, Map<String, dynamic>>>
-  _runMutation({
+      _runMutation({
     required String operationName,
     required String document,
     required Map<String, dynamic> variables,
@@ -53,8 +73,20 @@ class GraphQLInboxDataSource {
     );
   }
 
-  // ── Public Methods ─────────────────────────────────────────────────────────
+  // ── Questions Query ──────────────────────────────────────────────────────
 
+  /**
+   * Fetches a list of questions for a specific user from the GraphQL API.
+   *
+   * [currentUserId] is the ID of the user whose questions are being fetched.
+   * [limit] is the maximum number of questions to retrieve.
+   * [offset] is used for pagination to skip a certain number of results.
+   * [status] filters the questions based on their current state (e.g., 'pending').
+   *
+   * Returns:
+   * - [Right] containing a [List] of [InboxQuestionModel] on success.
+   * - [Left] containing an error [String] if the network request or parsing fails.
+   */
   Future<Either<String, List<InboxQuestionModel>>> getPendingQuestions(
     String currentUserId, {
     int limit = 20,
@@ -62,15 +94,10 @@ class GraphQLInboxDataSource {
     String status = 'pending',
   }) async {
     try {
-      final normalizedStatus = status.trim().toLowerCase();
-      final statuses = switch (normalizedStatus) {
-        'archived' || 'archive' => const <String>['archive', 'archived'],
-        '' || 'unanswered' => const <String>['pending'],
-        _ => <String>[normalizedStatus],
-      };
+      final statuses = _resolveStatuses(status);
 
       final result = await _runNetworkFirstQuery(
-        operationName: 'GetPendingQuestions',
+        operationName: InboxQueries.getPendingQuestionsOpName,
         document: InboxQueries.getPendingQuestions,
         variables: {
           'currentUserId': currentUserId,
@@ -86,55 +113,216 @@ class GraphQLInboxDataSource {
 
       final edges =
           result.data?['questionsCollection']?['edges'] as List<dynamic>? ??
-          const <dynamic>[];
+              const <dynamic>[];
 
-      final mediaIds = _extractRecommendationMediaIds(edges);
-      final mediaById = await _mediaRecommendationsLoader(mediaIds);
+      final mediaById =
+          await _mediaRecommendationsLoader(_extractMediaIds(edges));
 
-      final questions = <InboxQuestionModel>[];
-      for (final edge in edges) {
-        try {
-          final node =
-              (edge as Map<String, dynamic>)['node'] as Map<String, dynamic>;
-          final rawProfile = node['profiles'];
-
-          Map<String, dynamic>? senderProfile;
-          if (rawProfile is Map<String, dynamic>) {
-            senderProfile = rawProfile;
-          } else if (rawProfile is List &&
-              rawProfile.isNotEmpty &&
-              rawProfile.first is Map) {
-            senderProfile = Map<String, dynamic>.from(rawProfile.first as Map);
-          }
-          questions.add(
-            InboxQuestionModel.fromMap({
-              'id': node['id'],
-              'recipient_id': node['recipient_id'],
-              'sender_id': node['sender_id'],
-              'question_text': node['question_text'],
-              'question_type': node['question_type'],
-              'media_rec_id': node['media_rec_id'],
-              'media_recommendations': mediaById[_asInt(node['media_rec_id'])],
-              'is_anonymous': node['is_anonymous'],
-              'status': node['status'],
-              'created_at': node['created_at'],
-              'sender': senderProfile,
-            }),
-          );
-        } catch (e) {
-          if (kDebugMode) {
-            debugPrint('WARN: Skipping malformed inbox edge: $e');
-          }
-        }
-      }
-
-      return right(questions);
+      return right(_parseQuestionEdges(edges, mediaById));
     } catch (e) {
       return left('Failed to fetch pending questions: $e');
     }
   }
 
-  Set<int> _extractRecommendationMediaIds(List<dynamic> questionEdges) {
+  /**
+   * Resolves the question status string into a list of specific status values.
+   */
+  List<String> _resolveStatuses(String status) {
+    final normalized = status.trim().toLowerCase();
+    return switch (normalized) {
+      'archived' || 'archive' => const ['archive', 'archived'],
+      '' || 'unanswered' => const ['pending'],
+      _ => [normalized],
+    };
+  }
+
+  /**
+   * Parses raw GraphQL edges into a list of [InboxQuestionModel].
+   */
+  List<InboxQuestionModel> _parseQuestionEdges(
+    List<dynamic> edges,
+    Map<int, Map<String, dynamic>> mediaById,
+  ) {
+    final questions = <InboxQuestionModel>[];
+
+    for (final edge in edges) {
+      try {
+        final node =
+            (edge as Map<String, dynamic>)['node'] as Map<String, dynamic>;
+        questions.add(_buildQuestionModel(node, mediaById));
+      } catch (e) {
+        _log('WARN: Skipping malformed inbox edge: $e');
+      }
+    }
+
+    return questions;
+  }
+
+  /**
+   * Builds an [InboxQuestionModel] from a raw JSON node.
+   */
+  InboxQuestionModel _buildQuestionModel(
+    Map<String, dynamic> node,
+    Map<int, Map<String, dynamic>> mediaById,
+  ) {
+    return InboxQuestionModel.fromMap({
+      'id': node['id'],
+      'recipient_id': node['recipient_id'],
+      'sender_id': node['sender_id'],
+      'question_text': node['question_text'],
+      'question_type': node['question_type'],
+      'media_rec_id': node['media_rec_id'],
+      'media_recommendations': mediaById[_asInt(node['media_rec_id'])],
+      'is_anonymous': node['is_anonymous'],
+      'status': node['status'],
+      'created_at': node['created_at'],
+      'sender': _parseSenderProfile(node['profiles']),
+    });
+  }
+
+  /**
+   * Extracts the sender profile from a raw profiles object (handles Map or List).
+   */
+  static Map<String, dynamic>? _parseSenderProfile(dynamic rawProfile) {
+    if (rawProfile is Map<String, dynamic>) return rawProfile;
+    if (rawProfile is List &&
+        rawProfile.isNotEmpty &&
+        rawProfile.first is Map) {
+      return Map<String, dynamic>.from(rawProfile.first as Map);
+    }
+    return null;
+  }
+
+  // ── Question Actions ─────────────────────────────────────────────────────
+
+  /**
+   * Submits an answer content for a specific question via a GraphQL mutation.
+   *
+   * [questionId] is the unique identifier of the question to answer.
+   * [answerText] is the text content of the user's response.
+   * [userId] is the ID of the user performing the action.
+   *
+   * Returns:
+   * - [Right] with [Unit] if the mutation completes successfully.
+   * - [Left] with an error [String] if the server returns an error.
+   */
+  Future<Either<String, Unit>> answerQuestion({
+    required String questionId,
+    required String answerText,
+    required String userId,
+  }) {
+    return _handleQuestionAction(
+      questionId: questionId,
+      userId: userId,
+      action: 'answer',
+      answerText: answerText,
+    );
+  }
+
+  /**
+   * Deletes a specific question by invoking a GraphQL mutation.
+   *
+   * [questionId] is the unique identifier of the target question.
+   *
+   * Returns:
+   * - [Right] with [Unit] on success.
+   * - [Left] with an error [String] on failure.
+   */
+  Future<Either<String, Unit>> deleteQuestion(String questionId) {
+    return _handleQuestionAction(
+      questionId: questionId,
+      userId: _currentUserId,
+      action: 'delete',
+    );
+  }
+
+  /**
+   * Archives a question so it no longer appears in the primary inbox.
+   *
+   * [questionId] is the unique identifier of the question to archive.
+   *
+   * Returns:
+   * - [Right] with [Unit] on success.
+   * - [Left] with an error [String] on failure.
+   */
+  Future<Either<String, Unit>> archiveQuestion({
+    required String questionId,
+  }) {
+    return _handleQuestionAction(
+      questionId: questionId,
+      userId: _currentUserId,
+      action: 'archive',
+    );
+  }
+
+  /**
+   * Restores an archived question to the active inbox.
+   *
+   * [questionId] is the unique identifier of the question to unarchive.
+   *
+   * Returns:
+   * - [Right] with [Unit] on success.
+   * - [Left] with an error [String] on failure.
+   */
+  Future<Either<String, Unit>> unarchiveQuestion({
+    required String questionId,
+  }) {
+    return _handleQuestionAction(
+      questionId: questionId,
+      userId: _currentUserId,
+      action: 'unarchive',
+    );
+  }
+
+  /**
+   * Helper to get the current user ID from Supabase.
+   */
+  String get _currentUserId =>
+      Supabase.instance.client.auth.currentUser?.id ?? '';
+
+  /**
+   * Generic handler for question-related actions (answer, delete, archive, etc.) via RPC.
+   */
+  Future<Either<String, Unit>> _handleQuestionAction({
+    required String questionId,
+    required String userId,
+    required String action,
+    String? answerText,
+  }) async {
+    try {
+      _log('DEBUG: Starting $action via RPC: $questionId');
+
+      final result = await _runMutation(
+        operationName: InboxMutations.handleQuestionActionOpName,
+        document: InboxMutations.handleQuestionAction,
+        variables: {
+          'questionId': questionId,
+          'userId': userId,
+          'action': action,
+          'answerText': answerText,
+        },
+      );
+
+      if (result.hasErrors) {
+        _log('DEBUG: RPC $action failed: ${result.graphqlErrors}');
+        _log('DEBUG: RPC $action link error: ${result.linkException}');
+        return left(SupabaseErrorHandler.getErrorMessage(result));
+      }
+
+      _log('DEBUG: $action completed successfully via RPC');
+      return right(unit);
+    } catch (e) {
+      _log('DEBUG: Exception in $action RPC: $e');
+      return left('Failed to $action question: $e');
+    }
+  }
+
+  // ── Media Recommendations ────────────────────────────────────────────────
+
+  /**
+   * Extracts media recommendation IDs from a list of question edges.
+   */
+  Set<int> _extractMediaIds(List<dynamic> questionEdges) {
     final ids = <int>{};
 
     for (final edge in questionEdges) {
@@ -142,22 +330,22 @@ class GraphQLInboxDataSource {
       final node = edge['node'];
       if (node is! Map<String, dynamic>) continue;
 
-      final questionType = (node['question_type'] as String? ?? '')
-          .trim()
-          .toLowerCase();
-      if (questionType != 'recommendation') continue;
+      final type =
+          (node['question_type'] as String? ?? '').trim().toLowerCase();
+      if (type != 'recommendation') continue;
 
-      final mediaRecId = _asInt(node['media_rec_id']);
-      if (mediaRecId != null) {
-        ids.add(mediaRecId);
-      }
+      final id = _asInt(node['media_rec_id']);
+      if (id != null) ids.add(id);
     }
 
     return ids;
   }
 
+  /**
+   * Default loader for fetching media recommendations by ID from Supabase.
+   */
   static Future<Map<int, Map<String, dynamic>>>
-  _defaultLoadMediaRecommendationsById(Set<int> ids) async {
+      _defaultLoadMediaRecommendationsById(Set<int> ids) async {
     if (ids.isEmpty) return const {};
 
     try {
@@ -166,46 +354,36 @@ class GraphQLInboxDataSource {
           .select('*')
           .inFilter('id', ids.toList(growable: false));
 
-      final mediaById = <int, Map<String, dynamic>>{};
-      for (final row in rows.cast<Map<String, dynamic>>()) {
-        final map = _normalizeMediaRecommendationRow(row);
-        final id = _asIntStatic(map['id']);
-        if (id != null) {
-          mediaById[id] = map;
-        }
-      }
-
-      return mediaById;
+      return {
+        for (final row in rows.cast<Map<String, dynamic>>())
+          if (_asInt(_normalizeMediaRow(row)['id']) case final id?)
+            id: _normalizeMediaRow(row),
+      };
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint(
-          'WARN: Failed to load media recommendations from Supabase: $e',
-        );
-      }
+      _log('WARN: Failed to load media recommendations from Supabase: $e');
       return const {};
     }
   }
 
-  int? _asInt(dynamic value) {
+  // ── Normalization Utilities ──────────────────────────────────────────────
+
+  /**
+   * Safely converts a dynamic value to an integer.
+   */
+  static int? _asInt(dynamic value) {
     if (value is int) return value;
     if (value is num) return value.toInt();
     if (value is String) return int.tryParse(value);
     return null;
   }
 
-  static int? _asIntStatic(dynamic value) {
-    if (value is int) return value;
-    if (value is num) return value.toInt();
-    if (value is String) return int.tryParse(value);
-    return null;
-  }
-
-  static Map<String, dynamic> _normalizeMediaRecommendationRow(
-    Map<String, dynamic> row,
-  ) {
+  /**
+   * Normalizes raw media recommendation data for consistency.
+   */
+  static Map<String, dynamic> _normalizeMediaRow(Map<String, dynamic> row) {
     final map = Map<String, dynamic>.from(row);
 
-    final posterPath = _firstNonEmptyString([
+    final posterPath = _firstNonEmpty([
       map['poster_path'],
       map['posterPath'],
       map['poster_url'],
@@ -215,22 +393,22 @@ class GraphQLInboxDataSource {
     ]);
 
     if (posterPath != null) {
-      map['poster_path'] = _normalizePosterPathValue(posterPath);
+      map['poster_path'] = _normalizePosterPath(posterPath);
     }
 
-    map['tmdb_id'] = _asIntStatic(map['tmdb_id'] ?? map['tmdbId']) ?? 0;
+    map['tmdb_id'] = _asInt(map['tmdb_id'] ?? map['tmdbId']) ?? 0;
     map['media_type'] =
-        _firstNonEmptyString([
-          map['media_type'],
-          map['mediaType'],
-        ])?.toLowerCase() ??
-        '';
-    map['title'] = _firstNonEmptyString([map['title'], map['name']]) ?? '';
+        _firstNonEmpty([map['media_type'], map['mediaType']])?.toLowerCase() ??
+            '';
+    map['title'] = _firstNonEmpty([map['title'], map['name']]) ?? '';
 
     return map;
   }
 
-  static String? _firstNonEmptyString(List<dynamic> values) {
+  /**
+   * Returns the first non-empty string from a list of potential values.
+   */
+  static String? _firstNonEmpty(List<dynamic> values) {
     for (final value in values) {
       final text = value?.toString().trim() ?? '';
       if (text.isNotEmpty) return text;
@@ -238,7 +416,10 @@ class GraphQLInboxDataSource {
     return null;
   }
 
-  static String _normalizePosterPathValue(String raw) {
+  /**
+   * Normalizes a poster path to ensure it's a relative path starting with '/'.
+   */
+  static String _normalizePosterPath(String raw) {
     final value = raw.trim();
     if (value.isEmpty) return value;
 
@@ -246,8 +427,7 @@ class GraphQLInboxDataSource {
       return value.startsWith('/') ? value : '/$value';
     }
 
-    final marker = '/t/p/';
-    final markerIndex = value.indexOf(marker);
+    final markerIndex = value.indexOf('/t/p/');
     if (markerIndex != -1) {
       final lastSlash = value.lastIndexOf('/');
       if (lastSlash != -1 && lastSlash + 1 < value.length) {
@@ -257,160 +437,5 @@ class GraphQLInboxDataSource {
 
     return value;
   }
-
-  Future<Either<String, Unit>> answerQuestion({
-    required String questionId,
-    required String answerText,
-    required String userId,
-  }) async {
-    try {
-      if (kDebugMode) {
-        debugPrint('DEBUG: Starting answerQuestion via RPC: $questionId');
-      }
-
-      final result = await _runMutation(
-        operationName: 'HandleQuestionAction',
-        document: InboxMutations.handleQuestionAction,
-        variables: {
-          'questionId': questionId,
-          'userId': userId,
-          'action': 'answer',
-          'answerText': answerText,
-        },
-      );
-
-      if (result.hasErrors) {
-        if (kDebugMode) {
-          debugPrint('DEBUG: RPC Answer failed: ${result.graphqlErrors}');
-          debugPrint('DEBUG: RPC Answer link error: ${result.linkException}');
-        }
-        return left(SupabaseErrorHandler.getErrorMessage(result));
-      }
-
-      if (kDebugMode) {
-        debugPrint('DEBUG: answerQuestion completed successfully via RPC');
-      }
-      return right(unit);
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('DEBUG: Exception in answerQuestion RPC: $e');
-      }
-      return left('Failed to answer question: $e');
-    }
-  }
-
-  Future<Either<String, Unit>> deleteQuestion(String questionId) async {
-    try {
-      if (kDebugMode) {
-        debugPrint('DEBUG: Starting deleteQuestion via RPC: $questionId');
-      }
-
-      final user = Supabase.instance.client.auth.currentUser;
-      final userId = user?.id ?? '';
-
-      final result = await _runMutation(
-        operationName: 'HandleQuestionAction',
-        document: InboxMutations.handleQuestionAction,
-        variables: {
-          'questionId': questionId,
-          'userId': userId,
-          'action': 'delete',
-          'answerText': null,
-        },
-      );
-
-      if (result.hasErrors) {
-        if (kDebugMode) {
-          debugPrint('DEBUG: RPC Delete failed: ${result.graphqlErrors}');
-          debugPrint('DEBUG: RPC Delete link error: ${result.linkException}');
-        }
-        return left(SupabaseErrorHandler.getErrorMessage(result));
-      }
-
-      return right(unit);
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('DEBUG: Exception in deleteQuestion RPC: $e');
-      }
-      return left('Failed to delete question: $e');
-    }
-  }
-
-  Future<Either<String, Unit>> archiveQuestion({
-    required String questionId,
-  }) async {
-    try {
-      if (kDebugMode) {
-        debugPrint('DEBUG: Starting archiveQuestion via RPC: $questionId');
-      }
-
-      final user = Supabase.instance.client.auth.currentUser;
-      final userId = user?.id ?? '';
-
-      final result = await _runMutation(
-        operationName: 'HandleQuestionAction',
-        document: InboxMutations.handleQuestionAction,
-        variables: {
-          'questionId': questionId,
-          'userId': userId,
-          'action': 'archive',
-        },
-      );
-
-      if (result.hasErrors) {
-        if (kDebugMode) {
-          debugPrint('DEBUG: RPC Archive failed: ${result.graphqlErrors}');
-          debugPrint('DEBUG: RPC Archive link error: ${result.linkException}');
-        }
-        return left(SupabaseErrorHandler.getErrorMessage(result));
-      }
-
-      return right(unit);
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('DEBUG: Exception in archiveQuestion RPC: $e');
-      }
-      return left('Failed to archive question: $e');
-    }
-  }
-
-  Future<Either<String, Unit>> unarchiveQuestion({
-    required String questionId,
-  }) async {
-    try {
-      if (kDebugMode) {
-        debugPrint('DEBUG: Starting unarchiveQuestion via RPC: $questionId');
-      }
-
-      final user = Supabase.instance.client.auth.currentUser;
-      final userId = user?.id ?? '';
-
-      final result = await _runMutation(
-        operationName: 'HandleQuestionAction',
-        document: InboxMutations.handleQuestionAction,
-        variables: {
-          'questionId': questionId,
-          'userId': userId,
-          'action': 'unarchive',
-        },
-      );
-
-      if (result.hasErrors) {
-        if (kDebugMode) {
-          debugPrint('DEBUG: RPC Unarchive failed: ${result.graphqlErrors}');
-          debugPrint(
-            'DEBUG: RPC Unarchive link error: ${result.linkException}',
-          );
-        }
-        return left(SupabaseErrorHandler.getErrorMessage(result));
-      }
-
-      return right(unit);
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('DEBUG: Exception in unarchiveQuestion RPC: $e');
-      }
-      return left('Failed to unarchive question: $e');
-    }
-  }
 }
+

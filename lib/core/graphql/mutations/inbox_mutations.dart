@@ -1,4 +1,15 @@
+/**
+ * Contains GraphQL mutation definitions for the inbox feature.
+ */
 class InboxMutations {
+  /**
+   * Operation name for handling question actions.
+   */
+  static const String handleQuestionActionOpName = 'HandleQuestionAction';
+
+  /**
+   * Mutation to handle various question actions (answer, delete, archive, unarchive) via an RPC call.
+   */
   static const String handleQuestionAction = r'''
     mutation HandleQuestionAction(
       $questionId: UUID!
@@ -15,3 +26,4 @@ class InboxMutations {
     }
   ''';
 }
+

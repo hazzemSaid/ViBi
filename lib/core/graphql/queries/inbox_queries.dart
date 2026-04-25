@@ -1,4 +1,16 @@
+/**
+ * Contains GraphQL query definitions for the inbox feature.
+ */
 class InboxQueries {
+  /**
+   * Operation name for fetching pending questions.
+   */
+  static const String getPendingQuestionsOpName = 'GetPendingQuestions';
+
+  /**
+   * Query to fetch questions for a specific user filtered by status, with pagination support.
+   * Includes details about the question and the sender's profile.
+   */
   static const String getPendingQuestions = r'''
     query GetPendingQuestions($currentUserId: UUID!, $limit: Int!, $offset: Int!, $statuses: [String!]!) {
       questionsCollection(
@@ -31,3 +43,4 @@ class InboxQueries {
     }
   ''';
 }
+

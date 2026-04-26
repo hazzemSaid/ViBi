@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:vibi/features/inbox/presentation/cubits/answer_question_cubit.dart';
-import 'package:vibi/features/inbox/presentation/cubits/pending_questions_cubit.dart';
-import 'package:vibi/features/inbox/presentation/state/answer_screen_visibility.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
+import 'package:vibi/core/notifiers/answerScreenVisibilityNotifier.dart';
+import 'package:vibi/features/inbox/presentation/helpers/answer_screen_helpers.dart';
+import 'package:vibi/features/inbox/presentation/helpers/question_media_helpers.dart';
+import 'package:vibi/features/inbox/presentation/view/answer_question_cubit/answer_question_cubit.dart';
+import 'package:vibi/features/inbox/presentation/view/pending_questions_cubit/pending_questions_cubit.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 import 'package:vibi/features/recommendation/presentation/widgets/media_card.dart';
 
@@ -45,8 +47,6 @@ class _AnswerScreenState extends State<AnswerScreen> {
   final _focusNode = FocusNode();
   bool _isPosting = false;
 
-  static const Color _pink = Color(0xFFFE2C55);
-
   @override
   void initState() {
     super.initState();
@@ -66,26 +66,7 @@ class _AnswerScreenState extends State<AnswerScreen> {
     super.dispose();
   }
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
-
-  /**
-   * Resolves username from current Supabase user metadata/email.
-   *
-   * Takes:
-   * - no arguments.
-   *
-   * Returns:
-   * - best-effort username string for share attribution.
-   *
-   * Used for:
-   * - Passing user handle into [ShareAnswerScreen].
-   */
-  String get _username {
-    final user = Supabase.instance.client.auth.currentUser;
-    return (user?.userMetadata?['username'] as String?)?.trim() ??
-        user?.email?.split('@').first ??
-        'me';
-  }
+  // ── Helpers ────────────────────────────────────────────────────────
 
   /**
    * Indicates whether posting is currently allowed.
@@ -100,71 +81,8 @@ class _AnswerScreenState extends State<AnswerScreen> {
    * - Post button visual/interaction state.
    */
   bool get _canPost => _answerController.text.trim().isNotEmpty && !_isPosting;
-  bool get _isRecommendationQuestion => widget.questionType == 'recommendation';
-  TmdbMedia get _recommendationMedia {
-    return widget.mediaRec ??
-        TmdbMedia(
-          tmdbId: 0,
-          mediaType: 'movie',
-          title: widget.questionText.trim().isEmpty
-              ? 'Movie Recommendation'
-              : widget.questionText.trim(),
-        );
-  }
 
-  // ── Actions ────────────────────────────────────────────────────────────────
-
-  /**
-   * Shows validation dialog when user attempts to post empty answer.
-   *
-   * Takes:
-   * - no arguments.
-   *
-   * Returns:
-   * - void.
-   *
-   * Used for:
-   * - Blocking empty submissions with clear feedback.
-   */
-  void _showEmptyAnswerError() {
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1C1C1E),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Text(
-          'Answer required',
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-        ),
-        content: Text(
-          'Please type your answer before posting.',
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 14,
-            color: Colors.white.withValues(alpha: 0.60),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text(
-              'OK',
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontWeight: FontWeight.w700,
-                color: Color(0xFFFE2C55),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // ── Actions ─────────────────────────────────────────────────────────
 
   /**
    * Posts answer, refreshes pending list, then opens share composer.
@@ -181,7 +99,7 @@ class _AnswerScreenState extends State<AnswerScreen> {
   Future<void> _postAnswer() async {
     final text = _answerController.text.trim();
     if (text.isEmpty) {
-      _showEmptyAnswerError();
+      showEmptyAnswerError(context);
       return;
     }
 
@@ -215,7 +133,7 @@ class _AnswerScreenState extends State<AnswerScreen> {
 
     setState(() => _isPosting = false);
 
-    if (_isRecommendationQuestion) {
+    if (isRecommendationQuestion(widget.questionType)) {
       messenger.showSnackBar(
         SnackBar(
           content: const Text('Answer posted'),
@@ -234,7 +152,7 @@ class _AnswerScreenState extends State<AnswerScreen> {
         'questionText': widget.questionText,
         'answerText': text,
         'isAnonymous': widget.isAnonymous,
-        'username': _username,
+        'username': getUsername(context),
       },
     );
 
@@ -255,7 +173,7 @@ class _AnswerScreenState extends State<AnswerScreen> {
    */
   void _close() => Navigator.of(context).pop();
 
-  // ── Build ──────────────────────────────────────────────────────────────────
+  // ── Build ──────────────────────────────────────────────────────────
 
   /**
    * Builds answer composer screen scaffold and sections.
@@ -271,35 +189,41 @@ class _AnswerScreenState extends State<AnswerScreen> {
    */
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final answerState = context.watch<AnswerQuestionCubit>().state;
     final isLoading = answerState.isLoading || _isPosting;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
+      backgroundColor: theme.colorScheme.surface,
       resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Column(
           children: [
-            // ── Top bar ──────────────────────────────────────────────────
+            // ── Top bar ─────────────────────────────────
             _buildTopBar(isLoading),
 
-            // ── Question card ────────────────────────────────────────────
+            // ── Question card ──────────────────────────────
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                padding: EdgeInsets.fromLTRB(
+                  AppSizes.s20,
+                  AppSizes.s24,
+                  AppSizes.s20,
+                  AppSizes.s24,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildQuestionBubble(),
-                    const SizedBox(height: 24),
+                    AppSizes.gapH24,
                     _buildAnswerField(),
                   ],
                 ),
               ),
             ),
 
-            // ── Bottom action bar ────────────────────────────────────────
+            // ── Bottom action bar ───────────────────────
             AnimatedPadding(
               duration: const Duration(milliseconds: 120),
               curve: Curves.easeOut,
@@ -312,7 +236,7 @@ class _AnswerScreenState extends State<AnswerScreen> {
     );
   }
 
-  // ── Top bar ────────────────────────────────────────────────────────────────
+  // ── Top bar ────────────────────────────────────────────────────────
 
   /**
    * Builds top bar with close action and title.
@@ -327,13 +251,14 @@ class _AnswerScreenState extends State<AnswerScreen> {
    * - Consistent navigation chrome on answer composer.
    */
   Widget _buildTopBar(bool isLoading) {
+    final theme = Theme.of(context);
     return Container(
-      height: 52,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      height: AppSizes.s56,
+      padding: EdgeInsets.symmetric(horizontal: AppSizes.s12),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: Colors.white.withValues(alpha: 0.06),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
             width: 1,
           ),
         ),
@@ -344,36 +269,38 @@ class _AnswerScreenState extends State<AnswerScreen> {
           GestureDetector(
             onTap: _close,
             child: Container(
-              width: 36,
-              height: 36,
+              width: AppSizes.s32,
+              height: AppSizes.s32,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.close, color: Colors.white, size: 18),
+              child: Icon(
+                Icons.close,
+                color: theme.colorScheme.onSurface,
+                size: AppSizes.iconNormal,
+              ),
             ),
           ),
           // Title
-          const Expanded(
+          Expanded(
             child: Text(
               'Reply',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 16,
+              style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
+                color: theme.colorScheme.onSurface,
               ),
             ),
           ),
           // Spacer to balance back button
-          const SizedBox(width: 36),
+          SizedBox(width: AppSizes.s32),
         ],
       ),
     );
   }
 
-  // ── Question bubble ────────────────────────────────────────────────────────
+  // ── Question bubble ─────────────────────────────────────────────────
 
   /**
    * Builds highlighted question bubble at top of composer.
@@ -388,37 +315,42 @@ class _AnswerScreenState extends State<AnswerScreen> {
    * - Providing question context while composing answer.
    */
   Widget _buildQuestionBubble() {
-    if (_isRecommendationQuestion) {
+    final theme = Theme.of(context);
+    if (isRecommendationQuestion(widget.questionType)) {
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(AppSizes.s16),
         decoration: BoxDecoration(
-          color: _pink,
-          borderRadius: BorderRadius.circular(20),
+          color: pinkColor,
+          borderRadius: BorderRadius.circular(AppSizes.r20),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSizes.s10,
+                vertical: AppSizes.s4,
+              ),
               decoration: BoxDecoration(
                 color: Colors.black.withValues(alpha: 0.20),
-                borderRadius: BorderRadius.circular(999),
+                borderRadius: BorderRadius.circular(AppSizes.rMax),
               ),
-              child: const Text(
+              child: Text(
                 'RECOMMENDATION',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 9,
+                style: theme.textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: 0.7,
-                  color: Colors.white,
+                  color: theme.colorScheme.onPrimary,
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            AppSizes.gapH12,
             MediaCard(
-              media: _recommendationMedia,
+              media: buildRecommendationMedia(
+                widget.mediaRec,
+                widget.questionText,
+              ),
               compact: true,
               showOverview: true,
             ),
@@ -429,49 +361,48 @@ class _AnswerScreenState extends State<AnswerScreen> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(AppSizes.s20),
       decoration: BoxDecoration(
-        color: _pink,
-        borderRadius: BorderRadius.circular(20),
+        color: pinkColor,
+        borderRadius: BorderRadius.circular(AppSizes.r20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSizes.s10,
+              vertical: AppSizes.s4,
+            ),
             decoration: BoxDecoration(
               color: Colors.black.withValues(alpha: 0.20),
-              borderRadius: BorderRadius.circular(999),
+              borderRadius: BorderRadius.circular(AppSizes.rMax),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   widget.isAnonymous ? '👻' : '👤',
-                  style: const TextStyle(fontSize: 10),
+                  style: TextStyle(fontSize: AppSizes.s10),
                 ),
-                const SizedBox(width: 4),
+                AppSizes.gapW4,
                 Text(
                   widget.isAnonymous ? 'ANONYMOUS' : 'FROM USER',
-                  style: const TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 7,
+                  style: theme.textTheme.labelSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: 0.7,
-                    color: Colors.white,
+                    color: theme.colorScheme.onPrimary,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 14),
+          AppSizes.gapH12,
           Text(
             widget.questionText,
-            style: const TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 20,
+            style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w800,
-              color: Colors.white,
+              color: theme.colorScheme.onPrimary,
               height: 1.35,
             ),
           ),
@@ -480,7 +411,7 @@ class _AnswerScreenState extends State<AnswerScreen> {
     );
   }
 
-  // ── Answer field ───────────────────────────────────────────────────────────
+  // ── Answer field ───────────────────────────────────────────────────
 
   /**
    * Builds multi-line text field for entering answer content.
@@ -489,37 +420,32 @@ class _AnswerScreenState extends State<AnswerScreen> {
    * - no arguments.
    *
    * Returns:
-   * - Configured [TextField] with live character counting behavior.
+   * - Configured TextField with live character counting behavior.
    *
    * Used for:
    * - Capturing user answer text input.
    */
   Widget _buildAnswerField() {
+    final theme = Theme.of(context);
     return TextField(
       controller: _answerController,
       focusNode: _focusNode,
       maxLines: null,
       minLines: 3,
       maxLength: 200,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 16,
+      style: theme.textTheme.bodyLarge?.copyWith(
+        color: theme.colorScheme.onSurface,
         fontWeight: FontWeight.w500,
-        fontFamily: 'Inter',
         height: 1.5,
       ),
       decoration: InputDecoration(
         hintText: 'Type your reply...',
-        hintStyle: TextStyle(
-          color: Colors.white.withValues(alpha: 0.25),
-          fontSize: 16,
+        hintStyle: theme.textTheme.bodyLarge?.copyWith(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.25),
           fontWeight: FontWeight.w400,
-          fontFamily: 'Inter',
         ),
-        counterStyle: TextStyle(
-          color: Colors.white.withValues(alpha: 0.30),
-          fontSize: 12,
-          fontFamily: 'Inter',
+        counterStyle: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.30),
           fontWeight: FontWeight.w600,
         ),
         border: InputBorder.none,
@@ -529,7 +455,7 @@ class _AnswerScreenState extends State<AnswerScreen> {
     );
   }
 
-  // ── Bottom bar ─────────────────────────────────────────────────────────────
+  // ── Bottom bar ─────────────────────────────────────────────────────
 
   /**
    * Builds footer containing character count and post action.
@@ -544,12 +470,18 @@ class _AnswerScreenState extends State<AnswerScreen> {
    * - Triggering post workflow and exposing input length feedback.
    */
   Widget _buildBottomBar(bool isLoading) {
+    final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+      padding: EdgeInsets.fromLTRB(
+        AppSizes.s20,
+        AppSizes.s12,
+        AppSizes.s20,
+        AppSizes.s12,
+      ),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: Colors.white.withValues(alpha: 0.06),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
             width: 1,
           ),
         ),
@@ -559,11 +491,9 @@ class _AnswerScreenState extends State<AnswerScreen> {
           // Character count
           Text(
             '${_answerController.text.length}/200',
-            style: TextStyle(
-              fontFamily: 'Inter',
-              fontSize: 12,
+            style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w600,
-              color: Colors.white.withValues(alpha: 0.30),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.30),
             ),
           ),
           const Spacer(),
@@ -572,29 +502,36 @@ class _AnswerScreenState extends State<AnswerScreen> {
             onTap: isLoading ? null : _postAnswer,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSizes.s24,
+                vertical: AppSizes.s12,
+              ),
               decoration: BoxDecoration(
-                color: _canPost ? _pink : Colors.white.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(999),
+                color: _canPost
+                    ? pinkColor
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(AppSizes.rMax),
               ),
               child: isLoading
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
+                  ? SizedBox(
+                      width: AppSizes.s20,
+                      height: AppSizes.s20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: theme.colorScheme.onPrimary,
                       ),
                     )
                   : Text(
-                      _isRecommendationQuestion
+                      isRecommendationQuestion(widget.questionType)
                           ? 'Post Answer'
                           : 'Post & Share',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 14,
+                      style: theme.textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: _canPost ? Colors.white : Colors.white30,
+                        color: _canPost
+                            ? theme.colorScheme.onPrimary
+                            : theme.colorScheme.onSurface.withValues(
+                                alpha: 0.30,
+                              ),
                       ),
                     ),
             ),

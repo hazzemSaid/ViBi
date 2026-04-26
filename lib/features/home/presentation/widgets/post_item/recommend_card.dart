@@ -99,7 +99,7 @@ class _RecommendQuestionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: AppSizes.p16,
+            padding: AppSizes.p12,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

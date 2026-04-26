@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/features/inbox/domain/usecases/answer_question_usecase.dart';
-import 'package:vibi/features/inbox/presentation/state/answer_question_state.dart';
+import 'package:vibi/features/inbox/presentation/view/answer_question_cubit/answer_question_state.dart';
 
 class AnswerQuestionCubit extends Cubit<AnswerQuestionState> {
   AnswerQuestionCubit(this._answerQuestionUseCase)

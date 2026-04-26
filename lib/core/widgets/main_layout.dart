@@ -2,10 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:vibi/features/inbox/presentation/cubits/pending_questions_cubit.dart';
-import 'package:vibi/features/inbox/presentation/state/answer_screen_visibility.dart';
-import 'package:vibi/features/inbox/presentation/state/pending_questions_state.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
+import 'package:vibi/core/notifiers/answerScreenVisibilityNotifier.dart';
+import 'package:vibi/features/inbox/presentation/view/pending_questions_cubit/pending_questions_cubit.dart';
+import 'package:vibi/features/inbox/presentation/view/pending_questions_cubit/pending_questions_state.dart';
 
+/**
+ * Root layout widget that wraps the go_router Shell with bottom navigation.
+ *
+ * Takes:
+ * - navigationShell: StatefulNavigationShell from go_router.
+ *
+ * Returns:
+ * - Scaffold with bottom navigation bar and optional answer screen handling.
+ *
+ * Used for:
+ * - Providing the main app layout with tab-based navigation.
+ */
 class MainLayout extends StatelessWidget {
   const MainLayout({required this.navigationShell, super.key});
 
@@ -19,8 +32,6 @@ class MainLayout extends StatelessWidget {
   }
 
   bool _isModalOpen(BuildContext context) {
-    // Check if there's a modal/dialog open above the main navigation
-    // Navigator.canPop() returns true if there's a route that can be popped
     return Navigator.of(context, rootNavigator: false).canPop();
   }
 
@@ -87,23 +98,27 @@ class _BottomNavBarState extends State<_BottomNavBar>
     }
   }
 
-  Widget _buildInboxIconWithBadge() {
+  Widget _buildInboxIconWithBadge(BuildContext context) {
+    final theme = Theme.of(context);
     final state = context.watch<PendingQuestionsCubit>().state;
     final count = state is PendingQuestionsSuccess ? state.questions.length : 0;
-    final Image inboxIcon = Image(
+    final inboxIcon = Image(
       image: const AssetImage('assets/images/inbox.png'),
-      width: 24,
-      height: 24,
-      color: widget.currentIndex == 2 ? Colors.white : Colors.white54,
+      width: AppSizes.iconNormal,
+      height: AppSizes.iconNormal,
+      color: widget.currentIndex == 2
+          ? theme.colorScheme.onSurface
+          : theme.colorScheme.onSurface.withValues(alpha: 0.54),
     );
+
     if (count > 0) {
       return Badge(
         label: Padding(
-          padding: const EdgeInsets.only(top: 2),
+          padding: EdgeInsets.only(top: AppSizes.s2),
           child: Text(count > 99 ? '99+' : count.toString()),
         ),
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
+        backgroundColor: theme.colorScheme.error,
+        textColor: theme.colorScheme.onError,
         child: inboxIcon,
       );
     }
@@ -112,6 +127,10 @@ class _BottomNavBarState extends State<_BottomNavBar>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isSmallScreen = screenWidth < 400;
+
     return NotificationListener<UserScrollNotification>(
       onNotification: (notification) {
         _handleScroll(notification);
@@ -124,11 +143,11 @@ class _BottomNavBarState extends State<_BottomNavBar>
         ).animate(_animationController),
         child: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF0F1419),
+            color: theme.colorScheme.surface,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
+                color: theme.shadowColor.withValues(alpha: 0.1),
+                blurRadius: AppSizes.s8,
                 offset: const Offset(0, -2),
               ),
             ],
@@ -136,39 +155,60 @@ class _BottomNavBarState extends State<_BottomNavBar>
           child: SafeArea(
             top: false,
             child: BottomNavigationBar(
-              backgroundColor: const Color(0xFF0F1419),
-              selectedItemColor: Colors.white,
-              unselectedItemColor: Colors.white54,
+              backgroundColor: theme.colorScheme.surface,
+              selectedItemColor: theme.colorScheme.onSurface,
+              unselectedItemColor: theme.colorScheme.onSurface.withValues(alpha: 0.54),
               type: BottomNavigationBarType.fixed,
               showSelectedLabels: true,
               showUnselectedLabels: true,
-              selectedFontSize: 12,
-              unselectedFontSize: 12,
+              selectedFontSize: isSmallScreen ? AppSizes.s10 : AppSizes.s12,
+              unselectedFontSize: isSmallScreen ? AppSizes.s10 : AppSizes.s12,
               currentIndex: widget.currentIndex,
               onTap: widget.onTap,
               elevation: 0,
               items: [
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.home_outlined),
-                  activeIcon: Icon(Icons.home),
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.home_outlined,
+                    size: AppSizes.iconNormal,
+                  ),
+                  activeIcon: Icon(
+                    Icons.home,
+                    size: AppSizes.iconNormal,
+                  ),
                   label: 'For you',
                 ),
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.search),
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.search,
+                    size: AppSizes.iconNormal,
+                  ),
                   label: 'Search',
                 ),
                 BottomNavigationBarItem(
-                  icon: _buildInboxIconWithBadge(),
+                  icon: _buildInboxIconWithBadge(context),
                   label: 'Inbox',
                 ),
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.favorite_border),
-                  activeIcon: Icon(Icons.favorite),
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.favorite_border,
+                    size: AppSizes.iconNormal,
+                  ),
+                  activeIcon: Icon(
+                    Icons.favorite,
+                    size: AppSizes.iconNormal,
+                  ),
                   label: 'Favorites',
                 ),
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.person_outline),
-                  activeIcon: Icon(Icons.person),
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.person_outline,
+                    size: AppSizes.iconNormal,
+                  ),
+                  activeIcon: Icon(
+                    Icons.person,
+                    size: AppSizes.iconNormal,
+                  ),
                   label: 'Profile',
                 ),
               ],

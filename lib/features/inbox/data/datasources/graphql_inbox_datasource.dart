@@ -126,12 +126,14 @@ class GraphQLInboxDataSource {
 
   /**
    * Resolves the question status string into a list of specific status values.
+   * When 'all' is specified, returns all possible statuses to fetch everything.
    */
   List<String> _resolveStatuses(String status) {
     final normalized = status.trim().toLowerCase();
     return switch (normalized) {
       'archived' || 'archive' => const ['archive', 'archived'],
       '' || 'unanswered' => const ['pending'],
+      'all' => const ['pending', 'answered', 'deleted', 'archive', 'archived'],
       _ => [normalized],
     };
   }

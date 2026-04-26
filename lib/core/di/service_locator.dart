@@ -23,10 +23,10 @@ import 'package:vibi/features/inbox/domain/usecases/answer_question_usecase.dart
 import 'package:vibi/features/inbox/domain/usecases/archive_question_usecase.dart';
 import 'package:vibi/features/inbox/domain/usecases/delete_question_usecase.dart';
 import 'package:vibi/features/inbox/domain/usecases/get_pending_questions_usecase.dart';
-import 'package:vibi/features/inbox/presentation/cubits/answer_question_cubit.dart';
-import 'package:vibi/features/inbox/presentation/cubits/archive_question_cubit.dart';
-import 'package:vibi/features/inbox/presentation/cubits/delete_question_cubit.dart';
-import 'package:vibi/features/inbox/presentation/cubits/pending_questions_cubit.dart';
+import 'package:vibi/features/inbox/presentation/view/answer_question_cubit/answer_question_cubit.dart';
+import 'package:vibi/features/inbox/presentation/view/archive_question_cubit/archive_question_cubit.dart';
+import 'package:vibi/features/inbox/presentation/view/delete_question_cubit/delete_question_cubit.dart';
+import 'package:vibi/features/inbox/presentation/view/pending_questions_cubit/pending_questions_cubit.dart';
 import 'package:vibi/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:vibi/features/profile/data/repositories/public_profile_repository_impl.dart';
 import 'package:vibi/features/profile/data/repositories/social_links_repository_impl.dart';

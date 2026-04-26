@@ -1,7 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:vibi/features/inbox/domain/entities/inbox_question.dart';
 import 'package:vibi/features/inbox/domain/usecases/get_pending_questions_usecase.dart';
-import 'package:vibi/features/inbox/presentation/state/pending_questions_state.dart';
+import 'package:vibi/features/inbox/presentation/view/pending_questions_cubit/pending_questions_state.dart';
 
 class PendingQuestionsCubit extends Cubit<PendingQuestionsState> {
   PendingQuestionsCubit(this._getPendingQuestionsUseCase)
@@ -33,6 +34,11 @@ class PendingQuestionsCubit extends Cubit<PendingQuestionsState> {
 
   Future<void> loadArchivedQuestions() async {
     _currentStatus = 'archive';
+    await loadInitialQuestions();
+  }
+
+  Future<void> loadAllQuestions() async {
+    _currentStatus = 'all';
     await loadInitialQuestions();
   }
 
@@ -203,6 +209,9 @@ class PendingQuestionsCubit extends Cubit<PendingQuestionsState> {
     if (_currentStatus == 'archive') {
       return normalized == 'archive' || normalized == 'archived';
     }
+    if (_currentStatus == 'all') {
+      return true;
+    }
     return normalized == _currentStatus;
   }
 
@@ -213,6 +222,47 @@ class PendingQuestionsCubit extends Cubit<PendingQuestionsState> {
     final updatedQuestions = currentState.questions
         .where((question) => question.id != questionId)
         .toList();
+
+    if (isClosed) return;
+    emit(
+      currentState.copyWith(questions: updatedQuestions, isLoadingMore: false),
+    );
+  }
+
+  /**
+   * Updates a question's status in-memory without refetching.
+   *
+   * Takes:
+   * - questionId: The ID of the question to update.
+   * - newStatus: The new status to set.
+   *
+   * Used for:
+   * - Optimistic UI updates when archiving/unarchiving questions.
+   */
+  void updateQuestionStatus(String questionId, String newStatus) {
+    final currentState = state;
+    if (currentState is! PendingQuestionsSuccess) return;
+
+    final updatedQuestions = currentState.questions.map((q) {
+      if (q.id == questionId) {
+        // Create updated question with new status
+        return InboxQuestion(
+          id: q.id,
+          recipientId: q.recipientId,
+          senderId: q.senderId,
+          senderUsername: q.senderUsername,
+          senderAvatarUrl: q.senderAvatarUrl,
+          questionText: q.questionText,
+          questionType: q.questionType,
+          mediaRecId: q.mediaRecId,
+          mediaRec: q.mediaRec,
+          isAnonymous: q.isAnonymous,
+          status: newStatus,
+          createdAt: q.createdAt,
+        );
+      }
+      return q;
+    }).toList();
 
     if (isClosed) return;
     emit(

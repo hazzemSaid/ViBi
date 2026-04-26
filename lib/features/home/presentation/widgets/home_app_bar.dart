@@ -14,14 +14,7 @@ class HomeAppBar extends StatelessWidget {
       floating: true,
       title: Row(
         children: [
-          Text(
-            'ViBi',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: AppSizes.s24,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
+          Image.asset('assets/images/logo1.png', height: AppSizes.s24),
           AppSizes.gapW16,
           Text(
             'FEED',

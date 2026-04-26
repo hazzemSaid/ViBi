@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vibi/core/state/view_state.dart';
 import 'package:vibi/features/reactions/domain/entities/comment_item.dart';
 import 'package:vibi/features/reactions/domain/entities/reaction_summary.dart';
 import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
 import 'package:vibi/features/reactions/presentation/providers/reaction_cubit.dart';
+import 'package:vibi/features/reactions/presentation/providers/reaction_state.dart';
 
 class _FakeReactionsRepository implements ReactionsRepository {
   _FakeReactionsRepository({required ReactionSummary seed}) : _summary = seed;
@@ -75,9 +75,9 @@ void main() {
         await cubit.load('answer-1');
         await cubit.toggleReaction(answerId: 'answer-1', reaction: 'love');
 
-        expect(cubit.state.status, ViewStatus.success);
-        expect(cubit.state.data?.myReaction, 'love');
-        expect(cubit.state.data?.counts['love'], 2);
+        expect(cubit.state, isA<ReactionLoaded>());
+        expect((cubit.state as ReactionLoaded).summary.myReaction, 'love');
+        expect((cubit.state as ReactionLoaded).summary.counts['love'], 2);
 
         await cubit.close();
       },
@@ -98,10 +98,19 @@ void main() {
         await cubit.load('answer-1');
         await cubit.toggleReaction(answerId: 'answer-1', reaction: 'sad');
 
-        expect(cubit.state.status, ViewStatus.failure);
-        expect(cubit.state.data?.counts['love'], 3);
-        expect(cubit.state.data?.counts['sad'], 1);
-        expect(cubit.state.data?.myReaction, isNull);
+        expect(cubit.state, isA<ReactionFailure>());
+        expect(
+          (cubit.state as ReactionFailure).fallbackSummary?.counts['love'],
+          3,
+        );
+        expect(
+          (cubit.state as ReactionFailure).fallbackSummary?.counts['sad'],
+          1,
+        );
+        expect(
+          (cubit.state as ReactionFailure).fallbackSummary?.myReaction,
+          isNull,
+        );
 
         await cubit.close();
       },

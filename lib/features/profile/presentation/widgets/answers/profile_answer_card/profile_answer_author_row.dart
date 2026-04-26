@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vibi/features/profile/domain/entities/answered_question.dart';
+import 'package:vibi/features/inbox/domain/entities/answered_question.dart';
 
 class ProfileAnswerAuthorRow extends StatelessWidget {
   final AnsweredQuestion answer;
@@ -15,9 +15,16 @@ class ProfileAnswerAuthorRow extends StatelessWidget {
           backgroundImage: answer.answererAvatarUrl != null
               ? NetworkImage(answer.answererAvatarUrl!)
               : null,
-          backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+          backgroundColor: Theme.of(
+            context,
+          ).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
           child: answer.answererAvatarUrl == null
-              ? Icon(Icons.person, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.35))
+              ? Icon(
+                  Icons.person,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
+                )
               : null,
         ),
         const SizedBox(width: 12),
@@ -35,19 +42,28 @@ class ProfileAnswerAuthorRow extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-Text(
+              Text(
                 'Answered',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72), fontSize: 12),
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+                  fontSize: 12,
+                ),
               ),
             ],
           ),
         ),
         IconButton(
-          icon: Icon(Icons.more_horiz, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72)),
+          icon: Icon(
+            Icons.more_horiz,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+          ),
           onPressed: () {},
         ),
       ],
     );
   }
 }
-

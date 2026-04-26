@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/features/profile/domain/entities/answered_question.dart';
+import 'package:vibi/features/inbox/domain/entities/answered_question.dart';
 
 import 'profile_answer_card/profile_answer_action_row.dart';
 import 'profile_answer_card/profile_answer_author_row.dart';
@@ -26,8 +26,9 @@ class ProfileAnswerCard extends StatelessWidget {
     final isTablet = screenWidth >= 600;
     final bodyFontSize = isTablet ? 17.0 : 15.0;
     final questionFontSize = isTablet ? 20.0 : 18.0;
-    final displayName =
-        answer.isAnonymous ? 'Anonymous User' : (answer.senderUsername ?? 'Someone');
+    final displayName = answer.isAnonymous
+        ? 'Anonymous User'
+        : (answer.senderUsername ?? 'Someone');
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSizes.s24),

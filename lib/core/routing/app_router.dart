@@ -14,6 +14,7 @@ import 'package:vibi/features/auth/presentation/screens/verify_email_screen.dart
 import 'package:vibi/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:vibi/features/home/presentation/screens/home_screen.dart';
 import 'package:vibi/features/inbox/presentation/screens/inbox_screen.dart';
+import 'package:vibi/features/inbox/presentation/screens/share_answer_screen.dart';
 import 'package:vibi/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:vibi/features/profile/presentation/screens/edit_profile_public_web_screen.dart';
 import 'package:vibi/features/profile/presentation/screens/edit_profile_screen.dart';
@@ -23,7 +24,6 @@ import 'package:vibi/features/profile/presentation/screens/profile_screen.dart';
 import 'package:vibi/features/profile/presentation/screens/public_profile_screen.dart';
 import 'package:vibi/features/search/presentation/screens/search_screen.dart';
 import 'package:vibi/features/splash/presentation/screens/splash_screen.dart';
-import 'package:vibi/features/inbox/presentation/screens/share_answer_screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
@@ -86,7 +86,8 @@ GoRouter createAppRouter(AuthCubit authCubit) {
         path: '/share-answer',
         name: 'share-answer',
         builder: (context, state) {
-          final Map<String, dynamic>? extra = state.extra as Map<String, dynamic>?;
+          final Map<String, dynamic>? extra =
+              state.extra as Map<String, dynamic>?;
           return ShareAnswerScreen(
             questionText: extra?['questionText'] ?? '',
             answerText: extra?['answerText'] ?? '',
@@ -101,6 +102,11 @@ GoRouter createAppRouter(AuthCubit authCubit) {
         name: 'public-profile',
         builder: (context, state) {
           final userId = state.pathParameters['userId']!;
+          final currentId = authCubit.currentUser?.id;
+          // if currentId is null, treat as own profile to avoid self-follow
+          if (currentId == null || userId == currentId) {
+            return ProfileScreen();
+          }
           return PublicProfileScreen(userId: userId);
         },
       ),
@@ -230,7 +236,8 @@ GoRouter createAppRouter(AuthCubit authCubit) {
           return '/welcome';
         }
       }
-      if (authCubit.state.isLoading || authControllerState is AuthActionLoading) {
+      if (authCubit.state.isLoading ||
+          authControllerState is AuthActionLoading) {
         return null;
       }
       return null;

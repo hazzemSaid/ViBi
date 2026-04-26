@@ -47,7 +47,7 @@ void main() async {
   // Initialize Push Notifications via Service Locator
   await getIt<PushNotificationService>().initialize();
 
-  // Enable verbose logging for debugging (rem  ove in production)
+  // Enable verbose logging for debugging (remove in production)
   OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
   // Initialize with your OneSignal App ID
   OneSignal.initialize(dotenv.env['ONESIGNAL_APP_ID'] ?? '');

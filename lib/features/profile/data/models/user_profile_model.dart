@@ -27,9 +27,9 @@ class UserProfileModel extends UserProfile {
   factory UserProfileModel.fromMap(Map<String, dynamic> map) {
     return UserProfileModel(
       uid: map['id'] as String,
-      name: map['full_name'] as String? ?? '',
-      username: map['username'] as String? ?? '',
-      bio: map['bio'] as String?,
+      name: map['full_name'],
+      username: map['username'],
+      bio: map['bio'] as String? ?? '',
       avatarUrls: _parseAvatarUrls(map['avatar_urls']),
       updatedAt: map['updated_at'] != null
           ? DateTime.parse(map['updated_at'] as String)

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vibi/features/profile/domain/entities/answered_question.dart';
+import 'package:vibi/features/inbox/domain/entities/answered_question.dart';
 
 class ProfileSenderRow extends StatelessWidget {
   final AnsweredQuestion answer;
@@ -27,8 +27,10 @@ class ProfileSenderRow extends StatelessWidget {
               ? Icon(
                   Icons.person,
                   color: answer.isAnonymous
-                  ? Theme.of(context).colorScheme.secondary
-                      : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
+                      ? Theme.of(context).colorScheme.secondary
+                      : Theme.of(
+                          context,
+                        ).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
                   size: 16,
                 )
               : null,
@@ -60,7 +62,9 @@ class ProfileSenderRow extends StatelessWidget {
                           vertical: 1,
                         ),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.2),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.secondary.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
@@ -75,9 +79,14 @@ class ProfileSenderRow extends StatelessWidget {
                     ),
                 ],
               ),
-Text(
+              Text(
                 'Asked',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72), fontSize: 10),
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+                  fontSize: 10,
+                ),
               ),
             ],
           ),
@@ -86,4 +95,3 @@ Text(
     );
   }
 }
-

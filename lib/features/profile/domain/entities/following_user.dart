@@ -1,4 +1,6 @@
-class FollowingUser {
+import 'package:equatable/equatable.dart';
+
+class FollowingUser extends Equatable {
   final String id;
   final String? username;
   final String? fullName;
@@ -7,7 +9,7 @@ class FollowingUser {
   final int followersCount;
   final DateTime followedAt;
 
-  FollowingUser({
+  const FollowingUser({
     required this.id,
     this.username,
     this.fullName,
@@ -16,4 +18,7 @@ class FollowingUser {
     required this.followersCount,
     required this.followedAt,
   });
+
+  @override
+  List<Object?> get props => [id, username, fullName, avatarUrl, bio, followersCount, followedAt];
 }

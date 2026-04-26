@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/features/profile/domain/entities/answered_question.dart';
+import 'package:vibi/features/inbox/domain/entities/answered_question.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/public_profile_state.dart';
 import 'package:vibi/features/profile/presentation/widgets/answers/profile_answer_card.dart';

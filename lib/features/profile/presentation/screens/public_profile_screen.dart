@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/features/profile/domain/entities/answered_question.dart';
 import 'package:vibi/features/profile/domain/entities/public_profile.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/public_profile_state.dart';
@@ -13,14 +12,21 @@ import 'package:vibi/features/social/presentation/providers/follow_providers.dar
 class PublicProfileScreen extends StatefulWidget {
   final String lookupValue;
   final bool isUsernameLookup;
+  final bool isCurrentUser;
 
-  const PublicProfileScreen({super.key, required String userId})
-    : lookupValue = userId,
-      isUsernameLookup = false;
+  const PublicProfileScreen({
+    super.key,
+    required String userId,
+    this.isCurrentUser = false,
+  }) : lookupValue = userId,
+       isUsernameLookup = false;
 
-  const PublicProfileScreen.byUsername({super.key, required String username})
-    : lookupValue = username,
-      isUsernameLookup = true;
+  const PublicProfileScreen.byUsername({
+    super.key,
+    required String username,
+    this.isCurrentUser = false,
+  }) : lookupValue = username,
+       isUsernameLookup = true;
 
   @override
   State<PublicProfileScreen> createState() => _PublicProfileScreenState();
@@ -29,6 +35,8 @@ class PublicProfileScreen extends StatefulWidget {
 class _PublicProfileScreenState extends State<PublicProfileScreen> {
   late final PublicProfileCubit _publicProfileCubit;
   late final FollowCubit _followCubit;
+
+  bool get isCurrentUserOwner => widget.isCurrentUser;
 
   @override
   void initState() {
@@ -63,6 +71,7 @@ class _PublicProfileScreenState extends State<PublicProfileScreen> {
       child: _PublicProfileBody(
         lookupValue: widget.lookupValue,
         isUsernameLookup: widget.isUsernameLookup,
+        isCurrentUser: widget.isCurrentUser,
       ),
     );
   }
@@ -72,11 +81,12 @@ class _PublicProfileBody extends StatelessWidget {
   const _PublicProfileBody({
     required this.lookupValue,
     required this.isUsernameLookup,
+    required this.isCurrentUser,
   });
 
   final String lookupValue;
   final bool isUsernameLookup;
-
+  final bool isCurrentUser;
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
@@ -111,7 +121,9 @@ class _PublicProfileBody extends StatelessWidget {
             );
           }
 
-          final PublicProfile? profile = (state is PublicProfileLoaded) ? state.profile : null;
+          final PublicProfile? profile = (state is PublicProfileLoaded)
+              ? state.profile
+              : null;
           if (profile == null) {
             return Center(
               child: Text(
@@ -189,7 +201,7 @@ class _PublicProfileBody extends StatelessWidget {
                               followingCount: '${profile.followingCount}',
                               answersCount: '${profile.answersCount}',
                               userId: profile.id,
-                              isCurrentUser: false,
+                              isCurrentUser: isCurrentUser,
                             ),
                             const SizedBox(height: AppSizes.s24),
                             PublicProfileActionsRow(profile: profile),
@@ -204,23 +216,23 @@ class _PublicProfileBody extends StatelessWidget {
                               PublicProfilePrivateContent(
                                 isFollowing: profile.isFollowing,
                               )
-                              else
-                                BlocProvider(
-                                  create: (_) =>
-                                      getIt<UserAnswersCubit>()..load(profile.id),
-                                  child:
-                                      BlocBuilder<
-                                        UserAnswersCubit,
-                                        UserAnswersState
-                                      >(
-                                        builder: (context, answersState) {
-                                          return PublicProfileAnswersSection(
-                                            answersState: answersState,
-                                            compactActions: true,
-                                          );
-                                        },
-                                      ),
-                                ),
+                            else
+                              BlocProvider(
+                                create: (_) =>
+                                    getIt<UserAnswersCubit>()..load(profile.id),
+                                child:
+                                    BlocBuilder<
+                                      UserAnswersCubit,
+                                      UserAnswersState
+                                    >(
+                                      builder: (context, answersState) {
+                                        return PublicProfileAnswersSection(
+                                          answersState: answersState,
+                                          compactActions: true,
+                                        );
+                                      },
+                                    ),
+                              ),
                           ],
                         ),
                       ),

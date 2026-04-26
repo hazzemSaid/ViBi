@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/features/profile/domain/entities/following_user.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/public_profile_state.dart';
 import 'package:vibi/features/social/presentation/providers/follow_providers.dart';
@@ -144,6 +143,7 @@ class _FollowingListScreenState extends State<FollowingListScreen> {
                           )
                         : null,
                     onTap: () {
+                      print('Tapped on ${followingUser.username}');
                       context.pushNamed(
                         'public-profile',
                         pathParameters: {'userId': followingUser.id},

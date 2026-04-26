@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/features/profile/domain/entities/follower_user.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/public_profile_state.dart';
 import 'package:vibi/features/social/domain/repositories/follow_repository.dart';

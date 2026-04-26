@@ -24,7 +24,6 @@ class PublicProfileModel extends PublicProfile {
     super.statusText,
     super.publicFontFamily,
     super.isVerified,
-    super.backgroundcolor,
   });
 
   factory PublicProfileModel.fromGraphQL(
@@ -70,7 +69,6 @@ class PublicProfileModel extends PublicProfile {
       statusText: node['status_text'] as String?,
       publicFontFamily: node['public_font_family'] as String? ?? 'inter',
       isVerified: node['is_verified'] as bool? ?? false,
-      backgroundcolor: node['backgroundcolor'] as String?,
     );
   }
 
@@ -108,7 +106,6 @@ class PublicProfileModel extends PublicProfile {
       statusText: map['status_text'] as String?,
       publicFontFamily: map['public_font_family'] as String? ?? 'inter',
       isVerified: map['is_verified'] as bool? ?? false,
-      backgroundcolor: map['backgroundcolor'] as String?,
     );
   }
 

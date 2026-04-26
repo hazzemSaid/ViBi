@@ -1,5 +1,5 @@
+import 'package:vibi/features/inbox/domain/entities/answered_question.dart';
 import 'package:vibi/features/profile/data/sources/graphql_profile_datasource.dart';
-import 'package:vibi/features/profile/domain/entities/answered_question.dart';
 import 'package:vibi/features/profile/domain/entities/public_profile.dart';
 import 'package:vibi/features/profile/domain/repositories/public_profile_repository.dart';
 
@@ -29,6 +29,7 @@ class PublicProfileRepositoryImpl implements PublicProfileRepository {
 
   @override
   Future<List<AnsweredQuestion>> getUserAnswers(String userId) async {
-    return await _dataSource.getUserAnswers(userId);
+    final models = await _dataSource.getUserAnswers(userId);
+    return models.cast<AnsweredQuestion>();
   }
 }

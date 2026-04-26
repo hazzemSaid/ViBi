@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/features/profile/domain/entities/answered_question.dart';
+import 'package:vibi/features/inbox/domain/entities/answered_question.dart';
 import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
 import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
 import 'package:vibi/features/reactions/presentation/widgets/comment_sheet.dart';

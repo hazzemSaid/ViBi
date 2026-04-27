@@ -4,8 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/notifiers/answerScreenVisibilityNotifier.dart';
-import 'package:vibi/features/inbox/presentation/view/pending_questions_cubit/pending_questions_cubit.dart';
-import 'package:vibi/features/inbox/presentation/view/pending_questions_cubit/pending_questions_state.dart';
+import 'package:vibi/features/inbox/presentation/viewmodle/pending_questions_cubit/pending_questions_cubit.dart';
+import 'package:vibi/features/inbox/presentation/viewmodle/pending_questions_cubit/pending_questions_state.dart';
 
 /**
  * Root layout widget that wraps the go_router Shell with bottom navigation.
@@ -157,7 +157,9 @@ class _BottomNavBarState extends State<_BottomNavBar>
             child: BottomNavigationBar(
               backgroundColor: theme.colorScheme.surface,
               selectedItemColor: theme.colorScheme.onSurface,
-              unselectedItemColor: theme.colorScheme.onSurface.withValues(alpha: 0.54),
+              unselectedItemColor: theme.colorScheme.onSurface.withValues(
+                alpha: 0.54,
+              ),
               type: BottomNavigationBarType.fixed,
               showSelectedLabels: true,
               showUnselectedLabels: true,
@@ -168,21 +170,12 @@ class _BottomNavBarState extends State<_BottomNavBar>
               elevation: 0,
               items: [
                 BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.home_outlined,
-                    size: AppSizes.iconNormal,
-                  ),
-                  activeIcon: Icon(
-                    Icons.home,
-                    size: AppSizes.iconNormal,
-                  ),
+                  icon: Icon(Icons.home_outlined, size: AppSizes.iconNormal),
+                  activeIcon: Icon(Icons.home, size: AppSizes.iconNormal),
                   label: 'For you',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.search,
-                    size: AppSizes.iconNormal,
-                  ),
+                  icon: Icon(Icons.search, size: AppSizes.iconNormal),
                   label: 'Search',
                 ),
                 BottomNavigationBarItem(
@@ -190,25 +183,13 @@ class _BottomNavBarState extends State<_BottomNavBar>
                   label: 'Inbox',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.favorite_border,
-                    size: AppSizes.iconNormal,
-                  ),
-                  activeIcon: Icon(
-                    Icons.favorite,
-                    size: AppSizes.iconNormal,
-                  ),
+                  icon: Icon(Icons.favorite_border, size: AppSizes.iconNormal),
+                  activeIcon: Icon(Icons.favorite, size: AppSizes.iconNormal),
                   label: 'Favorites',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.person_outline,
-                    size: AppSizes.iconNormal,
-                  ),
-                  activeIcon: Icon(
-                    Icons.person,
-                    size: AppSizes.iconNormal,
-                  ),
+                  icon: Icon(Icons.person_outline, size: AppSizes.iconNormal),
+                  activeIcon: Icon(Icons.person, size: AppSizes.iconNormal),
                   label: 'Profile',
                 ),
               ],

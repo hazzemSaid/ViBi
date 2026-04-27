@@ -12,7 +12,7 @@ import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
 import 'package:vibi/features/auth/presentation/controllers/auth_controller.dart';
 import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
-import 'package:vibi/features/inbox/presentation/view/pending_questions_cubit/pending_questions_cubit.dart';
+import 'package:vibi/features/inbox/presentation/viewmodle/pending_questions_cubit/pending_questions_cubit.dart';
 
 import 'core/routing/app_router.dart';
 import 'core/services/push_notification_service.dart';

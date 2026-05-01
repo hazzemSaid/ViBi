@@ -1,5 +1,7 @@
+import 'package:dartz/dartz.dart';
+
 abstract class QuestionRepository {
-  Future<void> sendQuestion({
+  Future<Either<String, void>> sendQuestion({
     required String recipientId,
     required String questionText,
     required bool isAnonymous,

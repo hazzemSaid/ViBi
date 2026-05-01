@@ -4,10 +4,12 @@ import 'package:vibi/core/errors/errors_handel.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
 import 'package:vibi/core/graphql/mutations/social_links_mutations.dart';
 import 'package:vibi/core/graphql/queries/social_links_queries.dart';
+import 'package:vibi/features/profile/data/datasources/social_links_datasource.dart';
+import 'package:vibi/features/profile/data/models/social_link_dtos.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
 
 /// GraphQL-only Social Links data source.
-class GraphQLSocialLinksDataSource {
+class GraphQLSocialLinksDataSource implements SocialLinksDataSource {
   final ferry.Client _ferryClient;
 
   GraphQLSocialLinksDataSource({ferry.Client? ferryClient})
@@ -33,6 +35,7 @@ class GraphQLSocialLinksDataSource {
     return 'custom';
   }
 
+  @override
   Future<Either<String, List<SocialLink>>> fetchSocialLinks(
     String userId,
   ) async {
@@ -60,26 +63,16 @@ class GraphQLSocialLinksDataSource {
     return right(links);
   }
 
-  Future<Either<String, SocialLink>> addSocialLink({
-    required String userId,
-    required String platform,
-    required String url,
-    required String? title,
-    required String? displayLabel,
-    required int displayOrder,
-  }) async {
-    final normalizedPlatform = _normalizePlatform(platform);
+  @override
+  Future<Either<String, SocialLink>> addSocialLink(AddSocialLinkDto dto) async {
+    final normalizedPlatform = _normalizePlatform(dto.platform);
 
     final result = await GraphQLConfig.ferryMutate(
       'AddSocialLink',
       document: SocialLinksMutations.addSocialLink,
       variables: {
-        'userId': userId,
+        ...dto.toMap(),
         'platform': normalizedPlatform,
-        'url': url,
-        'title': title,
-        'displayLabel': displayLabel,
-        'displayOrder': displayOrder,
       },
       clientOverride: _ferryClient,
     );
@@ -99,28 +92,16 @@ class GraphQLSocialLinksDataSource {
     return right(SocialLink.fromMap(node));
   }
 
-  Future<Either<String, SocialLink>> updateSocialLink({
-    required String linkId,
-    required String platform,
-    required String url,
-    required String? title,
-    required String? displayLabel,
-    required int displayOrder,
-    required bool isActive,
-  }) async {
-    final normalizedPlatform = _normalizePlatform(platform);
+  @override
+  Future<Either<String, SocialLink>> updateSocialLink(UpdateSocialLinkDto dto) async {
+    final normalizedPlatform = _normalizePlatform(dto.platform);
 
     final result = await GraphQLConfig.ferryMutate(
       'UpdateSocialLink',
       document: SocialLinksMutations.updateSocialLink,
       variables: {
-        'id': linkId,
+        ...dto.toMap(),
         'platform': normalizedPlatform,
-        'url': url,
-        'title': title,
-        'displayLabel': displayLabel,
-        'displayOrder': displayOrder,
-        'isActive': isActive,
       },
       clientOverride: _ferryClient,
     );
@@ -139,6 +120,7 @@ class GraphQLSocialLinksDataSource {
     return right(SocialLink.fromMap(node));
   }
 
+  @override
   Future<Either<String, Unit>> deleteSocialLink(String linkId) async {
     final result = await GraphQLConfig.ferryMutate(
       'DeleteSocialLink',

@@ -63,4 +63,18 @@ class ContentSearchResultModel extends ContentSearchResult {
     if (value is String) return [value];
     return const [];
   }
+
+  ContentSearchResult toEntity() {
+    return ContentSearchResult(
+      id: id,
+      userId: userId,
+      username: username,
+      avatarUrl: avatarUrl,
+      questionText: questionText,
+      answerText: answerText,
+      likesCount: likesCount,
+      createdAt: createdAt,
+      isAnonymous: isAnonymous,
+    );
+  }
 }

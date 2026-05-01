@@ -6,7 +6,7 @@ import 'package:vibi/core/constants/question_filter_enum.dart';
 import 'package:vibi/features/inbox/domain/entities/inbox_question.dart';
 import 'package:vibi/features/inbox/presentation/helpers/question_media_helpers.dart';
 import 'package:vibi/features/inbox/presentation/widgets/icon_action.dart';
-import 'package:vibi/features/recommendation/presentation/widgets/media_card.dart';
+import 'package:vibi/core/common/widgets/media_card.dart';
 
 /**
  * Individual question card with answer, delete, and archive actions.

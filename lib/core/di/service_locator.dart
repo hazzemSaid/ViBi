@@ -5,6 +5,7 @@ import 'package:vibi/core/graphql/graphql_config.dart';
 import 'package:vibi/core/services/push_notification_service.dart';
 import 'package:vibi/core/services/tmdb_service.dart';
 import 'package:vibi/core/theme/theme_cubit.dart';
+import 'package:vibi/features/auth/data/datasources/auth_datasource.dart';
 import 'package:vibi/features/auth/data/datasources/supabase_auth_datasource.dart';
 import 'package:vibi/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:vibi/features/auth/domain/repositories/auth_repository.dart';
@@ -25,18 +26,24 @@ import 'package:vibi/features/follow/domain/usecases/get_following_usecase.dart'
 import 'package:vibi/features/follow/presentation/cubit/follow/follow_cubit.dart';
 import 'package:vibi/features/follow/presentation/cubit/followers/followers_cubit.dart';
 import 'package:vibi/features/follow/presentation/cubit/followings/followings_cubit.dart';
+import 'package:vibi/features/inbox/data/datasources/inbox_datasource.dart';
 import 'package:vibi/features/inbox/data/datasources/graphql_inbox_datasource.dart';
 import 'package:vibi/features/inbox/data/repositories/inbox_repository_impl.dart';
 import 'package:vibi/features/inbox/domain/repositories/inbox_repository.dart';
+import 'package:vibi/features/answer/data/datasources/answer_datasource.dart';
+import 'package:vibi/features/answer/data/datasources/graphql_answer_datasource.dart';
+import 'package:vibi/features/answer/data/repositories/answer_repository_impl.dart';
+import 'package:vibi/features/answer/domain/repositories/answer_repository.dart';
 import 'package:vibi/features/answer/domain/usecase/answer_question_usecase.dart';
-import 'package:vibi/features/inbox/domain/usecases/archive_question_usecase.dart';
-import 'package:vibi/features/inbox/domain/usecases/delete_question_usecase.dart';
+import 'package:vibi/features/answer/domain/usecase/archive_question_usecase.dart';
+import 'package:vibi/features/answer/domain/usecase/delete_question_usecase.dart';
 import 'package:vibi/features/inbox/domain/usecases/get_pending_questions_usecase.dart';
 import 'package:vibi/features/answer/presentation/cubit/question_answer/answer_question_cubit.dart';
 import 'package:vibi/features/inbox/presentation/cubit/question_archive/archive_question_cubit.dart';
 import 'package:vibi/features/inbox/presentation/cubit/question_delete/delete_question_cubit.dart';
 import 'package:vibi/features/inbox/presentation/cubit/padding_question/pending_questions_cubit.dart';
 import 'package:vibi/features/profile/data/datasources/graphql_profile_datasource.dart';
+import 'package:vibi/features/profile/data/datasources/social_links_datasource.dart';
 import 'package:vibi/features/profile/data/datasources/graphql_social_links_datasource.dart';
 import 'package:vibi/features/profile/data/datasources/profile_datasource.dart';
 import 'package:vibi/features/profile/data/repositories/profile_repository_impl.dart';
@@ -59,6 +66,7 @@ import 'package:vibi/features/profile/presentation/cubit/answer_cubit.dart';
 import 'package:vibi/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:vibi/features/profile/presentation/cubit/public_profile_cubit.dart';
 import 'package:vibi/features/profile/presentation/cubit/social_links_cubit.dart';
+import 'package:vibi/features/sendQuestion/data/datasources/question_datasource.dart';
 import 'package:vibi/features/sendQuestion/data/datasources/graphql_question_datasource.dart';
 import 'package:vibi/features/sendQuestion/data/repositories/question_repository_impl.dart';
 import 'package:vibi/features/sendQuestion/domain/repositories/question_repository.dart';
@@ -70,6 +78,7 @@ import 'package:vibi/features/reactions/presentation/cubit/comments_cubit.dart';
 import 'package:vibi/features/reactions/presentation/cubit/reaction_cubit.dart';
 import 'package:vibi/features/recommendation/data/repositories/recommendation_repository.dart';
 import 'package:vibi/features/recommendation/presentation/cubits/recommendation_flow_cubit.dart';
+import 'package:vibi/features/search/data/datasources/search_datasource.dart';
 import 'package:vibi/features/search/data/datasources/graphql_search_datasource.dart';
 import 'package:vibi/features/search/data/repositories/search_repository_impl.dart';
 import 'package:vibi/features/search/domain/repositories/search_repository.dart';
@@ -90,6 +99,7 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   _initRecommendation();
   _initReactions();
   _initInbox();
+  _initAnswer();
   _initFollow();
 }
 
@@ -111,11 +121,11 @@ void _initCore(SharedPreferences prefs) {
 // Auth Feature
 // -----------------------------------------------------------------------------
 void _initAuth() {
-  getIt.registerLazySingleton<SupabaseAuthDataSource>(
+  getIt.registerLazySingleton<AuthDataSource>(
     SupabaseAuthDataSource.new,
   );
   getIt.registerLazySingleton<AuthRepository>(
-    () => AuthRepositoryImpl(getIt<SupabaseAuthDataSource>()),
+    () => AuthRepositoryImpl(getIt<AuthDataSource>()),
   );
   getIt.registerFactory<AuthCubit>(() => AuthCubit(getIt<AuthRepository>()));
   getIt.registerFactory<AuthActionCubit>(
@@ -204,11 +214,11 @@ void _initProfile() {
 // Social Links Feature
 // -----------------------------------------------------------------------------
 void _initSocialLinks() {
-  getIt.registerLazySingleton<GraphQLSocialLinksDataSource>(
+  getIt.registerLazySingleton<SocialLinksDataSource>(
     () => GraphQLSocialLinksDataSource(ferryClient: GraphQLConfig.ferryClient),
   );
   getIt.registerLazySingleton<SocialLinksRepository>(
-    () => SocialLinksRepositoryImpl(getIt<GraphQLSocialLinksDataSource>()),
+    () => SocialLinksRepositoryImpl(getIt<SocialLinksDataSource>()),
   );
   getIt.registerLazySingleton<FetchSocialLinksUseCase>(
     () => FetchSocialLinksUseCase(getIt<SocialLinksRepository>()),
@@ -237,11 +247,11 @@ void _initSocialLinks() {
 // Search Feature
 // -----------------------------------------------------------------------------
 void _initSearch() {
-  getIt.registerLazySingleton<GraphQLSearchDataSource>(
+  getIt.registerLazySingleton<SearchDataSource>(
     () => GraphQLSearchDataSource(ferryClient: GraphQLConfig.ferryClient),
   );
   getIt.registerLazySingleton<SearchRepository>(
-    () => SearchRepositoryImpl(getIt<GraphQLSearchDataSource>()),
+    () => SearchRepositoryImpl(getIt<SearchDataSource>()),
   );
   getIt.registerFactory<UserSearchCubit>(
     () => UserSearchCubit(getIt<SearchRepository>()),
@@ -255,11 +265,11 @@ void _initSearch() {
 // Questions Feature
 // -----------------------------------------------------------------------------
 void _initQuestions() {
-  getIt.registerLazySingleton<GraphQLQuestionDataSource>(
+  getIt.registerLazySingleton<QuestionDataSource>(
     () => GraphQLQuestionDataSource(),
   );
   getIt.registerLazySingleton<QuestionRepository>(
-    () => QuestionRepositoryImpl(getIt<GraphQLQuestionDataSource>()),
+    () => QuestionRepositoryImpl(getIt<QuestionDataSource>()),
   );
   getIt.registerFactory<SendQuestionCubit>(
     () => SendQuestionCubit(getIt<QuestionRepository>()),
@@ -303,37 +313,49 @@ void _initReactions() {
 // Inbox Feature
 // -----------------------------------------------------------------------------
 void _initInbox() {
-  getIt.registerLazySingleton<GraphQLInboxDataSource>(
+  getIt.registerLazySingleton<InboxDataSource>(
     () => GraphQLInboxDataSource(graphQLClient: GraphQLConfig.ferryClient),
   );
   getIt.registerFactory<InboxRepository>(
-    () => InboxRepositoryImpl(getIt<GraphQLInboxDataSource>()),
+    () => InboxRepositoryImpl(getIt<InboxDataSource>()),
   );
   getIt.registerFactory<GetPendingQuestionsUseCase>(
     () => GetPendingQuestionsUseCase(getIt<InboxRepository>()),
   );
-  getIt.registerFactory<AnswerQuestionUseCase>(
-    () => AnswerQuestionUseCase(getIt<InboxRepository>()),
-  );
-  getIt.registerFactory<DeleteQuestionUseCase>(
-    () => DeleteQuestionUseCase(getIt<InboxRepository>()),
-  );
   getIt.registerFactory<PendingQuestionsCubit>(
     () => PendingQuestionsCubit(getIt<GetPendingQuestionsUseCase>()),
+  );
+  getIt.registerLazySingleton<ArchiveQuestionUseCase>(
+    () => ArchiveQuestionUseCase(getIt<AnswerRepository>()),
+  );
+  getIt.registerFactory<ArchiveQuestionCubit>(
+    () => ArchiveQuestionCubit(
+      archiveQuestionUseCase: getIt<ArchiveQuestionUseCase>(),
+    ),
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Answer Feature
+// -----------------------------------------------------------------------------
+void _initAnswer() {
+  getIt.registerLazySingleton<AnswerDataSource>(
+    () => GraphQLAnswerDataSource(graphQLClient: GraphQLConfig.ferryClient),
+  );
+  getIt.registerLazySingleton<AnswerRepository>(
+    () => AnswerRepositoryImpl(getIt<AnswerDataSource>()),
+  );
+  getIt.registerFactory<AnswerQuestionUseCase>(
+    () => AnswerQuestionUseCase(getIt<AnswerRepository>()),
+  );
+  getIt.registerFactory<DeleteQuestionUseCase>(
+    () => DeleteQuestionUseCase(getIt<AnswerRepository>()),
   );
   getIt.registerFactory<AnswerQuestionCubit>(
     () => AnswerQuestionCubit(getIt<AnswerQuestionUseCase>()),
   );
   getIt.registerFactory<DeleteQuestionCubit>(
     () => DeleteQuestionCubit(getIt<DeleteQuestionUseCase>()),
-  );
-  getIt.registerLazySingleton<ArchiveQuestionUseCase>(
-    () => ArchiveQuestionUseCase(getIt<InboxRepository>()),
-  );
-  getIt.registerFactory<ArchiveQuestionCubit>(
-    () => ArchiveQuestionCubit(
-      archiveQuestionUseCase: getIt<ArchiveQuestionUseCase>(),
-    ),
   );
 }
 

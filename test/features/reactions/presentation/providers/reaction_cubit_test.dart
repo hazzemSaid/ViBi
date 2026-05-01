@@ -1,119 +1,187 @@
-// import 'package:flutter_test/flutter_test.dart';
-// import 'package:vibi/features/reactions/domain/entities/comment_item.dart';
-// import 'package:vibi/features/reactions/domain/entities/reaction_summary.dart';
-// import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
-// import 'package:vibi/features/reactions/presentation/providers/reaction_cubit.dart';
-// import 'package:vibi/features/reactions/presentation/providers/reaction_state.dart';
+import 'dart:async';
 
-// class _FakeReactionsRepository implements ReactionsRepository {
-//   _FakeReactionsRepository({required ReactionSummary seed}) : _summary = seed;
+import 'package:flutter_test/flutter_test.dart';
+import 'package:vibi/features/reactions/domain/entities/comment_item.dart';
+import 'package:vibi/features/reactions/domain/entities/reaction_summary.dart';
+import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
+import 'package:vibi/features/reactions/presentation/cubit/reaction_cubit.dart';
+import 'package:vibi/features/reactions/presentation/cubit/reaction_state.dart';
 
-//   ReactionSummary _summary;
-//   bool throwOnToggle = false;
+class _FakeReactionsRepository implements ReactionsRepository {
+  _FakeReactionsRepository({required ReactionSummary seed}) : _summary = seed;
 
-//   @override
-//   Future<ReactionSummary> getReactionSummary({
-//     required String answerId,
-//     String? userId,
-//   }) async {
-//     return _summary;
-//   }
+  ReactionSummary _summary;
+  bool throwOnToggle = false;
 
-//   @override
-//   Future<void> toggleReaction({
-//     required String answerId,
-//     required String userId,
-//     required String reaction,
-//   }) async {
-//     if (throwOnToggle) {
-//       throw Exception('toggle failed');
-//     }
+  @override
+  Future<ReactionSummary> getReactionSummary({
+    required String answerId,
+    String? userId,
+  }) async {
+    return _summary;
+  }
 
-//     final nextCounts = Map<String, int>.from(_summary.counts);
-//     final previous = _summary.myReaction;
+  @override
+  Future<void> toggleReaction({
+    required String answerId,
+    required String userId,
+    required String reaction,
+    bool throwOnToggle = false,
+  }) async {
+    if (this.throwOnToggle) {
+      throw Exception('toggle failed');
+    }
 
-//     if (previous == reaction) {
-//       nextCounts[reaction] = ((nextCounts[reaction] ?? 0) - 1).clamp(0, 9999);
-//       _summary = ReactionSummary(counts: nextCounts, myReaction: null);
-//       return;
-//     }
+    final nextCounts = Map<String, int>.from(_summary.counts);
+    final previous = _summary.myReaction;
 
-//     if (previous != null) {
-//       nextCounts[previous] = ((nextCounts[previous] ?? 0) - 1).clamp(0, 9999);
-//     }
-//     nextCounts[reaction] = (nextCounts[reaction] ?? 0) + 1;
-//     _summary = ReactionSummary(counts: nextCounts, myReaction: reaction);
-//   }
+    if (previous == reaction) {
+      nextCounts[reaction] = ((nextCounts[reaction] ?? 0) - 1).clamp(0, 9999);
+      _summary = ReactionSummary(counts: nextCounts, myReaction: null);
+      return;
+    }
 
-//   @override
-//   Future<List<CommentItem>> getComments(String answerId) async => const [];
+    if (previous != null) {
+      nextCounts[previous] = ((nextCounts[previous] ?? 0) - 1).clamp(0, 9999);
+    }
+    nextCounts[reaction] = (nextCounts[reaction] ?? 0) + 1;
+    _summary = ReactionSummary(counts: nextCounts, myReaction: reaction);
+  }
 
-//   @override
-//   Future<void> addComment({
-//     required String answerId,
-//     required String userId,
-//     required String body,
-//   }) async {}
+  @override
+  Future<List<CommentItem>> getComments(String answerId) async => const [];
 
-//   @override
-//   Future<int> getCommentsCount(String answerId) async => 0;
-// }
+  @override
+  Future<void> addComment({
+    required String answerId,
+    required String userId,
+    required String body,
+  }) async {}
 
-// void main() {
-//   group('ReactionCubit', () {
-//     test(
-//       'toggleReaction applies optimistic flow and ends in success',
-//       () async {
-//         final repo = _FakeReactionsRepository(
-//           seed: const ReactionSummary(counts: {'love': 1, 'sad': 0, 'haha': 0}),
-//         );
-//         final cubit = ReactionCubit(
-//           repo,
-//           currentUserIdProvider: () => 'user-1',
-//         );
+  @override
+  Future<int> getCommentsCount(String answerId) async => 0;
+}
 
-//         await cubit.load('answer-1');
-//         await cubit.toggleReaction(answerId: 'answer-1', reaction: 'love');
+void main() {
+  group('ReactionCubit', () {
+    test(
+      'toggleReaction applies optimistic flow and ends in success',
+      () async {
+        final repo = _FakeReactionsRepository(
+          seed: const ReactionSummary(counts: {'love': 1, 'sad': 0, 'haha': 0}),
+        );
+        final cubit = ReactionCubit(
+          repo,
+          currentUserIdProvider: () => 'user-1',
+        );
 
-//         expect(cubit.state, isA<ReactionLoaded>());
-//         expect((cubit.state as ReactionLoaded).summary.myReaction, 'love');
-//         expect((cubit.state as ReactionLoaded).summary.counts['love'], 2);
+        await cubit.load('answer-1');
+        expect(cubit.state, isA<ReactionLoaded>());
 
-//         await cubit.close();
-//       },
-//     );
+        await cubit.toggleReaction(answerId: 'answer-1', reaction: 'love');
 
-//     test(
-//       'toggleReaction rolls back and emits failure when repository fails',
-//       () async {
-//         final repo = _FakeReactionsRepository(
-//           seed: const ReactionSummary(counts: {'love': 3, 'sad': 1, 'haha': 0}),
-//         );
-//         repo.throwOnToggle = true;
-//         final cubit = ReactionCubit(
-//           repo,
-//           currentUserIdProvider: () => 'user-1',
-//         );
+        expect(cubit.state, isA<ReactionLoaded>());
+        expect((cubit.state as ReactionLoaded).summary.myReaction, 'love');
+        expect((cubit.state as ReactionLoaded).summary.counts['love'], 2);
 
-//         await cubit.load('answer-1');
-//         await cubit.toggleReaction(answerId: 'answer-1', reaction: 'sad');
+        await cubit.close();
+      },
+    );
 
-//         expect(cubit.state, isA<ReactionFailure>());
-//         expect(
-//           (cubit.state as ReactionFailure).fallbackSummary?.counts['love'],
-//           3,
-//         );
-//         expect(
-//           (cubit.state as ReactionFailure).fallbackSummary?.counts['sad'],
-//           1,
-//         );
-//         expect(
-//           (cubit.state as ReactionFailure).fallbackSummary?.myReaction,
-//           isNull,
-//         );
+    test(
+      'toggleReaction rolls back and emits failure when repository fails',
+      () async {
+        final repo = _FakeReactionsRepository(
+          seed: const ReactionSummary(counts: {'love': 3, 'sad': 1, 'haha': 0}),
+        );
+        repo.throwOnToggle = true;
+        final cubit = ReactionCubit(
+          repo,
+          currentUserIdProvider: () => 'user-1',
+        );
 
-//         await cubit.close();
-//       },
-//     );
-//   });
-// }
+        await cubit.load('answer-1');
+        expect(cubit.state, isA<ReactionLoaded>());
+
+        await cubit.toggleReaction(answerId: 'answer-1', reaction: 'sad');
+
+        expect(cubit.state, isA<ReactionFailure>());
+        final failureState = cubit.state as ReactionFailure;
+        expect(failureState.fallbackSummary?.counts['love'], 3);
+        expect(failureState.fallbackSummary?.counts['sad'], 1);
+        expect(failureState.fallbackSummary?.myReaction, isNull);
+
+        await cubit.close();
+      },
+    );
+
+    test('load emits loaded state with summary', () async {
+      final repo = _FakeReactionsRepository(
+        seed: const ReactionSummary(counts: {'love': 5, 'sad': 2}),
+      );
+      final cubit = ReactionCubit(
+        repo,
+        currentUserIdProvider: () => 'user-1',
+      );
+
+      await cubit.load('answer-1');
+
+      expect(cubit.state, isA<ReactionLoaded>());
+      expect((cubit.state as ReactionLoaded).summary.counts['love'], 5);
+      expect((cubit.state as ReactionLoaded).summary.counts['sad'], 2);
+
+      await cubit.close();
+    });
+
+    test('load emits failure when repository throws', () async {
+      final repo = _FakeReactionsRepository(
+        seed: const ReactionSummary(counts: {}),
+      );
+      // Override to throw on getReactionSummary
+      final throwingRepo = _ThrowingReactionsRepository();
+      final cubit = ReactionCubit(
+        throwingRepo,
+        currentUserIdProvider: () => 'user-1',
+      );
+
+      await cubit.load('answer-1');
+
+      expect(cubit.state, isA<ReactionFailure>());
+
+      await cubit.close();
+    });
+  });
+}
+
+class _ThrowingReactionsRepository implements ReactionsRepository {
+  @override
+  Future<ReactionSummary> getReactionSummary({
+    required String answerId,
+    String? userId,
+  }) async {
+    throw Exception('network error');
+  }
+
+  @override
+  Future<void> toggleReaction({
+    required String answerId,
+    required String userId,
+    required String reaction,
+    bool throwOnToggle = false,
+  }) async {
+    throw Exception('toggle failed');
+  }
+
+  @override
+  Future<List<CommentItem>> getComments(String answerId) async => const [];
+
+  @override
+  Future<void> addComment({
+    required String answerId,
+    required String userId,
+    required String body,
+  }) async {}
+
+  @override
+  Future<int> getCommentsCount(String answerId) async => 0;
+}

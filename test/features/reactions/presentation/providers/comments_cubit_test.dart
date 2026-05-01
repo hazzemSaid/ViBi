@@ -7,10 +7,16 @@ import 'package:vibi/features/reactions/domain/repositories/reactions_repository
 import 'package:vibi/features/reactions/presentation/cubit/comments_cubit.dart';
 
 class _FakeReactionsRepository implements ReactionsRepository {
-  _FakeReactionsRepository({required ReactionSummary seed}) : _summary = seed;
+  _FakeReactionsRepository({
+    required ReactionSummary seed,
+    Duration? addCommentDelay,
+  }) : _summary = seed,
+       _addCommentDelay = addCommentDelay ?? Duration.zero;
 
   ReactionSummary _summary;
   bool throwOnAdd = false;
+  final Duration _addCommentDelay;
+  final List<CommentItem> _storedComments = [];
 
   @override
   Future<ReactionSummary> getReactionSummary({
@@ -48,52 +54,86 @@ class _FakeReactionsRepository implements ReactionsRepository {
   }
 
   @override
-  Future<List<CommentItem>> getComments(String answerId) async => const [];
+  Future<List<CommentItem>> getComments(String answerId) async {
+    return _storedComments
+        .where((c) => c.answerId == answerId)
+        .map((c) => CommentItem(
+              id: c.id,
+              answerId: c.answerId,
+              userId: c.userId,
+              body: c.body,
+              createdAt: c.createdAt,
+              username: c.username,
+              isOptimistic: false,
+            ))
+        .toList();
+  }
 
   @override
   Future<void> addComment({
     required String answerId,
     required String userId,
     required String body,
-  }) async {}
+  }) async {
+    if (throwOnAdd) {
+      throw Exception('add comment failed');
+    }
+    await Future.delayed(_addCommentDelay);
+    _storedComments.add(
+      CommentItem(
+        id: 'real-${_storedComments.length + 1}',
+        answerId: answerId,
+        userId: userId,
+        body: body,
+        createdAt: DateTime.now(),
+        username: 'test-user',
+        isOptimistic: false,
+      ),
+    );
+  }
 
   @override
-  Future<int> getCommentsCount(String answerId) async => 0;
+  Future<int> getCommentsCount(String answerId) async {
+    return _storedComments.where((c) => c.answerId == answerId).length;
+  }
 }
 
 void main() {
   group('CommentsCubit', () {
-    test('addComment shows optimistic item then resolves success', () async {
-      final repo = _FakeReactionsRepository(
-        seed: const ReactionSummary(counts: {'love': 0, 'sad': 0, 'haha': 0}),
-      );
-      final cubit = CommentsCubit(repo, currentUserIdProvider: () => 'user-1');
+  test('addComment shows optimistic item then resolves success', () async {
+    final repo = _FakeReactionsRepository(
+      seed: const ReactionSummary(counts: {'love': 0, 'sad': 0, 'haha': 0}),
+      // Add a small delay to simulate network request
+      addCommentDelay: const Duration(milliseconds: 10),
+    );
+    final cubit = CommentsCubit(repo, currentUserIdProvider: () => 'user-1');
 
-      await cubit.load('answer-1');
-      expect(cubit.state, isA<CommentsLoaded>());
+    await cubit.load('answer-1');
+    expect(cubit.state, isA<CommentsLoaded>());
 
-      final operation = cubit.addComment(answerId: 'answer-1', body: 'hello');
-      await Future<void>.delayed(const Duration(milliseconds: 5));
+    final operation = cubit.addComment(answerId: 'answer-1', body: 'hello');
+    // Wait briefly to allow optimistic update
+    await Future<void>.delayed(const Duration(milliseconds: 5));
 
-      expect(cubit.state, isA<CommentsLoaded>());
-      expect((cubit.state as CommentsLoaded).isSending, isTrue);
-      expect(
-        (cubit.state as CommentsLoaded).comments.last.isOptimistic,
-        isTrue,
-      );
+    expect(cubit.state, isA<CommentsLoaded>());
+    expect((cubit.state as CommentsLoaded).isSending, isTrue);
+    expect(
+      (cubit.state as CommentsLoaded).comments.last.isOptimistic,
+      isTrue,
+    );
 
-      await operation;
+    await operation;
 
-      expect((cubit.state as CommentsLoaded).isSending, isFalse);
-      expect(cubit.state, isA<CommentsLoaded>());
-      expect((cubit.state as CommentsLoaded).comments.last.body, 'hello');
-      expect(
-        (cubit.state as CommentsLoaded).comments.last.isOptimistic,
-        isFalse,
-      );
+    expect((cubit.state as CommentsLoaded).isSending, isFalse);
+    expect(cubit.state, isA<CommentsLoaded>());
+    expect((cubit.state as CommentsLoaded).comments.last.body, 'hello');
+    expect(
+      (cubit.state as CommentsLoaded).comments.last.isOptimistic,
+      isFalse,
+    );
 
-      await cubit.close();
-    });
+    await cubit.close();
+  });
 
     test('addComment rolls back optimistic item on failure', () async {
       final repo = _FakeReactionsRepository(

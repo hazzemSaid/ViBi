@@ -7,8 +7,8 @@ import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/features/feed/presentation/cubit/feed_cubit.dart';
 import 'package:vibi/features/feed/presentation/cubit/feed_state.dart';
 import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
-import 'package:vibi/features/reactions/presentation/widgets/comment_sheet.dart';
-import 'package:vibi/features/reactions/presentation/widgets/reaction_bar.dart';
+import 'package:vibi/core/common/widgets/comment_sheet.dart';
+import 'package:vibi/core/common/widgets/reaction_bar.dart';
 
 class ActionRow extends StatelessWidget {
   const ActionRow({

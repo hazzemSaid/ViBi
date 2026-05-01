@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:vibi/features/inbox/domain/repositories/inbox_repository.dart';
+import 'package:vibi/features/answer/domain/repositories/answer_repository.dart';
 
 /**
  * Use case responsible for moving questions between the active inbox and the archive.
@@ -9,7 +9,7 @@ import 'package:vibi/features/inbox/domain/repositories/inbox_repository.dart';
 class ArchiveQuestionUseCase {
   const ArchiveQuestionUseCase(this._repository);
 
-  final InboxRepository _repository;
+  final AnswerRepository _repository;
 
   /**
    * Archives a specific question, moving it out of the primary inbox view.

@@ -6,7 +6,7 @@ import 'package:vibi/features/reactions/domain/entities/reaction_summary.dart';
 import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
 import 'package:vibi/features/reactions/presentation/cubit/reaction_cubit.dart';
 import 'package:vibi/features/reactions/presentation/cubit/reaction_state.dart';
-import 'package:vibi/features/reactions/presentation/widgets/comment_sheet.dart';
+import 'package:vibi/core/common/widgets/comment_sheet.dart';
 
 const Map<String, String> _emojis = {'love': '❤️', 'sad': '😢', 'haha': '😂'};
 const Map<String, IconData> _reactionIcons = {

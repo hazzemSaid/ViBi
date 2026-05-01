@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
-import 'package:vibi/features/recommendation/presentation/widgets/media_card.dart';
+import 'package:vibi/core/common/widgets/media_card.dart';
 
 import 'sender_row.dart';
 

@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:vibi/features/inbox/domain/repositories/inbox_repository.dart';
+import 'package:vibi/features/answer/domain/repositories/answer_repository.dart';
 
 /**
  * Use case for deleting questions.
@@ -7,7 +7,7 @@ import 'package:vibi/features/inbox/domain/repositories/inbox_repository.dart';
 class DeleteQuestionUseCase {
   const DeleteQuestionUseCase(this._repository);
 
-  final InboxRepository _repository;
+  final AnswerRepository _repository;
 
   /**
    * Deletes a specific question.

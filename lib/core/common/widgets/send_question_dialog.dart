@@ -55,7 +55,7 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Question sent successfully'),
+            content: const Text('Question sent successfully'),
             backgroundColor: Theme.of(context).colorScheme.tertiary,
           ),
         );
@@ -266,7 +266,7 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
                                 ),
                               ),
                             )
-                          : Text(
+                          : const Text(
                               'Send Question',
                               style: TextStyle(
                                 fontSize: 16,

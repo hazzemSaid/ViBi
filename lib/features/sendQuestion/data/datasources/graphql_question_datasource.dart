@@ -1,31 +1,26 @@
+import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:vibi/features/sendQuestion/data/datasources/question_datasource.dart';
+import 'package:vibi/features/sendQuestion/data/models/send_question_dto.dart';
 
-class GraphQLQuestionDataSource {
+class GraphQLQuestionDataSource implements QuestionDataSource {
   final SupabaseClient _client;
 
   GraphQLQuestionDataSource({SupabaseClient? client})
     : _client = client ?? Supabase.instance.client;
 
-  Future<void> sendQuestion({
-    required String recipientId,
-    required String questionText,
-    required bool isAnonymous,
-    String? senderId,
-  }) async {
+  @override
+  Future<Either<String, void>> sendQuestion(SendQuestionDto dto) async {
     try {
-      await _client.from('questions').insert({
-        'recipient_id': recipientId,
-        'sender_id': isAnonymous ? null : senderId,
-        'question_text': questionText,
-        'is_anonymous': isAnonymous,
-        'status': 'pending',
-      });
+      await _client.from('questions').insert(dto.toMap());
 
       // Update question count for recipient
-      await _updateQuestionCount(recipientId);
+      await _updateQuestionCount(dto.recipientId);
+      return right(null);
     } catch (e) {
-      print('Send question error: $e');
-      rethrow;
+      debugPrint('Send question error: $e');
+      return left('Failed to send question: $e');
     }
   }
 

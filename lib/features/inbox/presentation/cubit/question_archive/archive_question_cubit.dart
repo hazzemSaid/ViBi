@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vibi/features/inbox/domain/usecases/archive_question_usecase.dart';
+import 'package:vibi/features/answer/domain/usecase/archive_question_usecase.dart';
 import 'archive_question_state.dart';
 
 class ArchiveQuestionCubit extends Cubit<ArchiveQuestionState> {

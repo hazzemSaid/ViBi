@@ -1,12 +1,14 @@
+import 'package:dartz/dartz.dart';
 import 'package:ferry/ferry.dart' as ferry;
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
 import 'package:vibi/core/graphql/queries/search_queries.dart';
+import 'package:vibi/features/search/data/datasources/search_datasource.dart';
 import 'package:vibi/features/search/data/models/content_search_result_model.dart';
 import 'package:vibi/features/search/data/models/user_search_result_model.dart';
 
-class GraphQLSearchDataSource {
+class GraphQLSearchDataSource implements SearchDataSource {
   final SupabaseClient _client;
   final ferry.Client _ferryClient;
 
@@ -16,8 +18,9 @@ class GraphQLSearchDataSource {
 
 
 
-  Future<List<UserSearchResultModel>> searchUsers(String query) async {
-    if (query.trim().isEmpty) return [];
+  @override
+  Future<Either<String, List<UserSearchResultModel>>> searchUsers(String query) async {
+    if (query.trim().isEmpty) return right([]);
 
     final searchPattern = '%${query.trim()}%';
 
@@ -32,7 +35,7 @@ class GraphQLSearchDataSource {
       if (result.hasErrors) {
         debugPrint('GraphQL search users error: ${result.graphqlErrors}');
         debugPrint('GraphQL search users link error: ${result.linkException}');
-        return _searchUsersViaRest(query);
+        return right(await _searchUsersViaRest(query));
       }
 
       final edges = result.data?['profilesCollection']?['edges'] as List? ?? [];
@@ -56,16 +59,16 @@ class GraphQLSearchDataSource {
         }
       }
 
-      return edges
+      return right(edges
           .map((edge) {
             final node = edge['node'] as Map<String, dynamic>;
             return UserSearchResultModel.fromGraphQL(node);
           })
           .where((user) => !blockedIds.contains(user.id))
-          .toList();
+          .toList());
     } catch (e) {
       debugPrint('Search users exception: $e');
-      return _searchUsersViaRest(query);
+      return right(await _searchUsersViaRest(query));
     }
   }
 
@@ -90,8 +93,9 @@ class GraphQLSearchDataSource {
     }
   }
 
-  Future<List<ContentSearchResultModel>> searchContent(String query) async {
-    if (query.trim().isEmpty) return [];
+  @override
+  Future<Either<String, List<ContentSearchResultModel>>> searchContent(String query) async {
+    if (query.trim().isEmpty) return right([]);
 
     final searchPattern = '%${query.trim()}%';
 
@@ -108,18 +112,18 @@ class GraphQLSearchDataSource {
         debugPrint(
           'GraphQL search content link error: ${result.linkException}',
         );
-        return _searchContentViaRest(query);
+        return right(await _searchContentViaRest(query));
       }
 
       final edges = result.data?['answersCollection']?['edges'] as List? ?? [];
 
-      return edges.map((edge) {
+      return right(edges.map((edge) {
         final node = edge['node'] as Map<String, dynamic>;
         return ContentSearchResultModel.fromGraphQL(node);
-      }).toList();
+      }).toList());
     } catch (e) {
       debugPrint('Search content exception: $e');
-      return _searchContentViaRest(query);
+      return right(await _searchContentViaRest(query));
     }
   }
 

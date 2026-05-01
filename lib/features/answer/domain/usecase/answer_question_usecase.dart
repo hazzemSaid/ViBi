@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:vibi/features/inbox/domain/repositories/inbox_repository.dart';
+import 'package:vibi/features/answer/domain/repositories/answer_repository.dart';
 
 /**
  * Use case for answering questions.
@@ -7,10 +7,10 @@ import 'package:vibi/features/inbox/domain/repositories/inbox_repository.dart';
 class AnswerQuestionUseCase {
   const AnswerQuestionUseCase(this._repository);
 
-  final InboxRepository _repository;
+  final AnswerRepository _repository;
 
   /**
-   * Executes the use case by calling [answerQuestion] on the [InboxRepository].
+   * Executes the use case by calling [answerQuestion] on the [AnswerRepository].
    *
    * [questionId] is the unique identifier of the question being answered.
    * [answerText] is the content of the answer provided by the user.

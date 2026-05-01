@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vibi/core/services/push_notification_service.dart';
@@ -21,45 +22,51 @@ class _FakeAuthRepository implements AuthRepository {
   Stream<AppUser?> get authStateChanges => Stream.value(null);
 
   @override
-  Future<AppUser> signInWithEmailPassword(String email, String password) async {
+  Future<Either<String, AppUser>> signInWithEmailPassword(
+    String email,
+    String password,
+  ) async {
     signInCalled = true;
     lastUsedEmail = email;
     if (throwOnSignIn) {
-      throw Exception('sign in failed');
+      return Left('sign in failed');
     }
-    return AppUser(id: 'mock-id-123', email: email);
+    return Right(AppUser(id: 'mock-id-123', email: email));
   }
 
   @override
-  Future<AppUser> signUpWithEmailPassword(
+  Future<Either<String, AppUser>> signUpWithEmailPassword(
     String email,
     String password, {
     Map<String, dynamic>? data,
   }) async {
     signUpCalled = true;
     lastUsedEmail = email;
-    return AppUser(id: 'mock-id-123', email: email);
+    return Right(AppUser(id: 'mock-id-123', email: email));
   }
 
   @override
-  Future<AppUser> signInWithGoogle() async {
+  Future<Either<String, AppUser>> signInWithGoogle() async {
     signInWithGoogleCalled = true;
-    return AppUser(id: 'mock-google-id', email: 'google@test.com');
+    return Right(AppUser(id: 'mock-google-id', email: 'google@test.com'));
   }
 
   @override
-  Future<void> signOut() async {
+  Future<Either<String, void>> signOut() async {
     signOutCalled = true;
+    return Right(null);
   }
 
   @override
-  Future<void> sendEmailVerification() async {
+  Future<Either<String, void>> sendEmailVerification() async {
     sendVerificationCalled = true;
+    return Right(null);
   }
 
   @override
-  Future<void> reloadUser() async {
+  Future<Either<String, void>> reloadUser() async {
     reloadUserCalled = true;
+    return Right(null);
   }
 }
 
@@ -74,7 +81,6 @@ void main() {
   setUp(() {
     fakeRepository = _FakeAuthRepository();
     mockNotificationService = _MockPushNotificationService();
-    // Stub notification service methods
     when(
       () => mockNotificationService.updateUserId(any()),
     ).thenAnswer((_) async {});
@@ -95,6 +101,7 @@ void main() {
 
     test('signInWithEmail emits success and calls repository', () async {
       await controller.signInWithEmail('test@example.com', 'password123');
+      await Future<void>.delayed(Duration.zero);
 
       expect(controller.state, isA<AuthActionSuccess>());
       expect(fakeRepository.signInCalled, isTrue);
@@ -105,6 +112,7 @@ void main() {
       fakeRepository.throwOnSignIn = true;
 
       await controller.signInWithEmail('test@example.com', 'password123');
+      await Future<void>.delayed(Duration.zero);
 
       expect(controller.state, isA<AuthActionFailure>());
       final failure = controller.state as AuthActionFailure;
@@ -113,6 +121,7 @@ void main() {
 
     test('signUpWithEmail calls repository correctly', () async {
       await controller.signUpWithEmail('new@example.com', 'password123');
+      await Future<void>.delayed(Duration.zero);
 
       expect(controller.state, isA<AuthActionSuccess>());
       expect(fakeRepository.signUpCalled, isTrue);
@@ -121,6 +130,7 @@ void main() {
 
     test('signInWithGoogle calls repository correctly', () async {
       await controller.signInWithGoogle();
+      await Future<void>.delayed(Duration.zero);
 
       expect(controller.state, isA<AuthActionSuccess>());
       expect(fakeRepository.signInWithGoogleCalled, isTrue);
@@ -128,6 +138,7 @@ void main() {
 
     test('signOut calls repository correctly', () async {
       await controller.signOut();
+      await Future<void>.delayed(Duration.zero);
 
       expect(controller.state, isA<AuthActionSuccess>());
       expect(fakeRepository.signOutCalled, isTrue);
@@ -135,6 +146,7 @@ void main() {
 
     test('sendEmailVerification calls repository correctly', () async {
       await controller.sendEmailVerification();
+      await Future<void>.delayed(Duration.zero);
 
       expect(controller.state, isA<AuthActionSuccess>());
       expect(fakeRepository.sendVerificationCalled, isTrue);
@@ -142,6 +154,7 @@ void main() {
 
     test('reloadUser calls repository correctly', () async {
       await controller.reloadUser();
+      await Future<void>.delayed(Duration.zero);
 
       expect(controller.state, isA<AuthActionSuccess>());
       expect(fakeRepository.reloadUserCalled, isTrue);

@@ -1,10 +1,12 @@
+import 'package:dartz/dartz.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:vibi/features/auth/data/datasources/supabase_auth_datasource.dart';
+import 'package:vibi/features/auth/data/datasources/auth_datasource.dart';
+import 'package:vibi/features/auth/data/models/auth_dtos.dart';
 import 'package:vibi/features/auth/domain/entities/app_user.dart';
 import 'package:vibi/features/auth/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final SupabaseAuthDataSource dataSource;
+  final AuthDataSource dataSource;
 
   AuthRepositoryImpl(this.dataSource);
 
@@ -28,37 +30,33 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<AppUser> signInWithEmailPassword(String email, String password) async {
-    final user = await dataSource.signInWithEmailPassword(email, password);
-    return _mapUser(user);
+  Future<Either<String, AppUser>> signInWithEmailPassword(String email, String password) async {
+    final result = await dataSource.signInWithEmailPassword(SignInDto(email: email, password: password));
+    return result.map((user) => _mapUser(user));
   }
 
   @override
-  Future<AppUser> signUpWithEmailPassword(
+  Future<Either<String, AppUser>> signUpWithEmailPassword(
     String email,
     String password, {
     Map<String, dynamic>? data,
   }) async {
-    final user = await dataSource.signUpWithEmailPassword(
-      email,
-      password,
-      data: data,
-    );
-    return _mapUser(user);
+    final result = await dataSource.signUpWithEmailPassword(SignUpDto(email: email, password: password, data: data));
+    return result.map((user) => _mapUser(user));
   }
 
   @override
-  Future<AppUser> signInWithGoogle() async {
-    final user = await dataSource.signInWithGoogle();
-    return _mapUser(user);
+  Future<Either<String, AppUser>> signInWithGoogle() async {
+    final result = await dataSource.signInWithGoogle();
+    return result.map((user) => _mapUser(user));
   }
 
   @override
-  Future<void> signOut() => dataSource.signOut();
+  Future<Either<String, void>> signOut() => dataSource.signOut();
 
   @override
-  Future<void> sendEmailVerification() => dataSource.sendEmailVerification();
+  Future<Either<String, void>> sendEmailVerification() => dataSource.sendEmailVerification();
 
   @override
-  Future<void> reloadUser() => dataSource.reloadUser();
+  Future<Either<String, void>> reloadUser() => dataSource.reloadUser();
 }

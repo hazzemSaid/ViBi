@@ -4,14 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/errors/errors_handel.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
-import 'package:vibi/core/graphql/mutations/inbox_mutations.dart';
 import 'package:vibi/core/graphql/queries/inbox_queries.dart';
+import 'package:vibi/features/inbox/data/datasources/inbox_datasource.dart';
 import 'package:vibi/features/inbox/data/models/inbox_question_model.dart';
 
 /**
- * Data source for fetching and managing inbox questions via GraphQL.
+ * Data source for fetching inbox questions via GraphQL.
  */
-class GraphQLInboxDataSource {
+class GraphQLInboxDataSource implements InboxDataSource {
   final ferry.Client _ferryClient;
   final Future<Map<int, Map<String, dynamic>>> Function(Set<int> ids)
       _mediaRecommendationsLoader;
@@ -56,23 +56,6 @@ class GraphQLInboxDataSource {
     );
   }
 
-  /**
-   * Runs a GraphQL mutation.
-   */
-  Future<ferry.OperationResponse<Map<String, dynamic>, Map<String, dynamic>>>
-      _runMutation({
-    required String operationName,
-    required String document,
-    required Map<String, dynamic> variables,
-  }) {
-    return GraphQLConfig.ferryMutate(
-      operationName,
-      document: document,
-      variables: variables,
-      clientOverride: _ferryClient,
-    );
-  }
-
   // ── Questions Query ──────────────────────────────────────────────────────
 
   /**
@@ -87,6 +70,7 @@ class GraphQLInboxDataSource {
    * - [Right] containing a [List] of [InboxQuestionModel] on success.
    * - [Left] containing an error [String] if the network request or parsing fails.
    */
+  @override
   Future<Either<String, List<InboxQuestionModel>>> getPendingQuestions(
     String currentUserId, {
     int limit = 20,
@@ -193,130 +177,6 @@ class GraphQLInboxDataSource {
       return Map<String, dynamic>.from(rawProfile.first as Map);
     }
     return null;
-  }
-
-  // ── Question Actions ─────────────────────────────────────────────────────
-
-  /**
-   * Submits an answer content for a specific question via a GraphQL mutation.
-   *
-   * [questionId] is the unique identifier of the question to answer.
-   * [answerText] is the text content of the user's response.
-   * [userId] is the ID of the user performing the action.
-   *
-   * Returns:
-   * - [Right] with [Unit] if the mutation completes successfully.
-   * - [Left] with an error [String] if the server returns an error.
-   */
-  Future<Either<String, Unit>> answerQuestion({
-    required String questionId,
-    required String answerText,
-    required String userId,
-  }) {
-    return _handleQuestionAction(
-      questionId: questionId,
-      userId: userId,
-      action: 'answer',
-      answerText: answerText,
-    );
-  }
-
-  /**
-   * Deletes a specific question by invoking a GraphQL mutation.
-   *
-   * [questionId] is the unique identifier of the target question.
-   *
-   * Returns:
-   * - [Right] with [Unit] on success.
-   * - [Left] with an error [String] on failure.
-   */
-  Future<Either<String, Unit>> deleteQuestion(String questionId) {
-    return _handleQuestionAction(
-      questionId: questionId,
-      userId: _currentUserId,
-      action: 'delete',
-    );
-  }
-
-  /**
-   * Archives a question so it no longer appears in the primary inbox.
-   *
-   * [questionId] is the unique identifier of the question to archive.
-   *
-   * Returns:
-   * - [Right] with [Unit] on success.
-   * - [Left] with an error [String] on failure.
-   */
-  Future<Either<String, Unit>> archiveQuestion({
-    required String questionId,
-  }) {
-    return _handleQuestionAction(
-      questionId: questionId,
-      userId: _currentUserId,
-      action: 'archive',
-    );
-  }
-
-  /**
-   * Restores an archived question to the active inbox.
-   *
-   * [questionId] is the unique identifier of the question to unarchive.
-   *
-   * Returns:
-   * - [Right] with [Unit] on success.
-   * - [Left] with an error [String] on failure.
-   */
-  Future<Either<String, Unit>> unarchiveQuestion({
-    required String questionId,
-  }) {
-    return _handleQuestionAction(
-      questionId: questionId,
-      userId: _currentUserId,
-      action: 'unarchive',
-    );
-  }
-
-  /**
-   * Helper to get the current user ID from Supabase.
-   */
-  String get _currentUserId =>
-      Supabase.instance.client.auth.currentUser?.id ?? '';
-
-  /**
-   * Generic handler for question-related actions (answer, delete, archive, etc.) via RPC.
-   */
-  Future<Either<String, Unit>> _handleQuestionAction({
-    required String questionId,
-    required String userId,
-    required String action,
-    String? answerText,
-  }) async {
-    try {
-      _log('DEBUG: Starting $action via RPC: $questionId');
-
-      final result = await _runMutation(
-        operationName: InboxMutations.handleQuestionActionOpName,
-        document: InboxMutations.handleQuestionAction,
-        variables: {
-          'questionId': questionId,
-          'userId': userId,
-          'action': action,
-          'answerText': answerText,
-        },
-      );
-
-      if (result.hasErrors) {
-        _log('DEBUG: RPC $action failed: ${result.graphqlErrors}');
-        _log('DEBUG: RPC $action link error: ${result.linkException}');
-        return left(SupabaseErrorHandler.getErrorMessage(result));
-      }
-
-      _log('DEBUG: $action completed successfully via RPC');
-      return right(unit);
-    } catch (e) {
-      _log('DEBUG: Exception in $action RPC: $e');
-      return left('Failed to $action question: $e');
-    }
   }
 
   // ── Media Recommendations ────────────────────────────────────────────────

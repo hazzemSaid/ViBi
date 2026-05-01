@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vibi/features/inbox/domain/usecases/delete_question_usecase.dart';
+import 'package:vibi/features/answer/domain/usecase/delete_question_usecase.dart';
 import 'delete_question_state.dart';
 
 class DeleteQuestionCubit extends Cubit<DeleteQuestionState> {

@@ -8,7 +8,7 @@ import 'package:vibi/features/inbox/presentation/cubit/padding_question/pending_
 import 'package:vibi/features/answer/presentation/widgets/answer_screen_helpers.dart';
 import 'package:vibi/features/inbox/presentation/helpers/question_media_helpers.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
-import 'package:vibi/features/recommendation/presentation/widgets/media_card.dart';
+import 'package:vibi/core/common/widgets/media_card.dart';
 
 /**
  * Full-screen answer composer for one inbox question.

@@ -26,18 +26,59 @@ on:
         required: false
         default: ''
 
+permissions:
+  contents: write
+
 jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Prepare .env for CI tests
+        shell: bash
+        run: |
+          mkdir -p assets
+          if [ -n "${{ secrets.DOTENV_FILE }}" ]; then
+            printf "%s" "${{ secrets.DOTENV_FILE }}" > .env
+            cp .env assets/app_config.txt
+          elif [ -f .env.example ]; then
+            cp .env.example .env
+            cp .env assets/app_config.txt
+          else
+            echo "CI=true" > .env
+            cp .env assets/app_config.txt
+          fi
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Run Flutter tests
+        run: flutter test
+
   build-android:
     name: Build Android APK & AAB
-    if: ${{ github.event_name == 'push' || github.event.inputs.build_android == 'true' }}
+    if: ${{ github.event_name == 'push' || github.event.inputs.build_android == true }}
+    needs: [test]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -54,7 +95,6 @@ jobs:
           if [ -n "${{ secrets.DOTENV_FILE }}" ]; then
             printf "%s" "${{ secrets.DOTENV_FILE }}" > .env
             cp .env assets/app_config.txt
-            echo "Environment variables saved to assets/app_config.txt"
           elif [ -f .env.example ]; then
             cp .env.example .env
             cp .env assets/app_config.txt
@@ -62,9 +102,6 @@ jobs:
             echo "CI=true" > .env
             cp .env assets/app_config.txt
           fi
-          echo "--- DEBUG INFO ---"
-          echo "Variables successfully loaded into env:"
-          awk -F '=' '{if(NF>1) print "- "$1": [Length: "length($2)" characters]"}' assets/app_config.txt
 
       - name: Provide google-services.json for CI
         shell: bash
@@ -73,20 +110,14 @@ jobs:
             echo "google-services.json already exists"
           elif [ -n "${{ secrets.GOOGLE_SERVICES_JSON_B64 }}" ]; then
             printf "%s" "${{ secrets.GOOGLE_SERVICES_JSON_B64 }}" | base64 --decode > android/app/google-services.json
-            echo "google-services.json created from GOOGLE_SERVICES_JSON_B64"
           elif [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
             printf "%s" "${{ secrets.GOOGLE_SERVICES_JSON }}" > android/app/google-services.json
-            echo "google-services.json created from GOOGLE_SERVICES_JSON"
           else
             echo "Missing GOOGLE_SERVICES_JSON_B64 / GOOGLE_SERVICES_JSON secret" >&2
             exit 1
           fi
 
           python3 -c "import json; json.load(open('android/app/google-services.json', 'r', encoding='utf-8'))"
-          echo "google-services.json is valid JSON"
-          echo "--- DEBUG INFO ---"
-          echo "Project ID inside Google Services JSON:"
-          grep -o '"project_id": *"[^"]*"' android/app/google-services.json || echo "project_id not found"
 
       - name: Get dependencies
         run: flutter pub get
@@ -104,13 +135,21 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: android-release
-          path: build/app/outputs/
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-x86_64-release.apk
+            build/app/outputs/bundle/release/app-release.aab
           retention-days: 7
+          if-no-files-found: error
 
   build-ios:
     name: Build iOS Simulator
-    if: ${{ github.event_name == 'push' || github.event.inputs.build_ios == 'true' }}
+    if: ${{ github.event_name == 'push' || github.event.inputs.build_ios == true }}
+    needs: [test]
     runs-on: macos-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout code
@@ -128,7 +167,6 @@ jobs:
           if [ -n "${{ secrets.DOTENV_FILE }}" ]; then
             printf "%s" "${{ secrets.DOTENV_FILE }}" > .env
             cp .env assets/app_config.txt
-            echo "Environment variables saved to assets/app_config.txt"
           elif [ -f .env.example ]; then
             cp .env.example .env
             cp .env assets/app_config.txt
@@ -136,9 +174,6 @@ jobs:
             echo "CI=true" > .env
             cp .env assets/app_config.txt
           fi
-          echo "--- DEBUG INFO ---"
-          echo "Variables successfully loaded into env:"
-          awk -F '=' '{if(NF>1) print "- "$1": [Length: "length($2)" characters]"}' assets/app_config.txt
 
       - name: Provide GoogleService-Info.plist for CI
         shell: bash
@@ -147,18 +182,10 @@ jobs:
             echo "GoogleService-Info.plist already exists"
           elif [ -n "${{ secrets.GOOGLE_SERVICE_INFO_PLIST_B64 }}" ]; then
             printf "%s" "${{ secrets.GOOGLE_SERVICE_INFO_PLIST_B64 }}" | base64 --decode > ios/Runner/GoogleService-Info.plist
-            echo "GoogleService-Info.plist created from GOOGLE_SERVICE_INFO_PLIST_B64"
           elif [ -n "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" ]; then
             printf "%s" "${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}" > ios/Runner/GoogleService-Info.plist
-            echo "GoogleService-Info.plist created from GOOGLE_SERVICE_INFO_PLIST"
           else
             echo "No iOS Firebase plist secret provided; continuing"
-          fi
-          
-          if [ -f ios/Runner/GoogleService-Info.plist ]; then
-            echo "--- DEBUG INFO ---"
-            echo "Client ID inside Plist:"
-            grep -A 1 '<key>CLIENT_ID</key>' ios/Runner/GoogleService-Info.plist | grep '<string>' || echo "CLIENT_ID not found"
           fi
 
       - name: Get dependencies
@@ -173,12 +200,14 @@ jobs:
           name: ios-simulator-build
           path: build/ios/Debug-iphonesimulator/
           retention-days: 7
+          if-no-files-found: error
 
   create-release:
     name: Create GitHub Release
-    if: ${{ github.event_name == 'push' || (github.event.inputs.create_release == 'true' && github.event.inputs.build_android == 'true' && github.event.inputs.build_ios == 'true') }}
+    if: ${{ github.event_name == 'push' || (github.event.inputs.create_release == true && (github.event.inputs.build_android == true || github.event.inputs.build_ios == true)) }}
     needs: [build-android, build-ios]
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout code
@@ -213,7 +242,7 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release_meta.outputs.tag }}
           target_commitish: ${{ github.sha }}
@@ -221,15 +250,15 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            artifacts/android/flutter-apk/app-release.apk
-            artifacts/android/flutter-apk/app-armeabi-v7a-release.apk
-            artifacts/android/flutter-apk/app-arm64-v8a-release.apk
-            artifacts/android/flutter-apk/app-x86_64-release.apk
-            artifacts/android/bundle/release/app-release.aab
+            artifacts/android/app-release.apk
+            artifacts/android/app-armeabi-v7a-release.apk
+            artifacts/android/app-arm64-v8a-release.apk
+            artifacts/android/app-x86_64-release.apk
+            artifacts/android/app-release.aab
           body: |
             # ViBi Release ${{ steps.release_meta.outputs.version }}
 
-            ## 📱 Downloads
+            ## Downloads
 
             ### Android
             - **app-release.apk** - Universal APK (all architectures included)
@@ -242,17 +271,16 @@ jobs:
             - **iOS Simulator Build** - Available in artifacts for testing on simulator
             - For production, submit IPA to App Store Connect
 
-            ## 📝 Build Information
-            - **Release Date**: ${{ github.event.head_commit.timestamp }}
+            ## Build Information
             - **Commit**: ${{ github.sha }}
-            - **Branch**: main
+            - **Branch**: ${{ github.ref_name }}
 
-            ## 🚀 Installation Guide
+            ## Installation Guide
 
             ### Android
             **Direct Installation (APK)**:
             ```bash
-            adb install artifacts/android/flutter-apk/app-arm64-v8a-release.apk
+            adb install artifacts/android/app-arm64-v8a-release.apk
             ```
 
             **Google Play Store**:
@@ -272,6 +300,3 @@ jobs:
             2. Create a provisioning profile
             3. Build with: `flutter build ipa --release`
             4. Upload to App Store Connect
-
-            ## ✅ Changes in This Release
-            See commit history for detailed changes.

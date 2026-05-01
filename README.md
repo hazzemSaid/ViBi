@@ -1,130 +1,112 @@
-# ViBi Social App
+<p align="center">
+  <img src="assets/images/logo1.png" width="250" height="250" alt="ViBi Logo">
+</p>
 
-Welcome friends! This is the codebase for the ViBi social app.
+<h1 align="center">ViBi Social</h1>
 
-## Languages / اللغات
+<p align="center">
+  <strong>Connect, Ask, and Share. The modern open-source social Q&A platform.</strong>
+</p>
+
+<p align="center">
+  <a href="https://www.vibi.social/">Website</a> •
+  <a href="#key-features">Features</a> •
+  <a href="#tech-stack">Tech Stack</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#contributing">Contributing</a>
+</p>
+
+---
+
+## 🌍 Languages / اللغات
 
 - 🇬🇧 [English](README.md)
 - 🇸🇦 [العربية](README.ar.md)
 
-## Get The App
+## 🚀 About ViBi
 
-- Web: [Website](https://www.vibi.social/)
-- iOS: Coming soon
-- Android: Coming soon
+ViBi is a powerful open-source social application built with Flutter and Supabase. It combines the engagement of modern social media with a dedicated Q&A system, allowing users to connect, follow their favorite creators, and ask questions (anonymously or publicly).
 
-## Development Resources
+## ✨ Key Features
 
-This is a Flutter application, written in the Dart programming language.
+- **🔐 Robust Auth**: Secure Email/Password and Google OAuth login via Supabase.
+- **👤 Rich Profiles**: Customizable user profiles with avatars, bios, and integrated social links.
+- **📥 Smart Inbox**: A dedicated space for receiving and managing questions.
+- **💬 Anonymous Q&A**: Ask and answer questions with optional anonymity.
+- **📱 Dynamic Feed**: Real-time social feed showing content from people you follow.
+- **📸 Stories**: Share ephemeral social content that lasts for 24 hours.
+- **🔍 Advanced Search**: Find users and specific content quickly and efficiently.
+- **🔔 Notifications**: Stay updated with real-time push notifications.
 
-It builds on Supabase services (authentication, PostgreSQL, storage, and real-time features), plus GraphQL APIs for core social and feed functionality.
+## 🏗 Architecture
 
+The project is built using **Clean Architecture** principles to ensure scalability, testability, and maintainability:
 
-### Core Features
+- **Presentation Layer**: UI logic and state management using `Bloc/Cubit`.
+- **Domain Layer**: Pure business logic, entities, and use case definitions.
+- **Data Layer**: Repository implementations and data sources (GraphQL, Supabase, Rest).
 
-- User authentication (Email/Password + Google OAuth)
-- User profiles with avatars and social links
-- Stories (24-hour social content)
-- Q&A inbox (anonymous questions)
-- Feed system with following
-- Follow/Unfollow system
-- Search (users and content)
-- Notifications with push support
+*Recently refactored to enforce strict separation of concerns, standardized error handling with `Either`, and centralized common widgets.*
 
-### In Development
+## 🛠 Tech Stack
 
-- Direct messaging
-- Content moderation
-- Trending algorithm
-- Offline support
+- **Frontend**: [Flutter](https://flutter.dev/) & [Dart](https://dart.dev/)
+- **Backend**: [Supabase](https://supabase.com/) (PostgreSQL, Storage, Real-time)
+- **State Management**: [Bloc/Cubit](https://pub.dev/packages/flutter_bloc)
+- **API Layer**: [GraphQL](https://graphql.org/) (via [Ferry](https://pub.dev/packages/ferry))
+- **Routing**: [GoRouter](https://pub.dev/packages/go_router)
+- **Error Handling**: [Dartz](https://pub.dev/packages/dartz) (Functional Programming patterns)
 
-### Architecture
+## 🛠 Getting Started
 
-ViBi follows Clean Architecture principles:
+### Prerequisites
 
-- Presentation Layer: UI and state management (Bloc/cubit)
-- Domain Layer: Business logic and entities
-- Data Layer: Data sources (Supabase) and repositories
+- Flutter SDK (Latest Stable)
+- Dart SDK
+- A Supabase project (for local development, you'll need your own API keys)
 
-### Tech Stack
+### Installation
 
-- Frontend: Flutter + Dart
-- State Management: Bloc/cubit
-- Backend: Supabase (PostgreSQL)
-- Authentication: Supabase Auth
-- Routing: GoRouter
-- API: GraphQL
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/hazzemSaid/ViBi.git
+   cd ViBi
+   ```
 
-## Contributions
+2. **Install dependencies**:
+   ```bash
+   flutter pub get
+   ```
 
-### Note
+3. **Set up environment**:
+   Create a `.env` file in the root directory with your Supabase and Google OAuth credentials.
 
-While we do accept contributions, we prioritize high quality issues and pull requests. Adhering to the below guidelines will ensure a more timely review.
+4. **Run the app**:
+   ```bash
+   flutter run
+   ```
 
-### Rules
+## 🤝 Contributing
 
-- We may not respond to your issue or PR.
-- We may close an issue or PR without much feedback.
-- We may lock discussions or contributions if our attention is getting DDOSed.
-- We're not going to provide support for build issues.
+We welcome high-quality contributions! Please follow these steps:
 
-### Guidelines
+1. Check for [existing issues](https://github.com/hazzemSaid/ViBi/issues).
+2. Open a new issue to discuss major changes before submitting a PR.
+3. Follow the [Dart Style Guide](https://dart.dev/guides/language/effective-dart/style).
+4. Use conventional commits (e.g., `feat:`, `fix:`, `refactor:`).
 
-- Check for [existing issues](https://github.com/yourusername/vibi/issues) before filing a new one please.
-- Open an issue and give some time for discussion before submitting a PR.
-- Stay away from PRs like...
-  - Changing "Questions" to something else across the codebase.
-  - Refactoring the codebase, e.g., to replace Bloc/cubit with Provider.
-  - Adding entirely new features without prior discussion.
+*Note: Current contribution scope is primarily frontend-focused.*
 
-Remember, we serve a wide community of users. Our day-to-day involves us constantly asking "which top priority is our top priority." If you submit well-written PRs that solve problems concisely, that's an awesome contribution. Otherwise, as much as we'd love to accept your ideas and contributions, we really don't have the bandwidth. That's what forking is for.
+## 🛡 Security
 
-### Contribution Scope
+If you discover any security issues, please email us at **security@vibi-app.dev**.
 
-Public contributions are currently frontend-focused:
+## 📄 License
 
-- UI and UX improvements
-- Flutter feature and bug fixes in client code
-- Tests and documentation updates
+This project is licensed under the **MIT License** - see the [LICENSE](./LICENSE) file for details.
 
-Out of scope for public PRs (unless maintainers request it):
+---
 
-- Database schema and migration changes
-- Backend infrastructure and production credential updates
-- Security policy and production deployment configuration
-
-### Code Standards
-
-- Follow [Dart Style Guide](https://dart.dev/guides/language/effective-dart/style)
-- Use conventional commits: `feat:`, `fix:`, `docs:`, `test:`, `refactor:`
-- Null safety is required
-- Use Bloc/cubit for state management
-- Add tests for new features
-- Update docs for API changes
-
-## Forking Guidelines
-
-You have our blessing to fork this application. However, it's very important to be clear to users when you're giving them a fork.
-
-Please be sure to:
-
-- Change all branding in the repository and UI to clearly differentiate from ViBi.
-- Change any support links (feedback, email, terms of service, etc) to your own systems.
-- Replace any analytics or error-collection systems with your own so we don't get super confused.
-- Clearly communicate to users that it's a fork of ViBi.
-
-## Security Disclosures
-
-If you discover any security issues, please send an email to **security@vibi-app.dev**. The email is automatically CC'd to the entire team and we'll respond promptly.
-
-## Are You A Developer Interested In Building On Supabase And Flutter?
-
-ViBi is an open source social Q&A application built on Supabase and Flutter. With Supabase, you get a scalable PostgreSQL database, authentication, real-time capabilities, and more, empowering you to build amazing applications without being locked into proprietary platforms.
-
-## License (MIT)
-
-See [LICENSE](./LICENSE) for the full license.
-
-### P.S.
-
-We love you and all of the ways you support us. Thank you for making ViBi a great place!
+<p align="center">
+  Made with ❤️ by the ViBi Team
+</p>

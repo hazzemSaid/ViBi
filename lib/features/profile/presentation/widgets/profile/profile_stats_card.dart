@@ -56,6 +56,14 @@ class ProfileStatsCard extends StatelessWidget {
               context,
             ).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
           ),
+          StatItem(value: answersCount, label: 'Answers'),
+          Container(
+            width: 1,
+            height: 28,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
+          ),
           StatItem(
             value: followingCount,
             label: 'Following',
@@ -67,14 +75,6 @@ class ProfileStatsCard extends StatelessWidget {
               );
             },
           ),
-          Container(
-            width: 1,
-            height: 28,
-            color: Theme.of(
-              context,
-            ).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
-          ),
-          StatItem(value: answersCount, label: 'Answers'),
         ],
       ),
     );

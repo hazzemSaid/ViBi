@@ -10,9 +10,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
-import 'package:vibi/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
-import 'package:vibi/features/inbox/presentation/cubits/pending_questions_cubit.dart';
+import 'package:vibi/features/auth/presentation/cubit/auth_action_cubit.dart';
+import 'package:vibi/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:vibi/features/inbox/presentation/cubit/padding_question/pending_questions_cubit.dart';
 
 import 'core/routing/app_router.dart';
 import 'core/services/push_notification_service.dart';
@@ -36,10 +36,6 @@ void main() async {
   // Initialize Firebase — gracefully handles missing config (Appetizer / CI without secrets).
   await _initFirebase();
 
-  // Initialize Push Notifications
-  final pushNotificationService = PushNotificationService();
-  await pushNotificationService.initialize();
-
   // Initialize GraphQL client
   // This sets up the GraphQL endpoint with authentication
   await GraphQLConfig.initialize();
@@ -47,6 +43,9 @@ void main() async {
   // Initialize SharedPreferences
   final prefs = await SharedPreferences.getInstance();
   await setupServiceLocator(prefs);
+
+  // Initialize Push Notifications via Service Locator
+  await getIt<PushNotificationService>().initialize();
 
   // Enable verbose logging for debugging (remove in production)
   OneSignal.Debug.setLogLevel(OSLogLevel.verbose);
@@ -124,7 +123,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   late final AuthCubit _authCubit;
-  late final AuthController _authController;
+  late final AuthActionCubit _authActionCubit;
   late final PendingQuestionsCubit _pendingQuestionsCubit;
   late final ThemeCubit _themeCubit;
   late final AppRouterHolder _routerHolder;
@@ -134,7 +133,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _authCubit = getIt<AuthCubit>();
-    _authController = getIt<AuthController>();
+    _authActionCubit = getIt<AuthActionCubit>();
     _pendingQuestionsCubit = getIt<PendingQuestionsCubit>();
     _themeCubit = getIt<ThemeCubit>();
     _routerHolder = AppRouterHolder(createAppRouter(_authCubit));
@@ -152,7 +151,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _routerHolder.router.dispose();
     _authCubit.close();
-    _authController.close();
+    _authActionCubit.close();
     _pendingQuestionsCubit.close();
     _themeCubit.close();
     super.dispose();
@@ -163,7 +162,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AuthCubit>.value(value: _authCubit),
-        BlocProvider<AuthController>.value(value: _authController),
+        BlocProvider<AuthActionCubit>.value(value: _authActionCubit),
         BlocProvider<PendingQuestionsCubit>.value(
           value: _pendingQuestionsCubit,
         ),

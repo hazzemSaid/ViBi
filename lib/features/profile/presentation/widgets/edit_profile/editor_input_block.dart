@@ -48,9 +48,7 @@ class EditorInputBlock extends StatelessWidget {
             hintText: hintText,
             hintStyle: TextStyle(color: ProfileEditorPalette.placeholder),
             prefixText: prefixText,
-            prefixStyle: TextStyle(
-              color: ProfileEditorPalette.secondaryText,
-            ),
+            prefixStyle: TextStyle(color: ProfileEditorPalette.secondaryText),
             filled: true,
             fillColor: ProfileEditorPalette.fieldFill,
             contentPadding: const EdgeInsets.symmetric(
@@ -59,21 +57,15 @@ class EditorInputBlock extends StatelessWidget {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(
-                color: ProfileEditorPalette.outlineStrong,
-              ),
+              borderSide: BorderSide(color: ProfileEditorPalette.outlineStrong),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(
-                color: ProfileEditorPalette.outlineStrong,
-              ),
+              borderSide: BorderSide(color: ProfileEditorPalette.outlineStrong),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
-              borderSide: BorderSide(
-                color: ProfileEditorPalette.primaryText,
-              ),
+              borderSide: BorderSide(color: ProfileEditorPalette.primaryText),
             ),
           ),
         ),

@@ -65,4 +65,17 @@ class UserSearchResultModel extends UserSearchResult {
     if (fallback is int) return fallback;
     return 0;
   }
+
+  UserSearchResult toEntity() {
+    return UserSearchResult(
+      id: id,
+      name: name,
+      username: username,
+      bio: bio,
+      avatarUrls: avatarUrls,
+      followersCount: followersCount,
+      answersCount: answersCount,
+      isPrivate: isPrivate,
+    );
+  }
 }

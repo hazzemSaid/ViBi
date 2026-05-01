@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:vibi/features/profile/presentation/widgets/edit_profile/edit_profile_widgets.dart';
+import 'package:vibi/core/constants/app_constants.dart';
+import 'package:vibi/features/profile/presentation/widgets/edit_profile/profile_editor_palette.dart';
 
 class UnsavedChangesDialog extends StatelessWidget {
   const UnsavedChangesDialog({super.key});
@@ -17,7 +18,9 @@ class UnsavedChangesDialog extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           color: colorScheme.surface,
-          border: Border.all(color: colorScheme.outline.withValues(alpha: 0.45)),
+          border: Border.all(
+            color: colorScheme.outline.withValues(alpha: 0.45),
+          ),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -175,4 +178,3 @@ class UnsavedChangesDialog extends StatelessWidget {
     );
   }
 }
-

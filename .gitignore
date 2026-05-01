@@ -87,3 +87,8 @@ vibi_share_web
 .tracker/
 tracked.txt
 sentry.properties
+docs/profile_domain_data_documentation.md
+AGENTS.md
+.github/agents
+.github/prompts
+.opencode

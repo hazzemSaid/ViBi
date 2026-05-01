@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/features/recommendation/presentation/cubits/recommendation_flow_cubit.dart';
 import 'package:vibi/features/recommendation/presentation/cubits/recommendation_flow_state.dart';
-import 'package:vibi/features/recommendation/presentation/widgets/media_card.dart';
+import 'package:vibi/core/common/widgets/media_card.dart';
 import 'package:vibi/features/recommendation/presentation/widgets/trending_view.dart';
 class RecommendSearchScreen extends StatefulWidget {
   const RecommendSearchScreen({

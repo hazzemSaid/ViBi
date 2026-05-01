@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:vibi/features/home/presentation/widgets/suggested_card.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
+import 'suggested_card.dart';
 
 class SuggestedSection extends StatelessWidget {
   const SuggestedSection({super.key});
@@ -15,13 +16,13 @@ class SuggestedSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: AppSizes.p16,
           child: Text(
             'Suggested for you',
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
               fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontSize: AppSizes.s16,
             ),
           ),
         ),
@@ -29,7 +30,7 @@ class SuggestedSection extends StatelessWidget {
           height: listHeight,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            padding: AppSizes.h12,
             itemCount: _suggestions.length,
             itemBuilder: (context, index) {
               final s = _suggestions[index];
@@ -42,7 +43,7 @@ class SuggestedSection extends StatelessWidget {
             },
           ),
         ),
-        const SizedBox(height: 16),
+        AppSizes.gapH16,
       ],
     );
   }

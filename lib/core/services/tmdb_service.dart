@@ -1,4 +1,6 @@
+import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 
 class TmdbService {
@@ -17,46 +19,52 @@ class TmdbService {
               receiveTimeout: const Duration(seconds: 16),
             ),
           ),
-      _apiKey =
-          'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI3YmY2MmE3Yzc4YzkxNWQ4YTk3OTcxNDliZjdhMmNkZSIsIm5iZiI6MTc3NjUzMzkyMC4yMjg5OTk5LCJzdWIiOiI2OWUzYzFhMDM4NjBjMjkzODFmYjRiODEiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.5Q0NNfAonCkKyXGNP1KDEomIe3vZILoK2U82dNqn_Ns';
+      _apiKey = dotenv.env['TMDB_API_KEY']!;
 
-  Future<List<TmdbMedia>> search(String query) async {
-    final normalizedQuery = query.trim();
-    if (normalizedQuery.isEmpty) return const [];
+  Future<Either<Exception, List<TmdbMedia>>> search(String query) async {
+    try {
+      if (_apiKey.isEmpty) {
+        return left(Exception('TMDB_API_KEY is missing.'));
+      }
 
-    if (_apiKey.isEmpty) {
-      throw Exception('TMDB_API_KEY is missing.');
-    }
+      final normalizedQuery = query.trim();
+      if (normalizedQuery.isEmpty) return right(const []);
 
-    final response = await _dio.get(
-      '/search/multi',
-      queryParameters: {
-        'api_key': _apiKey,
-        'query': normalizedQuery,
-        'include_adult': false,
-        'page': 1,
-      },
-      options: Options(
-        headers: {
-          'Authorization': 'Bearer $_apiKey',
-          'Content-Type': 'application/json',
+      final response = await _dio.get(
+        '/search/multi',
+        queryParameters: {
+          'api_key': _apiKey,
+          'query': normalizedQuery,
+          'include_adult': false,
+          'page': 1,
         },
-      ),
-    );
-    print('TMDB search response: ${response.data}');
-    final data = response.data;
-    if (data is! Map<String, dynamic>) return const [];
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $_apiKey',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
 
-    final results = (data['results'] as List<dynamic>? ?? const <dynamic>[])
-        .whereType<Map<String, dynamic>>()
-        .map(TmdbMedia.fromJson)
-        .where(
-          (item) =>
-              (item.mediaType == 'movie' || item.mediaType == 'tv') &&
-              item.title.trim().isNotEmpty,
-        )
-        .toList(growable: false);
+      final data = response.data;
+      if (data is! Map<String, dynamic>) return right(const []);
 
-    return results;
+      final results =
+          (data['results'] as List<dynamic>? ?? const <dynamic>[])
+              .whereType<Map<String, dynamic>>()
+              .map(TmdbMedia.fromJson)
+              .where(
+                (item) =>
+                    (item.mediaType == 'movie' || item.mediaType == 'tv') &&
+                    item.title.trim().isNotEmpty,
+              )
+              .toList(growable: false);
+
+      return right(results);
+    } on DioException catch (e) {
+      return left(Exception('TMDB Network Error: ${e.message}'));
+    } catch (e) {
+      return left(Exception('TMDB Search Error: $e'));
+    }
   }
 }

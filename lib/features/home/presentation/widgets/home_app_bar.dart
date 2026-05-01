@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vibi/features/auth/presentation/controllers/auth_controller.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
+import 'package:vibi/features/auth/presentation/cubit/auth_action_cubit.dart';
 
 class HomeAppBar extends StatelessWidget {
   const HomeAppBar({super.key});
@@ -13,20 +14,13 @@ class HomeAppBar extends StatelessWidget {
       floating: true,
       title: Row(
         children: [
-          Text(
-            'ViBi',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 24,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          SizedBox(width: 16),
+          Image.asset('assets/images/logo1.png', height: AppSizes.s24),
+          AppSizes.gapW16,
           Text(
             'FEED',
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 12,
+              fontSize: AppSizes.s12,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
@@ -35,25 +29,21 @@ class HomeAppBar extends StatelessWidget {
       actions: [
         IconButton(
           icon: Icon(
-            Icons.notifications_none,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: Icon(
-            Icons.search,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: Icon(
             Icons.logout,
             color: Theme.of(context).colorScheme.error,
-            size: 20,
+            size: AppSizes.s20,
           ),
-          onPressed: () => context.read<AuthController>().signOut(),
+          onPressed: () => context.read<AuthActionCubit>().signOut(),
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.notifications_none,
+            color: Theme.of(context).colorScheme.onSurface,
+            size: AppSizes.s20,
+          ),
+          onPressed: () {
+            // TODO : implement notifications
+          },
         ),
       ],
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
-import 'package:vibi/features/recommendation/presentation/widgets/media_card.dart';
+import 'package:vibi/core/common/widgets/media_card.dart';
 
 import 'sender_row.dart';
 
@@ -31,10 +32,10 @@ class QuestionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(AppSizes.r16),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppSizes.r16),
         border: Border.all(
           color: Theme.of(
             context,
@@ -49,17 +50,17 @@ class QuestionCard extends StatelessWidget {
             displayName: displayName,
             displayAvatar: displayAvatar,
           ),
-          const SizedBox(height: 12),
+          AppSizes.gapH12,
           Text(
             _isRecommendation ? 'RECOMMENDATION' : 'Tell',
             style: TextStyle(
               color: Theme.of(context).colorScheme.secondary,
               fontWeight: FontWeight.w900,
-              fontSize: 10,
+              fontSize: AppSizes.s10,
               letterSpacing: 1.5,
             ),
           ),
-          const SizedBox(height: 8),
+          AppSizes.gapH8,
           if (_isRecommendation)
             MediaCard(media: mediaRec!, compact: true, showOverview: true)
           else

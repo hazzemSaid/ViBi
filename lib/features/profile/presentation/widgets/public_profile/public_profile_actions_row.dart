@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/profile/domain/entities/public_profile.dart';
 import 'package:vibi/features/profile/presentation/widgets/common/follow_button.dart';
-import 'package:vibi/features/questions/presentation/widgets/send_question_dialog.dart';
+import 'package:vibi/core/common/widgets/send_question_dialog.dart';
 
 class PublicProfileActionsRow extends StatelessWidget {
   final PublicProfile profile;

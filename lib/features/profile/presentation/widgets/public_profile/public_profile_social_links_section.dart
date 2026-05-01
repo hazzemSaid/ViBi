@@ -4,8 +4,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
-import 'package:vibi/features/profile/presentation/view/social_media_view/social_links_cubit.dart';
-import 'package:vibi/features/profile/presentation/view/social_media_view/social_media_cubit_state.dart';
+import 'package:vibi/features/profile/presentation/cubit/social_links_cubit.dart';
+import 'package:vibi/features/profile/presentation/cubit/social_media_state.dart';
 import 'package:vibi/features/profile/presentation/widgets/common/social_link_platform.dart';
 
 /// Read-only social links section for public profiles

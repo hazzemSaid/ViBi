@@ -1,10 +1,11 @@
 import 'package:dartz/dartz.dart';
-import 'package:vibi/features/profile/data/sources/graphql_social_links_datasource.dart';
+import 'package:vibi/features/profile/data/datasources/social_links_datasource.dart';
+import 'package:vibi/features/profile/data/models/social_link_dtos.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
 import 'package:vibi/features/profile/domain/repositories/social_links_repository.dart';
 
 class SocialLinksRepositoryImpl implements SocialLinksRepository {
-  final GraphQLSocialLinksDataSource _dataSource;
+  final SocialLinksDataSource _dataSource;
 
   SocialLinksRepositoryImpl(this._dataSource);
 
@@ -23,12 +24,14 @@ class SocialLinksRepositoryImpl implements SocialLinksRepository {
     required int displayOrder,
   }) {
     return _dataSource.addSocialLink(
-      userId: userId,
-      platform: platform,
-      url: url,
-      title: title,
-      displayLabel: displayLabel,
-      displayOrder: displayOrder,
+      AddSocialLinkDto(
+        userId: userId,
+        platform: platform,
+        url: url,
+        title: title,
+        displayLabel: displayLabel,
+        displayOrder: displayOrder,
+      ),
     );
   }
 
@@ -43,13 +46,15 @@ class SocialLinksRepositoryImpl implements SocialLinksRepository {
     required bool isActive,
   }) {
     return _dataSource.updateSocialLink(
-      linkId: linkId,
-      platform: platform,
-      url: url,
-      title: title,
-      displayLabel: displayLabel,
-      displayOrder: displayOrder,
-      isActive: isActive,
+      UpdateSocialLinkDto(
+        linkId: linkId,
+        platform: platform,
+        url: url,
+        title: title,
+        displayLabel: displayLabel,
+        displayOrder: displayOrder,
+        isActive: isActive,
+      ),
     );
   }
 

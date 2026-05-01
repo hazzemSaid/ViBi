@@ -40,7 +40,9 @@ class EditorLinkTile extends StatelessWidget {
             border: Border.all(color: ProfileEditorPalette.outline),
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.07),
+                color: Theme.of(
+                  context,
+                ).colorScheme.scrim.withValues(alpha: 0.07),
                 blurRadius: 3,
                 offset: Offset(0, 1),
               ),
@@ -105,4 +107,3 @@ class EditorLinkTile extends StatelessWidget {
     );
   }
 }
-

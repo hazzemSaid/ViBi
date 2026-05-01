@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:vibi/features/home/presentation/widgets/story_card.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
+import 'story_card.dart';
 
 class StoriesSection extends StatelessWidget {
   const StoriesSection({super.key});
@@ -42,7 +43,7 @@ class StoriesSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          padding: AppSizes.h16,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -51,28 +52,28 @@ class StoriesSection extends StatelessWidget {
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16,
+                  fontSize: AppSizes.s16,
                 ),
               ),
-              SizedBox(height: 4),
+              AppSizes.gapH4,
               Text(
                 'Tap a card to view. They auto-cycle as you scroll.',
                 style: TextStyle(
                   color: Theme.of(
                     context,
                   ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
-                  fontSize: 12,
+                  fontSize: AppSizes.s12,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        AppSizes.gapH16,
         SizedBox(
           height: listHeight,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            padding: AppSizes.h12,
             itemCount: _stories.length,
             itemBuilder: (context, index) {
               final s = _stories[index];
@@ -92,7 +93,7 @@ class StoriesSection extends StatelessWidget {
             },
           ),
         ),
-        const SizedBox(height: 16),
+        AppSizes.gapH16,
       ],
     );
   }

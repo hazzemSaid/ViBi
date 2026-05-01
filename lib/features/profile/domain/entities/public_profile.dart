@@ -1,4 +1,6 @@
-class PublicProfile {
+import 'package:equatable/equatable.dart';
+
+class PublicProfile extends Equatable {
   final String id;
   final String? name;
   final String? username;
@@ -21,9 +23,8 @@ class PublicProfile {
   final String? statusText;
   final String publicFontFamily;
   final bool isVerified;
-  final String? backgroundcolor;
 
-  PublicProfile({
+  const PublicProfile({
     required this.id,
     this.name,
     this.username,
@@ -46,7 +47,6 @@ class PublicProfile {
     this.statusText,
     this.publicFontFamily = 'inter',
     this.isVerified = false,
-    this.backgroundcolor,
   });
 
   PublicProfile copyWith({
@@ -95,7 +95,32 @@ class PublicProfile {
       statusText: statusText ?? this.statusText,
       publicFontFamily: publicFontFamily ?? this.publicFontFamily,
       isVerified: isVerified ?? this.isVerified,
-      backgroundcolor: backgroundcolor ?? this.backgroundcolor,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        id,
+        name,
+        username,
+        bio,
+        avatarUrls,
+        followersCount,
+        followingCount,
+        answersCount,
+        isPrivate,
+        isFollowing,
+        hasRequestedFollow,
+        canViewContent,
+        allowAnonymousQuestions,
+        publicProfileEnabled,
+        publicCtaText,
+        updatedAt,
+        favColor,
+        questionPlaceholder,
+        showSocialIcons,
+        statusText,
+        publicFontFamily,
+        isVerified,
+      ];
 }

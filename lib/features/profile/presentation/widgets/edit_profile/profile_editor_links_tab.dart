@@ -3,10 +3,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
-import 'package:vibi/features/profile/presentation/view/social_media_view/social_links_cubit.dart';
-import 'package:vibi/features/profile/presentation/view/social_media_view/social_media_cubit_state.dart';
+import 'package:vibi/features/profile/presentation/cubit/social_links_cubit.dart';
+import 'package:vibi/features/profile/presentation/cubit/social_media_state.dart';
 import 'package:vibi/features/profile/presentation/widgets/common/social_link_platform.dart';
-import 'package:vibi/features/profile/presentation/widgets/edit_profile/edit_profile_widgets.dart';
+import 'package:vibi/features/profile/presentation/widgets/edit_profile/editor_avatar_picker.dart';
+import 'package:vibi/features/profile/presentation/widgets/edit_profile/editor_empty_panel.dart';
+import 'package:vibi/features/profile/presentation/widgets/edit_profile/editor_input_block.dart';
+import 'package:vibi/features/profile/presentation/widgets/edit_profile/editor_platform_chip.dart';
+import 'package:vibi/features/profile/presentation/widgets/edit_profile/editor_section_card.dart';
+import 'package:vibi/features/profile/presentation/widgets/edit_profile/editor_switch_row.dart';
+import 'package:vibi/features/profile/presentation/widgets/edit_profile/profile_editor_palette.dart';
 
 class ProfileEditorLinksTab extends StatefulWidget {
   const ProfileEditorLinksTab({
@@ -307,146 +313,155 @@ class _ProfileEditorLinksTabState extends State<ProfileEditorLinksTab> {
         const SizedBox(height: 16),
         EditorSectionCard(
           title: 'Social Media',
-          child: BlocBuilder<SocialLinksCubit, SocialLinksState>(
-            bloc: widget.socialLinksCubit,
-            builder: (context, state) {
-              final allLinks = switch (state) {
-                SocialLinksLoaded loaded => loaded.links,
-                SocialLinksLoading loading => loading.previousLinks,
-                SocialLinksFailure failure => failure.previousLinks,
-                _ => const <SocialLink>[],
-              };
-              final socialLinks = widget.socialAccountLinksFor(allLinks);
-              _pruneControllers(socialLinks);
+          child: widget.socialLinksCubit == null
+              ? const EditorEmptyPanel(
+                  title: 'Social links unavailable',
+                  subtitle: 'Reload this page to manage social accounts.',
+                )
+              : BlocBuilder<SocialLinksCubit, SocialLinksState>(
+                  bloc: widget.socialLinksCubit,
+                  builder: (context, state) {
+                    final allLinks = switch (state) {
+                      SocialLinksLoaded loaded => loaded.links,
+                      SocialLinksLoading loading => loading.previousLinks,
+                      SocialLinksFailure failure => failure.previousLinks,
+                      _ => const <SocialLink>[],
+                    };
+                    final socialLinks = widget.socialAccountLinksFor(allLinks);
+                    _pruneControllers(socialLinks);
 
-              final linkedPlatforms = socialLinks
-                  .map((link) => link.platform)
-                  .toSet();
-              final availablePlatforms = kDatabaseSocialPlatforms
-                  .where(
-                    (platform) =>
-                        platform != 'custom' &&
-                        platform != 'website' &&
-                        !linkedPlatforms.contains(platform),
-                  )
-                  .toList();
+                    final linkedPlatforms = socialLinks
+                        .map((link) => link.platform)
+                        .toSet();
+                    final availablePlatforms = kDatabaseSocialPlatforms
+                        .where(
+                          (platform) =>
+                              platform != 'custom' &&
+                              platform != 'website' &&
+                              !linkedPlatforms.contains(platform),
+                        )
+                        .toList();
 
-              return ExpansionTile(
-                initiallyExpanded: _isSocialAccordionOpen,
-                onExpansionChanged: (isOpen) {
-                  setState(() => _isSocialAccordionOpen = isOpen);
-                },
-                tilePadding: EdgeInsets.zero,
-                childrenPadding: const EdgeInsets.only(top: 8),
-                title: Text(
-                  'Manage Social Media',
-                  style: TextStyle(
-                    color: ProfileEditorPalette.primaryText,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                subtitle: Text(
-                  'Add your social accounts using username only.',
-                  style: TextStyle(
-                    color: ProfileEditorPalette.mutedText,
-                    fontSize: 12,
-                  ),
-                ),
-                children: [
-                  Text(
-                    'Add your social accounts. They will appear as icons on your public page.',
-                    style: TextStyle(
-                      color: ProfileEditorPalette.mutedText,
-                      fontSize: 12,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  if (socialLinks.isEmpty)
-                    if (_pendingPlatform == null)
-                      const EditorEmptyPanel(
-                        title: 'No social accounts yet',
-                        subtitle:
-                            'Tap a platform below and add only your username.',
+                    return ExpansionTile(
+                      initiallyExpanded: _isSocialAccordionOpen,
+                      onExpansionChanged: (isOpen) {
+                        setState(() => _isSocialAccordionOpen = isOpen);
+                      },
+                      tilePadding: EdgeInsets.zero,
+                      childrenPadding: const EdgeInsets.only(top: 8),
+                      title: Text(
+                        'Manage Social Media',
+                        style: TextStyle(
+                          color: ProfileEditorPalette.primaryText,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                  if (socialLinks.isNotEmpty)
-                    Column(
+                      subtitle: Text(
+                        'Add your social accounts using username only.',
+                        style: TextStyle(
+                          color: ProfileEditorPalette.mutedText,
+                          fontSize: 12,
+                        ),
+                      ),
                       children: [
-                        for (final link in socialLinks) ...[
-                          _InlineSocialLinkRow(
-                            platform: link.platform,
-                            platformLabel: socialPlatformLabel(link.platform),
-                            controller: _controllerForLink(link),
-                            isSaving: _savingLinkIds.contains(link.id),
-                            onSave: () => _saveExistingLink(link),
-                            onDelete: () => widget.onDeleteLink(link),
-                            onToggle: (value) =>
-                                widget.onToggleLink(link, value),
-                            isActive: link.isActive,
+                        Text(
+                          'Add your social accounts. They will appear as icons on your public page.',
+                          style: TextStyle(
+                            color: ProfileEditorPalette.mutedText,
+                            fontSize: 12,
+                            height: 1.5,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        if (socialLinks.isEmpty)
+                          if (_pendingPlatform == null)
+                            const EditorEmptyPanel(
+                              title: 'No social accounts yet',
+                              subtitle:
+                                  'Tap a platform below and add only your username.',
+                            ),
+                        if (socialLinks.isNotEmpty)
+                          Column(
+                            children: [
+                              for (final link in socialLinks) ...[
+                                _InlineSocialLinkRow(
+                                  platform: link.platform,
+                                  platformLabel: socialPlatformLabel(
+                                    link.platform,
+                                  ),
+                                  controller: _controllerForLink(link),
+                                  isSaving: _savingLinkIds.contains(link.id),
+                                  onSave: () => _saveExistingLink(link),
+                                  onDelete: () => widget.onDeleteLink(link),
+                                  onToggle: (value) =>
+                                      widget.onToggleLink(link, value),
+                                  isActive: link.isActive,
+                                ),
+                                const SizedBox(height: 10),
+                              ],
+                            ],
+                          ),
+                        if (_pendingPlatform != null) ...[
+                          _InlinePendingSocialLinkRow(
+                            platform: _pendingPlatform!,
+                            platformLabel: socialPlatformLabel(
+                              _pendingPlatform!,
+                            ),
+                            controller: _pendingUsernameController,
+                            isSaving: _isPendingSaveInProgress,
+                            onCancel: _isPendingSaveInProgress
+                                ? null
+                                : () {
+                                    setState(() {
+                                      _pendingPlatform = null;
+                                      _pendingUsernameController.clear();
+                                    });
+                                  },
+                            onSave: _savePendingLink,
                           ),
                           const SizedBox(height: 10),
                         ],
-                      ],
-                    ),
-                  if (_pendingPlatform != null) ...[
-                    _InlinePendingSocialLinkRow(
-                      platform: _pendingPlatform!,
-                      platformLabel: socialPlatformLabel(_pendingPlatform!),
-                      controller: _pendingUsernameController,
-                      isSaving: _isPendingSaveInProgress,
-                      onCancel: _isPendingSaveInProgress
-                          ? null
-                          : () {
-                              setState(() {
-                                _pendingPlatform = null;
-                                _pendingUsernameController.clear();
-                              });
-                            },
-                      onSave: _savePendingLink,
-                    ),
-                    const SizedBox(height: 10),
-                  ],
-                  const SizedBox(height: 12),
-                  Text(
-                    'Add platform',
-                    style: TextStyle(
-                      color: ProfileEditorPalette.mutedText,
-                      fontSize: 11,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final platform in availablePlatforms)
-                        EditorPlatformChip(
-                          platform: platform,
-                          label: socialPlatformLabel(platform),
-                          onTap: () {
-                            setState(() {
-                              _pendingPlatform = platform;
-                              _pendingUsernameController.clear();
-                            });
-                          },
+                        const SizedBox(height: 12),
+                        Text(
+                          'Add platform',
+                          style: TextStyle(
+                            color: ProfileEditorPalette.mutedText,
+                            fontSize: 11,
+                          ),
                         ),
-                    ],
-                  ),
-                  if (availablePlatforms.isEmpty) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      'All supported social platforms are already connected.',
-                      style: TextStyle(
-                        color: ProfileEditorPalette.mutedText,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ],
-              );
-            },
-          ),
+                        const SizedBox(height: 8),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (final platform in availablePlatforms)
+                              EditorPlatformChip(
+                                platform: platform,
+                                label: socialPlatformLabel(platform),
+                                onTap: () {
+                                  setState(() {
+                                    _pendingPlatform = platform;
+                                    _pendingUsernameController.clear();
+                                  });
+                                },
+                              ),
+                          ],
+                        ),
+                        if (availablePlatforms.isEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            'All supported social platforms are already connected.',
+                            style: TextStyle(
+                              color: ProfileEditorPalette.mutedText,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ],
+                    );
+                  },
+                ),
         ),
         const SizedBox(height: 16),
         EditorSectionCard(

@@ -1,4 +1,6 @@
-class SocialLink {
+import 'package:equatable/equatable.dart';
+
+class SocialLink extends Equatable {
   final String id;
   final String platform;
   final String url;
@@ -28,4 +30,7 @@ class SocialLink {
       isActive: map['is_active'] as bool? ?? true,
     );
   }
+
+  @override
+  List<Object?> get props => [id, platform, url, title, displayLabel, displayOrder, isActive];
 }

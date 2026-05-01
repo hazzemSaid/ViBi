@@ -1,6 +1,12 @@
 import 'package:vibi/features/inbox/domain/entities/inbox_question.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 
+/**
+ * Data model for an inbox question, extending the domain [InboxQuestion] entity.
+ *
+ * This class provides serialization logic for converting GraphQL/Database maps
+ * into strongly-typed objects.
+ */
 class InboxQuestionModel extends InboxQuestion {
   InboxQuestionModel({
     required super.id,
@@ -17,6 +23,14 @@ class InboxQuestionModel extends InboxQuestion {
     required super.createdAt,
   });
 
+  /**
+   * Creates an [InboxQuestionModel] from a JSON-like [map].
+   *
+   * This method handles nesting logic for sender profiles and media recommendations,
+   * providing default values where necessary.
+   *
+   * Returns a populated [InboxQuestionModel].
+   */
   factory InboxQuestionModel.fromMap(Map<String, dynamic> map) {
     // Extract sender details from nested profile data if available
     final senderData = map['sender'] as Map<String, dynamic>?;
@@ -92,6 +106,11 @@ class InboxQuestionModel extends InboxQuestion {
     return null;
   }
 
+  /**
+   * Converts the [InboxQuestionModel] instance back into a JSON-like [Map].
+   *
+   * This is useful for caching or sending data back to a local database.
+   */
   Map<String, dynamic> toMap() {
     return {
       'id': id,

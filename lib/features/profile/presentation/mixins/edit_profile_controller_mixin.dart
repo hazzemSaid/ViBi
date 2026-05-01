@@ -4,16 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:vibi/core/constants/app_constants.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
+import 'package:vibi/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
 import 'package:vibi/features/profile/domain/entities/user_profile.dart';
-import 'package:vibi/features/profile/presentation/screens/edit_profile_public_web_screen.dart';
-import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
-import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit_state.dart';
-import 'package:vibi/features/profile/presentation/view/social_media_view/social_links_cubit.dart';
+import 'package:vibi/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:vibi/features/profile/presentation/cubit/profile_state.dart';
+import 'package:vibi/features/profile/presentation/cubit/social_links_cubit.dart';
+import 'package:vibi/features/profile/presentation/pages/edit_profile_public_web_screen.dart';
 import 'package:vibi/features/profile/presentation/widgets/common/social_link_platform.dart';
-import 'package:vibi/features/profile/presentation/widgets/edit_profile/edit_profile_widgets.dart';
+import 'package:vibi/features/profile/presentation/widgets/edit_profile/profile_editor_palette.dart';
 
 mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
   final formKey = GlobalKey<FormState>();
@@ -34,7 +35,7 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
   bool publicProfileEnabled = true;
   bool allowAnonymousQuestions = true;
   bool showSocialIcons = true;
-  String backgroundColor = ProfileConstants.backgroundColorOptions.first;
+  // String backgroundColor = ProfileConstants.backgroundColorOptions.first;
   String favColor = ProfileConstants.favColorOptions.first;
   String publicFontFamily = 'inter';
   int? avatarLoadingSlot;
@@ -90,9 +91,9 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
         showSocialIcons = profile?.showSocialIcons ?? true;
         allowAnonymousQuestions = profile?.allowAnonymousQuestions ?? true;
         publicProfileEnabled = profile?.publicProfileEnabled ?? true;
-        backgroundColor = profile?.backgroundcolor?.isNotEmpty == true
-            ? profile!.backgroundcolor!
-            : ProfileConstants.backgroundColorOptions.first;
+        // backgroundColor = profile?.backgroundcolor?.isNotEmpty == true
+        //     ? profile!.backgroundcolor!
+        //     : ProfileConstants.backgroundColorOptions.first;
 
         publicFontFamily = ProfileConstants.normalizeFontFamily(
           profile?.publicFontFamily,
@@ -185,12 +186,14 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
       for (var slot = 0; slot < 3; slot++) {
         final pendingFile = avatarFiles[slot];
         if (pendingFile != null) {
-          final uploadedUrl = await profileCubit.uploadPublicProfileImage(
+          final uploadedResult = await profileCubit.uploadPublicProfileImage(
             userId!,
             pendingFile,
             slot + 1,
           );
-          mergedAvatarUrls[slot] = uploadedUrl;
+          uploadedResult.fold((error) => throw Exception(error), (uploadedUrl) {
+            mergedAvatarUrls[slot] = uploadedUrl;
+          });
         }
       }
 
@@ -207,7 +210,6 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
         avatarUrls: compactAvatarUrls,
         allowAnonymousQuestions: allowAnonymousQuestions,
         publicProfileEnabled: publicProfileEnabled,
-        backgroundcolor: backgroundColor,
         publicCtaText: _trimToNull(ctaController.text),
         favColor: favColor,
         questionPlaceholder: _trimToNull(questionPlaceholderController.text),
@@ -320,7 +322,6 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
         ProfileConstants.normalizeFontFamily(profile.publicFontFamily)) {
       return true;
     }
-    if (backgroundColor != profile.backgroundcolor) return true;
     if (favColor != savedFavColor) return true;
 
     return false;
@@ -496,12 +497,16 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
 
   String? fontFamilyFor(String key) {
     switch (key) {
+      case 'google_sans':
+        return 'GoogleSans';
+      case 'inter':
+        return 'Inter';
       case 'serif':
         return 'serif';
       case 'mono':
         return 'monospace';
       default:
-        return null;
+        return 'Inter';
     }
   }
 
@@ -525,4 +530,3 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
     );
   }
 }
-

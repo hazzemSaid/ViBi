@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/core/state/view_state.dart';
-import 'package:vibi/features/profile/domain/entities/answered_question.dart';
-import 'package:vibi/features/profile/presentation/view/profile_view/profile_cubit.dart';
-import 'package:vibi/features/profile/presentation/widgets/answers/profile_answer_card.dart';
+import 'package:vibi/features/profile/presentation/cubit/answer_cubit.dart';
+import 'package:vibi/features/profile/presentation/cubit/answer_state.dart';
+import 'package:vibi/features/answer/presentation/widgets/profile_answer_card/profile_answer_card.dart';
 
 class PublicProfileAnswersSection extends StatelessWidget {
-  final ViewState<List<AnsweredQuestion>> answersAsync;
+  final UserAnswersState answersState;
   final bool compactActions;
 
   const PublicProfileAnswersSection({
     super.key,
-    required this.answersAsync,
+    required this.answersState,
     this.compactActions = false,
   });
 
@@ -35,10 +34,10 @@ class PublicProfileAnswersSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSizes.s16),
-        if (answersAsync.status == ViewStatus.success) ...[
+        if (answersState is UserAnswersLoaded) ...[
           Builder(
             builder: (context) {
-              final answers = answersAsync.data ?? [];
+              final answers = (answersState as UserAnswersLoaded).answers;
               if (answers.isEmpty) {
                 return Container(
                   width: double.infinity,
@@ -90,14 +89,14 @@ class PublicProfileAnswersSection extends StatelessWidget {
               );
             },
           ),
-        ] else if (answersAsync.status == ViewStatus.loading)
+        ] else if (answersState is UserAnswersLoading)
           const Center(
             child: Padding(
               padding: EdgeInsets.all(AppSizes.s24),
               child: CircularProgressIndicator(strokeWidth: 2),
             ),
           )
-        else
+        else if (answersState is UserAnswersFailure)
           Container(
             padding: EdgeInsets.all(AppSizes.s16),
             decoration: BoxDecoration(
@@ -107,7 +106,7 @@ class PublicProfileAnswersSection extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppSizes.r12),
             ),
             child: Text(
-              'Failed to load answers: ${answersAsync.errorMessage}',
+              'Failed to load answers: ${(answersState as UserAnswersFailure).message}',
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),

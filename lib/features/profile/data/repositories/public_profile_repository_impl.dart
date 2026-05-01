@@ -1,23 +1,24 @@
-import 'package:vibi/features/profile/data/sources/graphql_profile_datasource.dart';
+import 'package:dartz/dartz.dart';
+import 'package:vibi/features/profile/data/datasources/profile_datasource.dart';
 import 'package:vibi/features/profile/domain/entities/answered_question.dart';
 import 'package:vibi/features/profile/domain/entities/public_profile.dart';
 import 'package:vibi/features/profile/domain/repositories/public_profile_repository.dart';
 
 class PublicProfileRepositoryImpl implements PublicProfileRepository {
-  final GraphQLProfileDataSource _dataSource;
+  final ProfileDataSource _dataSource;
 
   PublicProfileRepositoryImpl(this._dataSource);
 
   @override
-  Future<PublicProfile?> getPublicProfile(
+  Future<Either<String, PublicProfile>> getPublicProfile(
     String userId,
     String? currentUserId,
-  ) async {
-    return await _dataSource.getPublicProfile(userId, currentUserId);
+  ) {
+    return (_dataSource.getPublicProfile(userId, currentUserId));
   }
 
   @override
-  Future<PublicProfile?> getPublicProfileByUsername(
+  Future<Either<String, PublicProfile>> getPublicProfileByUsername(
     String username,
     String? currentUserId,
   ) async {
@@ -28,7 +29,10 @@ class PublicProfileRepositoryImpl implements PublicProfileRepository {
   }
 
   @override
-  Future<List<AnsweredQuestion>> getUserAnswers(String userId) async {
-    return await _dataSource.getUserAnswers(userId);
+  Future<Either<String, List<AnsweredQuestion>>> getUserAnswers(
+    String userId,
+  ) async {
+    final result = await _dataSource.getUserAnswers(userId);
+    return result.map((answers) => answers.cast<AnsweredQuestion>());
   }
 }

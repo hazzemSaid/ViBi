@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:vibi/features/profile/presentation/widgets/edit_profile/profile_editor_palette.dart';
 
@@ -144,10 +145,14 @@ class _EditorAvatarSlot extends StatelessWidget {
               decoration: BoxDecoration(
                 color: ProfileEditorPalette.accent,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Theme.of(context).colorScheme.onSurface),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.1),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.scrim.withValues(alpha: 0.1),
                     blurRadius: 3,
                     offset: Offset(0, 1),
                   ),
@@ -177,11 +182,15 @@ class _EditorAvatarSlot extends StatelessWidget {
                   color: Theme.of(context).colorScheme.onSurface,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.45),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.45),
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).colorScheme.scrim.withValues(alpha: 0.1),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.scrim.withValues(alpha: 0.1),
                       blurRadius: 3,
                       offset: Offset(0, 1),
                     ),
@@ -199,4 +208,3 @@ class _EditorAvatarSlot extends StatelessWidget {
     );
   }
 }
-

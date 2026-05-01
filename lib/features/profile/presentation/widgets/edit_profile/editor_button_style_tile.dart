@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vibi/features/profile/presentation/widgets/edit_profile/edit_profile_widgets.dart';
+import 'package:vibi/features/profile/presentation/widgets/edit_profile/profile_editor_palette.dart';
 
 class EditorButtonStyleTile extends StatelessWidget {
   const EditorButtonStyleTile({
@@ -76,4 +76,3 @@ class EditorButtonStyleTile extends StatelessWidget {
     );
   }
 }
-

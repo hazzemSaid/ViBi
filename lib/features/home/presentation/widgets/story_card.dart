@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
 
 const customCacheKey = 'myCustomCacheKey';
 
@@ -51,15 +52,18 @@ class StoryCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: cardWidth,
-        margin: const EdgeInsets.symmetric(horizontal: 4.0),
+        margin: AppSizes.h4,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppSizes.r16),
           border: hasBorder || isAdd
-              ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2.5)
+              ? Border.all(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 2.5,
+                )
               : null,
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppSizes.r14),
           child: Stack(
             fit: StackFit.expand,
             children: [
@@ -76,7 +80,12 @@ class StoryCard extends StatelessWidget {
                     Container(color: Theme.of(context).colorScheme.surface),
                 errorWidget: (context, url, error) => Container(
                   color: Theme.of(context).colorScheme.surface,
-                  child: Icon(Icons.error, color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.35)),
+                  child: Icon(
+                    Icons.error,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.35),
+                  ),
                 ),
               ),
               Container(
@@ -84,7 +93,9 @@ class StoryCard extends StatelessWidget {
                   gradient: LinearGradient(
                     colors: [
                       Colors.transparent,
-                      Theme.of(context).colorScheme.scrim.withValues(alpha: 0.8),
+                      Theme.of(
+                        context,
+                      ).colorScheme.scrim.withValues(alpha: 0.8),
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -93,31 +104,31 @@ class StoryCard extends StatelessWidget {
                 ),
               ),
               Positioned(
-                top: 8,
-                left: 8,
+                top: AppSizes.s8,
+                left: AppSizes.s8,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+                  padding: AppSizes.h8.copyWith(
+                    top: AppSizes.s4,
+                    bottom: AppSizes.s4,
                   ),
                   decoration: BoxDecoration(
                     color: badgeColor,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppSizes.r12),
                   ),
                   child: Text(
                     badgeText,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSurface,
-                      fontSize: 10,
+                      fontSize: AppSizes.s10,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
               ),
               Positioned(
-                bottom: 12,
-                left: 12,
-                right: 12,
+                bottom: AppSizes.s12,
+                left: AppSizes.s12,
+                right: AppSizes.s12,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -126,17 +137,17 @@ class StoryCard extends StatelessWidget {
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontSize: AppSizes.s14,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-SizedBox(height: 4),
+                    AppSizes.gapH4,
                     Text(
                       subtitle,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontSize: 11,
+                        fontSize: AppSizes.s10, // Adjusted to s10 from 11
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -151,5 +162,3 @@ SizedBox(height: 4),
     );
   }
 }
-
-

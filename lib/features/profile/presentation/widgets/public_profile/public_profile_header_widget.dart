@@ -46,7 +46,7 @@ class PublicProfileHeaderWidget extends StatelessWidget {
               ),
             ),
             if (profile.isPrivate) ...[
-SizedBox(width: AppSizes.s8),
+              SizedBox(width: AppSizes.s8),
               Icon(
                 Icons.lock_outline,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -62,7 +62,9 @@ SizedBox(width: AppSizes.s8),
             vertical: AppSizes.s4,
           ),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
@@ -104,15 +106,14 @@ SizedBox(width: AppSizes.s8),
 
   String? _fontFamilyFor(String key) {
     switch (key) {
+      case 'google_sans':
+        return 'GoogleSans';
       case 'serif':
         return 'serif';
       case 'mono':
         return 'monospace';
       default:
-        return null;
+        return 'Inter'; // Default to a specific font for consistency
     }
   }
 }
-
-
-

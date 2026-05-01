@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:vibi/features/home/data/models/feed_item_model.dart';
+import 'package:vibi/features/feed/data/models/feed_item_model.dart';
 
 void main() {
   group('FeedItemModel', () {

@@ -6,15 +6,15 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:vibi/core/constants/app_constants.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
+import 'package:vibi/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
 import 'package:vibi/features/profile/domain/entities/user_profile.dart';
-import 'package:vibi/features/profile/presentation/view/screens/edit_profile_public_web_screen.dart';
-import 'package:vibi/features/profile/presentation/view/widgets/common/social_link_platform.dart';
-import 'package:vibi/features/profile/presentation/view/widgets/edit_profile/profile_editor_palette.dart';
-import 'package:vibi/features/profile/presentation/viewmodel/profile_cubit/profile_cubit.dart';
-import 'package:vibi/features/profile/presentation/viewmodel/profile_cubit/profile_cubit_state.dart';
-import 'package:vibi/features/profile/presentation/viewmodel/social_media_cubit/social_links_cubit.dart';
+import 'package:vibi/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:vibi/features/profile/presentation/cubit/profile_state.dart';
+import 'package:vibi/features/profile/presentation/cubit/social_links_cubit.dart';
+import 'package:vibi/features/profile/presentation/pages/edit_profile_public_web_screen.dart';
+import 'package:vibi/features/profile/presentation/widgets/common/social_link_platform.dart';
+import 'package:vibi/features/profile/presentation/widgets/edit_profile/profile_editor_palette.dart';
 
 mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
   final formKey = GlobalKey<FormState>();
@@ -186,12 +186,14 @@ mixin EditProfileControllerMixin on State<EditProfilePublicWebScreen> {
       for (var slot = 0; slot < 3; slot++) {
         final pendingFile = avatarFiles[slot];
         if (pendingFile != null) {
-          final uploadedUrl = await profileCubit.uploadPublicProfileImage(
+          final uploadedResult = await profileCubit.uploadPublicProfileImage(
             userId!,
             pendingFile,
             slot + 1,
           );
-          mergedAvatarUrls[slot] = uploadedUrl;
+          uploadedResult.fold((error) => throw Exception(error), (uploadedUrl) {
+            mergedAvatarUrls[slot] = uploadedUrl;
+          });
         }
       }
 

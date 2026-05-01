@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:vibi/features/profile/domain/entities/user_profile.dart';
 import 'package:vibi/features/profile/domain/repositories/profile_repository.dart';
 
@@ -15,7 +16,7 @@ class FetchUserProfileUseCase {
   /// [uid] is the unique user ID to fetch the profile for.
   ///
   /// Returns the [UserProfile] if found, or `null` if not found.
-  Future<UserProfile?> call(String uid) {
+  Future<Either<String, UserProfile>> call(String uid) {
     return _repository.fetchProfile(uid);
   }
 }

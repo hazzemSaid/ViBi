@@ -1,5 +1,6 @@
 import 'package:vibi/features/profile/domain/entities/user_profile.dart';
 import 'package:vibi/features/profile/domain/repositories/profile_repository.dart';
+import 'package:dartz/dartz.dart';
 
 /// Use case for updating a user's profile information.
 ///
@@ -14,7 +15,7 @@ class UpdateUserProfileUseCase {
   /// [profile] is the updated [UserProfile] object containing the new data.
   ///
   /// Throws an exception if the update operation fails.
-  Future<void> call(UserProfile profile) {
+  Future<Either<String, void>> call(UserProfile profile) {
     return _repository.updateProfile(profile);
   }
 }

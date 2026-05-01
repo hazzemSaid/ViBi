@@ -1,4 +1,6 @@
-class AnsweredQuestion {
+import 'package:equatable/equatable.dart';
+
+class AnsweredQuestion extends Equatable {
   final String id;
   final String userId;
   final String questionText;
@@ -70,4 +72,8 @@ class AnsweredQuestion {
 
   @override
   int get hashCode => id.hashCode;
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => [id];
 }

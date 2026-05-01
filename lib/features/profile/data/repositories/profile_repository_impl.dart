@@ -1,23 +1,24 @@
 import 'dart:io';
 
+import 'package:dartz/dartz.dart';
+import 'package:vibi/features/profile/data/datasources/profile_datasource.dart';
 import 'package:vibi/features/profile/data/models/user_profile_model.dart';
-import 'package:vibi/features/profile/data/sources/graphql_profile_datasource.dart';
 import 'package:vibi/features/profile/domain/entities/user_profile.dart';
 import 'package:vibi/features/profile/domain/repositories/profile_repository.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
-  final GraphQLProfileDataSource _dataSource;
+  final ProfileDataSource _dataSource;
 
   ProfileRepositoryImpl(this._dataSource);
 
   @override
-  Future<UserProfile?> fetchProfile(String uid) async {
+  Future<Either<String, UserProfile>> fetchProfile(String uid) async {
     final result = await _dataSource.fetchProfile(uid);
-    return result.fold((_) => null, (profile) => profile);
+    return result;
   }
 
   @override
-  Future<void> updateProfile(UserProfile profile) async {
+  Future<Either<String, void>> updateProfile(UserProfile profile) async {
     final model = UserProfileModel(
       uid: profile.uid,
       name: profile.name,
@@ -39,29 +40,40 @@ class ProfileRepositoryImpl implements ProfileRepository {
       publicFontFamily: profile.publicFontFamily,
       isVerified: profile.isVerified,
     );
-    await _dataSource.updateProfile(model);
+    final result = await _dataSource.updateProfile(model);
+    return result;
   }
 
   @override
-  Future<String> uploadProfileImage(String uid, File image) async {
-    return await _dataSource.uploadProfileImage(uid, image);
+  Future<Either<String, String>> uploadProfileImage(
+    String uid,
+    File image,
+  ) async {
+    final result = await _dataSource.uploadProfileImage(uid, image);
+    return result;
   }
 
   @override
-  Future<List<String>> uploadAndSaveAvatar(
+  Future<Either<String, List<String>>> uploadAndSaveAvatar(
     String uid,
     File image,
     List<String> currentAvatarUrls,
   ) async {
-    return await _dataSource.uploadAndSaveAvatar(uid, image, currentAvatarUrls);
+    final result = await _dataSource.uploadAndSaveAvatar(
+      uid,
+      image,
+      currentAvatarUrls,
+    );
+    return result;
   }
 
   @override
-  Future<String> uploadPublicProfileImage(
+  Future<Either<String, String>> uploadPublicProfileImage(
     String uid,
     File image,
     int slot,
   ) async {
-    return await _dataSource.uploadPublicProfileImage(uid, image, slot);
+    final result = await _dataSource.uploadPublicProfileImage(uid, image, slot);
+    return result;
   }
 }

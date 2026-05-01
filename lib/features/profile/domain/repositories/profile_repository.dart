@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dartz/dartz.dart';
 import 'package:vibi/features/profile/domain/entities/user_profile.dart';
 
 abstract class ProfileRepository {
@@ -8,14 +9,14 @@ abstract class ProfileRepository {
   /// [uid] is the unique user ID to fetch the profile for.
   ///
   /// Returns the [UserProfile] if found, or `null` if the profile doesn't exist.
-  Future<UserProfile?> fetchProfile(String uid);
+  Future<Either<String, UserProfile>> fetchProfile(String uid);
 
   /// Updates an existing user profile with new data.
   ///
   /// [profile] is the updated [UserProfile] object containing the new data.
   ///
   /// Throws an exception if the update fails.
-  Future<void> updateProfile(UserProfile profile);
+  Future<Either<String, void>> updateProfile(UserProfile profile);
 
   /// Uploads a profile image to Supabase storage.
   ///
@@ -25,7 +26,7 @@ abstract class ProfileRepository {
   /// Returns the public URL of the uploaded image.
   ///
   /// Throws an exception if the upload fails.
-  Future<String> uploadProfileImage(String uid, File image);
+  Future<Either<String, String>> uploadProfileImage(String uid, File image);
 
   /// Uploads a new avatar image and saves its URL to the user's avatar_urls list.
   ///
@@ -36,7 +37,7 @@ abstract class ProfileRepository {
   /// Returns the updated list of avatar URLs including the newly uploaded one.
   ///
   /// Throws an exception if the upload or save operation fails.
-  Future<List<String>> uploadAndSaveAvatar(
+  Future<Either<String, List<String>>> uploadAndSaveAvatar(
     String uid,
     File image,
     List<String> currentAvatarUrls,
@@ -52,5 +53,9 @@ abstract class ProfileRepository {
   ///
   /// Throws an [ArgumentError] if slot is not between 1 and 3.
   /// Throws an exception if the upload fails.
-  Future<String> uploadPublicProfileImage(String uid, File image, int slot);
+  Future<Either<String, String>> uploadPublicProfileImage(
+    String uid,
+    File image,
+    int slot,
+  );
 }

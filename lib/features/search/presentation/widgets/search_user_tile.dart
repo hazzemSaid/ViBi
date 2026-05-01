@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
+import 'package:vibi/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:vibi/features/search/domain/entities/user_search_result.dart';
 
 class SearchUserTile extends StatelessWidget {
@@ -43,7 +43,9 @@ class SearchUserTile extends StatelessWidget {
       ),
       leading: CircleAvatar(
         radius: 28,
-        backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.18),
+        backgroundColor: Theme.of(
+          context,
+        ).colorScheme.onSurfaceVariant.withValues(alpha: 0.18),
         backgroundImage: user.avatarUrls.isNotEmpty
             ? ResizeImage(
                 CachedNetworkImageProvider(user.avatarUrls.first),
@@ -52,7 +54,10 @@ class SearchUserTile extends StatelessWidget {
               )
             : null,
         child: user.avatarUrls.isEmpty
-            ? Icon(Icons.person, color: Theme.of(context).colorScheme.onSurfaceVariant)
+            ? Icon(
+                Icons.person,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              )
             : null,
       ),
       title: Row(
@@ -70,7 +75,7 @@ class SearchUserTile extends StatelessWidget {
             ),
           ),
           if (user.isPrivate) ...[
-SizedBox(width: AppSizes.s4),
+            SizedBox(width: AppSizes.s4),
             Icon(
               Icons.lock_outline,
               size: 14,
@@ -96,7 +101,9 @@ SizedBox(width: AppSizes.s4),
             Text(
               user.bio!,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurfaceVariant.withValues(alpha: 0.72),
                 fontSize: 12,
               ),
               maxLines: 2,
@@ -118,14 +125,13 @@ SizedBox(width: AppSizes.s4),
           ),
           Text(
             'followers',
-            style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 11),
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 11,
+            ),
           ),
         ],
       ),
     );
   }
 }
-
-
-
-

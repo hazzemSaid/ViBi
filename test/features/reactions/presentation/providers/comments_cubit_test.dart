@@ -4,8 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vibi/features/reactions/domain/entities/comment_item.dart';
 import 'package:vibi/features/reactions/domain/entities/reaction_summary.dart';
 import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
-import 'package:vibi/features/reactions/presentation/providers/comments_cubit.dart';
-import 'package:vibi/features/reactions/presentation/providers/comments_state.dart';
+import 'package:vibi/features/reactions/presentation/cubit/comments_cubit.dart';
 
 class _FakeReactionsRepository implements ReactionsRepository {
   _FakeReactionsRepository({required ReactionSummary seed}) : _summary = seed;

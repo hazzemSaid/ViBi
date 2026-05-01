@@ -1,5 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:vibi/features/profile/data/sources/graphql_social_links_datasource.dart';
+import 'package:vibi/features/profile/data/datasources/graphql_social_links_datasource.dart';
 import 'package:vibi/features/profile/domain/entities/social_link.dart';
 import 'package:vibi/features/profile/domain/repositories/social_links_repository.dart';
 

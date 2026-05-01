@@ -1,7 +1,7 @@
 import 'package:vibi/features/profile/domain/entities/user_profile.dart';
 
 class UserProfileModel extends UserProfile {
-  UserProfileModel({
+  const UserProfileModel({
     required super.uid,
     required super.name,
     required super.username,

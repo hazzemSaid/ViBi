@@ -4,8 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/features/reactions/domain/entities/reaction_summary.dart';
 import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
-import 'package:vibi/features/reactions/presentation/providers/reaction_cubit.dart';
-import 'package:vibi/features/reactions/presentation/providers/reaction_state.dart';
+import 'package:vibi/features/reactions/presentation/cubit/reaction_cubit.dart';
+import 'package:vibi/features/reactions/presentation/cubit/reaction_state.dart';
 import 'package:vibi/features/reactions/presentation/widgets/comment_sheet.dart';
 
 const Map<String, String> _emojis = {'love': '❤️', 'sad': '😢', 'haha': '😂'};

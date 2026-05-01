@@ -4,24 +4,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/core/widgets/main_layout.dart';
+import 'package:vibi/core/nav_main_layout/main_layout.dart';
+import 'package:vibi/features/answer/presentation/screen/share_answer_screen.dart';
 import 'package:vibi/features/auth/domain/repositories/auth_repository.dart';
-import 'package:vibi/features/auth/presentation/controllers/auth_controller.dart';
-import 'package:vibi/features/auth/presentation/providers/auth_providers.dart';
-import 'package:vibi/features/auth/presentation/screens/login_screen.dart';
-import 'package:vibi/features/auth/presentation/screens/signup_screen.dart';
-import 'package:vibi/features/auth/presentation/screens/verify_email_screen.dart';
-import 'package:vibi/features/auth/presentation/screens/welcome_screen.dart';
-import 'package:vibi/features/home/presentation/view/screens/home_screen.dart';
-import 'package:vibi/features/inbox/presentation/view/screens/inbox_screen.dart';
-import 'package:vibi/features/inbox/presentation/view/screens/share_answer_screen.dart';
-import 'package:vibi/features/onboarding/presentation/screens/onboarding_screen.dart';
-import 'package:vibi/features/profile/presentation/view/screens/edit_profile_public_web_screen.dart';
-import 'package:vibi/features/profile/presentation/view/screens/edit_profile_screen.dart';
-import 'package:vibi/features/profile/presentation/view/screens/followers_list_screen.dart';
-import 'package:vibi/features/profile/presentation/view/screens/following_list_screen.dart';
-import 'package:vibi/features/profile/presentation/view/screens/profile_screen.dart';
-import 'package:vibi/features/profile/presentation/view/screens/public_profile_screen.dart';
+import 'package:vibi/features/auth/presentation/cubit/auth_action_cubit.dart';
+import 'package:vibi/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:vibi/features/auth/presentation/pages/login_screen.dart';
+import 'package:vibi/features/auth/presentation/pages/signup_screen.dart';
+import 'package:vibi/features/auth/presentation/pages/verify_email_screen.dart';
+import 'package:vibi/features/auth/presentation/pages/welcome_screen.dart';
+import 'package:vibi/features/home/presentation/pages/home_screen.dart';
+import 'package:vibi/features/inbox/presentation/pages/inbox_screen.dart';
+import 'package:vibi/features/onboarding/presentation/pages/onboarding_screen.dart';
+import 'package:vibi/features/profile/presentation/pages/edit_profile_public_web_screen.dart';
+import 'package:vibi/features/profile/presentation/pages/edit_profile_screen.dart';
+import 'package:vibi/features/profile/presentation/pages/followers_list_screen.dart';
+import 'package:vibi/features/profile/presentation/pages/following_list_screen.dart';
+import 'package:vibi/features/profile/presentation/pages/profile_screen.dart';
+import 'package:vibi/features/profile/presentation/pages/public_profile_screen.dart';
 import 'package:vibi/features/search/presentation/screens/search_screen.dart';
 import 'package:vibi/features/splash/presentation/screens/splash_screen.dart';
 
@@ -204,7 +204,7 @@ GoRouter createAppRouter(AuthCubit authCubit) {
       ),
     ],
     redirect: (context, state) {
-      final authControllerState = context.read<AuthController>().state;
+      final authActionState = context.read<AuthActionCubit>().state;
       final loggingIn =
           state.matchedLocation == '/login' ||
           state.matchedLocation == '/signup' ||
@@ -236,8 +236,7 @@ GoRouter createAppRouter(AuthCubit authCubit) {
           return '/welcome';
         }
       }
-      if (authCubit.state.isLoading ||
-          authControllerState is AuthActionLoading) {
+      if (authCubit.state.isLoading || authActionState is AuthActionLoading) {
         return null;
       }
       return null;

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/features/reactions/presentation/providers/comments_cubit.dart';
+import 'package:vibi/features/reactions/presentation/cubit/comments_cubit.dart';
+import 'package:vibi/features/reactions/presentation/cubit/comments_state.dart';
 
 class CommentSheet extends StatefulWidget {
   const CommentSheet({super.key, required this.answerId});

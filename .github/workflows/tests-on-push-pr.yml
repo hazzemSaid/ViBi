@@ -12,10 +12,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  flutter-tests:
-    name: Flutter Tests
+  test-matrix:
+    name: Test - ${{ matrix.feature }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        feature:
+          - name: answer
+            path: test/features/answer
+          - name: auth
+            path: test/features/auth
+          - name: feed
+            path: test/features/feed
+          - name: home
+            path: test/features/home
+          - name: profile
+            path: test/features/profile
+          - name: reactions
+            path: test/features/reactions
+          - name: recommendation
+            path: test/features/recommendation
+          - name: search
+            path: test/features/search
 
     steps:
       - name: Checkout
@@ -34,7 +54,6 @@ jobs:
           if [ -n "${{ secrets.DOTENV_FILE }}" ]; then
             printf "%s" "${{ secrets.DOTENV_FILE }}" > .env
             cp .env assets/app_config.txt
-            echo "Environment variables saved to assets/app_config.txt"
           elif [ -f .env.example ]; then
             cp .env.example .env
             cp .env assets/app_config.txt
@@ -46,15 +65,42 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
-      - name: Flutter analyze (non-blocking)
-        run: flutter analyze || true
+      - name: Run ${{ matrix.feature.name }} tests
+        run: flutter test ${{ matrix.feature.path }} --coverage --coverage-path=coverage/lcov.info
 
-      - name: Run Flutter tests
-        run: flutter test --coverage
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v4
+      - name: Upload coverage for ${{ matrix.feature.name }}
+        uses: actions/upload-artifact@v4
         if: always()
+        with:
+          name: coverage-${{ matrix.feature.name }}
+          path: coverage/lcov.info
+          retention-days: 1
+          if-no-files-found: ignore
+
+  merge-coverage:
+    name: Merge Coverage Reports
+    needs: test-matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: always()
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: coverage-artifacts
+
+      - name: Merge coverage reports
+        run: |
+          mkdir -p coverage
+          find coverage-artifacts -name "lcov.info" -exec cat {} + > coverage/lcov.info
+          echo "Merged $(find coverage-artifacts -name "lcov.info" | wc -l) coverage reports"
+
+      - name: Upload merged coverage to Codecov
+        uses: codecov/codecov-action@v4
         with:
           files: coverage/lcov.info
           fail_ci_if_error: false

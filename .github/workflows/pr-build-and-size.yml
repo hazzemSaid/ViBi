@@ -9,9 +9,64 @@ permissions:
   pull-requests: write
 
 jobs:
+  test-matrix:
+    name: Test - ${{ matrix.feature }}
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: true
+      matrix:
+        feature:
+          - name: answer
+            path: test/features/answer
+          - name: auth
+            path: test/features/auth
+          - name: feed
+            path: test/features/feed
+          - name: home
+            path: test/features/home
+          - name: profile
+            path: test/features/profile
+          - name: reactions
+            path: test/features/reactions
+          - name: recommendation
+            path: test/features/recommendation
+          - name: search
+            path: test/features/search
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Prepare .env for CI tests
+        shell: bash
+        run: |
+          mkdir -p assets
+          if [ -n "${{ secrets.DOTENV_FILE }}" ]; then
+            printf "%s" "${{ secrets.DOTENV_FILE }}" > .env
+          elif [ -f .env.example ]; then
+            cp .env.example .env
+          else
+            echo "CI=true" > .env
+          fi
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Run ${{ matrix.feature.name }} tests
+        run: flutter test ${{ matrix.feature.path }}
+
   android-size-and-build:
     name: Android Build + Size Diff
     if: ${{ !github.event.pull_request.draft }}
+    needs: [test-matrix]
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -62,14 +117,11 @@ jobs:
 
           python3 -c "import json; json.load(open('android/app/google-services.json', 'r', encoding='utf-8'))"
 
-      - name: Get dependencies
-        run: flutter pub get
-
       - name: Flutter analyze (non-blocking)
         run: flutter analyze || true
 
-      - name: Run Flutter tests
-        run: flutter test
+      - name: Get dependencies
+        run: flutter pub get
 
       - name: Build Android APK (new)
         run: flutter build apk --release
@@ -213,6 +265,7 @@ jobs:
   ios-build:
     name: iOS Build Check
     if: ${{ !github.event.pull_request.draft }}
+    needs: [test-matrix]
     runs-on: macos-latest
     timeout-minutes: 30
 
@@ -257,9 +310,6 @@ jobs:
 
       - name: Flutter analyze (non-blocking)
         run: flutter analyze || true
-
-      - name: Run Flutter tests
-        run: flutter test
 
       - name: Install CocoaPods
         working-directory: ios

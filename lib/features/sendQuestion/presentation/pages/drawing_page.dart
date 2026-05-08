@@ -136,12 +136,15 @@ class _DrawingPageState extends State<DrawingPage> {
     Uint8List pngBytes;
     try {
       pngBytes = await _rasterize(drawingCubit.state);
-    } on StateError catch (e) {
+    } on StateError {
       if (!context.mounted) return;
-      final errorMessage = e.message;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Error: $errorMessage')));
+      ).showSnackBar(
+        const SnackBar(
+          content: Text('Couldn\'t capture your drawing. Please try again.'),
+        ),
+      );
       return;
     }
     if (!context.mounted) return;

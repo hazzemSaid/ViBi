@@ -84,8 +84,8 @@ class PublicProfileActionsRow extends StatelessWidget {
                         dotenv.env['SHARE_BASE_URL'] ?? _defaultShareBaseUrl;
                     final profileUrl = '$shareBaseUrl/u/$username';
                     Share.share(
-                      'Check out $username\'s profile on Vibi\n$profileUrl',
-                      subject: '$username\'s Vibi profile',
+                      'Check out $username\'s profile on ViBi\n$profileUrl',
+                      subject: '$username\'s ViBi profile',
                     );
                   }
                 : null,

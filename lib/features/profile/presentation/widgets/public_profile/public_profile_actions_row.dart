@@ -29,6 +29,8 @@ class PublicProfileActionsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final username = profile.username?.trim() ?? '';
+    final canShare = username.isNotEmpty;
     return Row(
       children: [
         // Follow Button
@@ -73,25 +75,20 @@ class PublicProfileActionsRow extends StatelessWidget {
           ),
           child: IconButton(
             icon: const Icon(Icons.ios_share, size: 22),
-            color: Theme.of(context).colorScheme.onSurface,
-            onPressed: () {
-              final username = profile.username?.trim() ?? '';
-              if (username.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Set a username to share this profile.'),
-                  ),
-                );
-                return;
-              }
-              final shareBaseUrl =
-                  dotenv.env['SHARE_BASE_URL'] ?? _defaultShareBaseUrl;
-              final profileUrl = '$shareBaseUrl/u/$username';
-              Share.share(
-                'Check out $username on ViBi\n$profileUrl',
-                subject: '$username\'s ViBi profile',
-              );
-            },
+            color: canShare
+                ? Theme.of(context).colorScheme.onSurface
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+            onPressed: canShare
+                ? () {
+                    final shareBaseUrl =
+                        dotenv.env['SHARE_BASE_URL'] ?? _defaultShareBaseUrl;
+                    final profileUrl = '$shareBaseUrl/u/$username';
+                    Share.share(
+                      'Check out $username\'s profile on ViBi\n$profileUrl',
+                      subject: '$username\'s ViBi profile',
+                    );
+                  }
+                : null,
           ),
         ),
       ],

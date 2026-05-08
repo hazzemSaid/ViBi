@@ -76,14 +76,20 @@ class PublicProfileActionsRow extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurface,
             onPressed: () {
               final username = profile.username?.trim() ?? '';
+              if (username.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Set a username to share this profile.'),
+                  ),
+                );
+                return;
+              }
               final shareBaseUrl =
                   dotenv.env['SHARE_BASE_URL'] ?? _defaultShareBaseUrl;
-              final profileUrl = username.isEmpty
-                  ? shareBaseUrl
-                  : '$shareBaseUrl/u/$username';
+              final profileUrl = '$shareBaseUrl/u/$username';
               Share.share(
-                'View ${profile.username ?? "this user"} on ViBi\n$profileUrl',
-                subject: '${profile.username ?? "user"}\'s ViBi profile',
+                'Check out $username on ViBi\n$profileUrl',
+                subject: '$username\'s ViBi profile',
               );
             },
           ),

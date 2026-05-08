@@ -77,7 +77,7 @@ class PublicProfileActionsRow extends StatelessWidget {
             icon: const Icon(Icons.ios_share, size: 22),
             color: canShare
                 ? Theme.of(context).colorScheme.onSurface
-                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
             onPressed: canShare
                 ? () {
                     final shareBaseUrl =

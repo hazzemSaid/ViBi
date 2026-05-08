@@ -141,7 +141,7 @@ class _DrawingPageState extends State<DrawingPage> {
       final errorMessage = e.message;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(errorMessage)));
+      ).showSnackBar(SnackBar(content: Text('Error: $errorMessage')));
       return;
     }
     if (!context.mounted) return;

@@ -138,8 +138,7 @@ class _DrawingPageState extends State<DrawingPage> {
       pngBytes = await _rasterize(drawingCubit.state);
     } on StateError catch (e) {
       if (!context.mounted) return;
-      final errorMessage =
-          (e.message as String?) ?? 'Failed to export drawing.';
+      final errorMessage = e.message;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(errorMessage)));

@@ -92,3 +92,5 @@ AGENTS.md
 .github/agents
 .github/prompts
 .opencode
+.agents 
+specs

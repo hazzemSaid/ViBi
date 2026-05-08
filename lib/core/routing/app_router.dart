@@ -93,6 +93,7 @@ GoRouter createAppRouter(AuthCubit authCubit) {
             answerText: extra?['answerText'] ?? '',
             username: extra?['username'] ?? '',
             isAnonymous: extra?['isAnonymous'] ?? false,
+            drawingUrl: extra?['drawingUrl'] as String?,
           );
         },
       ),

@@ -70,7 +70,7 @@ import 'package:vibi/features/sendQuestion/data/datasources/question_datasource.
 import 'package:vibi/features/sendQuestion/data/datasources/graphql_question_datasource.dart';
 import 'package:vibi/features/sendQuestion/data/repositories/question_repository_impl.dart';
 import 'package:vibi/features/sendQuestion/domain/repositories/question_repository.dart';
-import 'package:vibi/features/sendQuestion/presentation/cubit/question_providers.dart';
+import 'package:vibi/features/sendQuestion/presentation/cubit/send_question_cubit.dart';
 import 'package:vibi/features/reactions/data/datasources/reactions_remote_data_source.dart';
 import 'package:vibi/features/reactions/data/repositories/reactions_repository_impl.dart';
 import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
@@ -83,6 +83,11 @@ import 'package:vibi/features/search/data/datasources/graphql_search_datasource.
 import 'package:vibi/features/search/data/repositories/search_repository_impl.dart';
 import 'package:vibi/features/search/domain/repositories/search_repository.dart';
 import 'package:vibi/features/search/presentation/providers/search_providers.dart';
+import 'package:vibi/features/sendQuestion/data/datasources/drawing_remote_datasource.dart';
+import 'package:vibi/features/sendQuestion/data/repositories/drawing_repository_impl.dart';
+import 'package:vibi/features/sendQuestion/domain/repositories/drawing_repository.dart';
+import 'package:vibi/features/sendQuestion/domain/usecases/send_drawing_question.dart';
+import 'package:vibi/features/sendQuestion/presentation/cubit/send_drawing_cubit.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -101,6 +106,7 @@ Future<void> setupServiceLocator(SharedPreferences prefs) async {
   _initInbox();
   _initAnswer();
   _initFollow();
+  _initDrawing();
 }
 
 // -----------------------------------------------------------------------------
@@ -121,9 +127,7 @@ void _initCore(SharedPreferences prefs) {
 // Auth Feature
 // -----------------------------------------------------------------------------
 void _initAuth() {
-  getIt.registerLazySingleton<AuthDataSource>(
-    SupabaseAuthDataSource.new,
-  );
+  getIt.registerLazySingleton<AuthDataSource>(SupabaseAuthDataSource.new);
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(getIt<AuthDataSource>()),
   );
@@ -381,5 +385,23 @@ void _initFollow() {
   );
   getIt.registerFactory<FollowingCubit>(
     () => FollowingCubit(getFollowingUseCase: getIt<GetFollowingUseCase>()),
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Drawing Feature
+// -----------------------------------------------------------------------------
+void _initDrawing() {
+  getIt.registerLazySingleton<DrawingRemoteDataSource>(
+    () => DrawingRemoteDataSource(Supabase.instance.client),
+  );
+  getIt.registerLazySingleton<IDrawingRepository>(
+    () => DrawingRepositoryImpl(getIt<DrawingRemoteDataSource>()),
+  );
+  getIt.registerLazySingleton<SendDrawingQuestion>(
+    () => SendDrawingQuestion(getIt<IDrawingRepository>()),
+  );
+  getIt.registerFactory<SendDrawingCubit>(
+    () => SendDrawingCubit(getIt<SendDrawingQuestion>()),
   );
 }

@@ -31,12 +31,14 @@ class ShareAnswerScreen extends StatefulWidget {
     required this.answerText,
     required this.username,
     this.isAnonymous = false,
+    this.drawingUrl,
   });
 
   final String questionText;
   final String answerText;
   final String username;
   final bool isAnonymous;
+  final String? drawingUrl;
 
   @override
   State<ShareAnswerScreen> createState() => _ShareAnswerScreenState();
@@ -381,6 +383,7 @@ class _ShareAnswerScreenState extends State<ShareAnswerScreen> {
                 answerText: widget.answerText,
                 username: widget.username,
                 isAnonymous: widget.isAnonymous,
+                drawingUrl: widget.drawingUrl,
               ),
             ),
             ShareStoryControls(

@@ -19,6 +19,7 @@ class FeedItem extends Equatable {
   final int sharesCount;
   final DateTime createdAt;
   final bool isAnonymous;
+  final String? drawingUrl;
 
   const FeedItem({
     required this.id,
@@ -38,7 +39,10 @@ class FeedItem extends Equatable {
     required this.sharesCount,
     required this.createdAt,
     required this.isAnonymous,
+    this.drawingUrl,
   });
+
+  bool get isDrawing => questionType == 'drawing';
 
   FeedItem copyWith({
     String? id,
@@ -58,6 +62,7 @@ class FeedItem extends Equatable {
     int? sharesCount,
     DateTime? createdAt,
     bool? isAnonymous,
+    String? drawingUrl,
   }) {
     return FeedItem(
       id: id ?? this.id,
@@ -78,6 +83,7 @@ class FeedItem extends Equatable {
       sharesCount: sharesCount ?? this.sharesCount,
       createdAt: createdAt ?? this.createdAt,
       isAnonymous: isAnonymous ?? this.isAnonymous,
+      drawingUrl: drawingUrl ?? this.drawingUrl,
     );
   }
 
@@ -100,5 +106,6 @@ class FeedItem extends Equatable {
     sharesCount,
     createdAt,
     isAnonymous,
+    drawingUrl,
   ];
 }

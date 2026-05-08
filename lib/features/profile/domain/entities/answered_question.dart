@@ -14,6 +14,8 @@ class AnsweredQuestion extends Equatable {
   final String? senderAvatarUrl;
   final String? answererUsername;
   final String? answererAvatarUrl;
+  final String questionType;
+  final String? drawingUrl;
 
   AnsweredQuestion({
     required this.id,
@@ -29,7 +31,11 @@ class AnsweredQuestion extends Equatable {
     this.senderAvatarUrl,
     this.answererUsername,
     this.answererAvatarUrl,
+    this.questionType = 'text',
+    this.drawingUrl,
   });
+
+  bool get isDrawing => questionType == 'drawing' && drawingUrl != null;
 
   AnsweredQuestion copyWith({
     String? id,
@@ -45,6 +51,8 @@ class AnsweredQuestion extends Equatable {
     String? senderAvatarUrl,
     String? answererUsername,
     String? answererAvatarUrl,
+    String? questionType,
+    String? drawingUrl,
   }) {
     return AnsweredQuestion(
       id: id ?? this.id,
@@ -60,6 +68,8 @@ class AnsweredQuestion extends Equatable {
       senderAvatarUrl: senderAvatarUrl ?? this.senderAvatarUrl,
       answererUsername: answererUsername ?? this.answererUsername,
       answererAvatarUrl: answererAvatarUrl ?? this.answererAvatarUrl,
+      questionType: questionType ?? this.questionType,
+      drawingUrl: drawingUrl ?? this.drawingUrl,
     );
   }
 
@@ -74,6 +84,5 @@ class AnsweredQuestion extends Equatable {
   int get hashCode => id.hashCode;
 
   @override
-  // TODO: implement props
   List<Object?> get props => [id];
 }

@@ -18,6 +18,7 @@ class ActionRow extends StatelessWidget {
     required this.fallbackQuestionText,
     required this.fallbackUsername,
     required this.fallbackIsAnonymous,
+    this.fallbackDrawingUrl,
   });
 
   final String answerId;
@@ -25,6 +26,7 @@ class ActionRow extends StatelessWidget {
   final String fallbackQuestionText;
   final String fallbackUsername;
   final bool fallbackIsAnonymous;
+  final String? fallbackDrawingUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +42,7 @@ class ActionRow extends StatelessWidget {
           fallbackQuestionText: fallbackQuestionText,
           fallbackUsername: fallbackUsername,
           fallbackIsAnonymous: fallbackIsAnonymous,
+          fallbackDrawingUrl: fallbackDrawingUrl,
         ),
         AppSizes.gapW12,
         const _SendTellButton(),
@@ -130,6 +133,7 @@ class _ShareActionButton extends StatelessWidget {
     required this.fallbackQuestionText,
     required this.fallbackUsername,
     required this.fallbackIsAnonymous,
+    this.fallbackDrawingUrl,
   });
 
   final String answerId;
@@ -137,6 +141,7 @@ class _ShareActionButton extends StatelessWidget {
   final String fallbackQuestionText;
   final String fallbackUsername;
   final bool fallbackIsAnonymous;
+  final String? fallbackDrawingUrl;
   /**
    * Opens the share screen for the given answer.
    */
@@ -147,6 +152,7 @@ class _ShareActionButton extends StatelessWidget {
       String questionText,
       String username,
       bool isAnonymous,
+      String? drawingUrl,
       bool canShare,
     })
     payload,
@@ -167,6 +173,7 @@ class _ShareActionButton extends StatelessWidget {
         'answerText': payload.answerText,
         'username': payload.username,
         'isAnonymous': payload.isAnonymous,
+        'drawingUrl': payload.drawingUrl,
       },
     );
   }
@@ -182,6 +189,7 @@ class _ShareActionButton extends StatelessWidget {
         String questionText,
         String username,
         bool isAnonymous,
+        String? drawingUrl,
         bool canShare,
       })
     >(
@@ -196,6 +204,7 @@ class _ShareActionButton extends StatelessWidget {
             questionText: fallbackQuestionText,
             username: fallbackUsername,
             isAnonymous: fallbackIsAnonymous,
+            drawingUrl: fallbackDrawingUrl,
             canShare: false,
           );
         }
@@ -211,6 +220,7 @@ class _ShareActionButton extends StatelessWidget {
           questionText: item.questionText,
           username: item.answerAuthorUsername,
           isAnonymous: item.isAnonymous,
+          drawingUrl: item.drawingUrl,
           canShare: canShare,
         );
       },

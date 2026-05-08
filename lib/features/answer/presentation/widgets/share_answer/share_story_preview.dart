@@ -2,7 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/answer/presentation/widgets/share_answer/share_answer_models.dart';
+import 'package:vibi/core/common/widgets/drawing_question_card.dart';
+import 'package:vibi/core/common/widgets/full_screen_media_viewer.dart';
 
 /**
  * Live story preview that can be captured as layered screenshots.
@@ -32,6 +35,7 @@ class ShareStoryPreview extends StatelessWidget {
     required this.answerText,
     required this.username,
     required this.isAnonymous,
+    this.drawingUrl,
   });
 
   final ScreenshotController screenshotController;
@@ -46,6 +50,7 @@ class ShareStoryPreview extends StatelessWidget {
   final String answerText;
   final String username;
   final bool isAnonymous;
+  final String? drawingUrl;
 
   /**
    * Builds the full preview with optional branding overlay.
@@ -64,7 +69,10 @@ class ShareStoryPreview extends StatelessWidget {
     final previewRadius = BorderRadius.circular(isCapturing ? 0 : 22);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSizes.s20,
+        vertical: AppSizes.s16,
+      ),
       child: Screenshot(
         controller: screenshotController,
         child: ClipRRect(
@@ -88,7 +96,7 @@ class ShareStoryPreview extends StatelessWidget {
                   alignment: const Alignment(0, 0.06),
                   child: Screenshot(
                     controller: stickerController,
-                    child: _buildCard(),
+                    child: _buildCard(context),
                   ),
                 ),
                 if (!isCapturing)
@@ -140,7 +148,7 @@ class ShareStoryPreview extends StatelessWidget {
    * Used for:
    * - Main content unit shown in the exported story image.
    */
-  Widget _buildCard() {
+  Widget _buildCard(BuildContext context) {
     final accent = cardColor;
     final accentLabel = cardIsBright ? Colors.black : Colors.white;
 
@@ -240,19 +248,31 @@ class ShareStoryPreview extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          questionText,
-                          textAlign: TextAlign.start,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 26,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black.withValues(alpha: 0.90),
-                            height: 1.22,
+                        if (drawingUrl != null)
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxHeight: 180),
+                            child: DrawingQuestionCard(
+                              drawingUrl: drawingUrl!,
+                              onTap: () => FullScreenMediaViewer.show(
+                                context,
+                                drawingUrl!,
+                              ),
+                            ),
+                          )
+                        else
+                          Text(
+                            questionText,
+                            textAlign: TextAlign.start,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 26,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black.withValues(alpha: 0.90),
+                              height: 1.22,
+                            ),
                           ),
-                        ),
                         const SizedBox(height: 12),
                         Container(
                           height: 1,
@@ -333,7 +353,7 @@ class ShareStoryPreview extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 9),
+          AppSizes.gapH8,
           Transform.rotate(
             angle: 0.015,
             child: Container(

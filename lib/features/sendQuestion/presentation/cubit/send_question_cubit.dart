@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/features/sendQuestion/domain/repositories/question_repository.dart';
-import 'package:vibi/features/sendQuestion/presentation/cubit/question_state.dart';
+import 'package:vibi/features/sendQuestion/presentation/cubit/send_question_state.dart';
 
 class SendQuestionCubit extends Cubit<SendQuestionState> {
   SendQuestionCubit(this._repository) : super(const SendQuestionInitial());

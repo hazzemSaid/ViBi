@@ -200,12 +200,21 @@ class ProfileQueries {
             questions {
               id
               question_text
+              question_type
               is_anonymous
               sender_id
               profiles {
                 id
                 username
                 avatar_urls
+              }
+              question_mediaCollection {
+                edges {
+                  node {
+                    media_type
+                    media_url
+                  }
+                }
               }
             }
           }

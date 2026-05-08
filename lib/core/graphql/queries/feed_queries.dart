@@ -47,6 +47,14 @@ class FeedQueries {
                   release_date
                   vote_average
                 }
+                question_mediaCollection {
+                  edges {
+                    node {
+                      media_url
+                      media_type
+                    }
+                  }
+                }
               }
             }
           }
@@ -97,6 +105,14 @@ class FeedQueries {
                 overview
                 release_date
                 vote_average
+              }
+              question_mediaCollection {
+                edges {
+                  node {
+                    media_url
+                    media_type
+                  }
+                }
               }
             }
           }

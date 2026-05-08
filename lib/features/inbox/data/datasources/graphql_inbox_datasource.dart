@@ -151,6 +151,16 @@ class GraphQLInboxDataSource implements InboxDataSource {
     Map<String, dynamic> node,
     Map<int, Map<String, dynamic>> mediaById,
   ) {
+    final mediaEdges =
+        node['question_mediaCollection']?['edges'] as List<dynamic>?;
+    String? drawingUrl;
+    if (mediaEdges != null && mediaEdges.isNotEmpty) {
+      final mediaNode = mediaEdges.first['node'] as Map<String, dynamic>?;
+      if (mediaNode?['media_type'] == 'drawing') {
+        drawingUrl = mediaNode?['media_url'];
+      }
+    }
+
     return InboxQuestionModel.fromMap({
       'id': node['id'],
       'recipient_id': node['recipient_id'],
@@ -159,6 +169,7 @@ class GraphQLInboxDataSource implements InboxDataSource {
       'question_type': node['question_type'],
       'media_rec_id': node['media_rec_id'],
       'media_recommendations': mediaById[_asInt(node['media_rec_id'])],
+      'drawing_url': drawingUrl,
       'is_anonymous': node['is_anonymous'],
       'status': node['status'],
       'created_at': node['created_at'],

@@ -1,3 +1,4 @@
+import 'package:vibi/core/common/utils/question_media.dart';
 import 'package:vibi/features/feed/domain/entities/feed_item.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 
@@ -20,6 +21,7 @@ class FeedItemModel extends FeedItem {
     required super.sharesCount,
     required super.createdAt,
     required super.isAnonymous,
+    super.drawingUrl,
   });
 
   factory FeedItemModel.fromMap(Map<String, dynamic> map) {
@@ -56,6 +58,7 @@ class FeedItemModel extends FeedItem {
           ? DateTime.parse(map['created_at'] as String)
           : DateTime.now(),
       isAnonymous: question?['is_anonymous'] as bool? ?? false,
+      drawingUrl: map['drawing_url'] as String?,
     );
   }
 
@@ -141,6 +144,7 @@ class FeedItemModel extends FeedItem {
             )
           : DateTime.now(),
       isAnonymous: isAnon,
+      drawingUrl: parseDrawingUrl(question?['question_mediaCollection']),
     );
   }
 
@@ -186,6 +190,7 @@ class FeedItemModel extends FeedItem {
       'shares_count': sharesCount,
       'created_at': createdAt.toIso8601String(),
       'avatar_urls': avatarUrl != null ? [avatarUrl!] : [],
+      'drawing_url': drawingUrl,
     };
   }
 }

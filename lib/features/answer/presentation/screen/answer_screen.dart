@@ -8,6 +8,7 @@ import 'package:vibi/features/inbox/presentation/cubit/padding_question/pending_
 import 'package:vibi/features/answer/presentation/widgets/answer_screen_helpers.dart';
 import 'package:vibi/features/inbox/presentation/helpers/question_media_helpers.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
+import 'package:vibi/core/common/widgets/full_screen_media_viewer.dart';
 import 'package:vibi/core/common/widgets/media_card.dart';
 
 /**
@@ -317,6 +318,10 @@ class _AnswerScreenState extends State<AnswerScreen> {
   Widget _buildQuestionBubble() {
     final theme = Theme.of(context);
     if (isRecommendationQuestion(widget.questionType)) {
+      final media = buildRecommendationMedia(
+        widget.mediaRec,
+        widget.questionText,
+      );
       return Container(
         width: double.infinity,
         padding: EdgeInsets.all(AppSizes.s16),
@@ -347,12 +352,12 @@ class _AnswerScreenState extends State<AnswerScreen> {
             ),
             AppSizes.gapH12,
             MediaCard(
-              media: buildRecommendationMedia(
-                widget.mediaRec,
-                widget.questionText,
-              ),
+              media: media,
               compact: true,
               showOverview: true,
+              onTap: media.posterUrl.isNotEmpty
+                  ? () => FullScreenMediaViewer.show(context, media.posterUrl)
+                  : null,
             ),
           ],
         ),

@@ -12,8 +12,6 @@ import 'package:vibi/features/feed/presentation/widgets/feed_load_more_indicator
 import 'package:vibi/features/feed/presentation/widgets/feed_loading_state.dart';
 import 'package:vibi/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:vibi/features/home/presentation/widgets/post_item/post_item.dart';
-import 'package:vibi/features/home/presentation/widgets/post_item/recommend_card.dart';
-import 'package:vibi/features/home/presentation/widgets/suggested_section.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -112,37 +110,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             }
 
                             final FeedItem item = items[index];
-                            final bool isRecommendation =
-                                item.questionType == 'recommendation' &&
-                                item.mediaRec != null;
 
                             return Column(
                               key: ValueKey('column_${item.id}'),
                               children: [
                                 RepaintBoundary(
-                                  child: isRecommendation
-                                      ? RecommendCard(
-                                          key: ValueKey('rec_${item.id}'),
-                                          item: item,
-                                        )
-                                      : PostItem(
-                                          key: ValueKey('post_${item.id}'),
-                                          item: item,
-                                        ),
-                                ),
-                                Divider(
-                                  color: Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.05),
-                                  height: 1,
-                                ),
-                                //TODO : implement suggested users section
-                                if (index == 0 && false) ...const [
-                                  // Todo : We make a new features into future
-                                  SuggestedSection(
-                                    key: ValueKey('suggested_section'),
+                                  child: PostItem(
+                                    key: ValueKey('post_${item.id}'),
+                                    item: item,
                                   ),
-                                  Divider(height: 1),
-                                ],
+                                ),
                               ],
                             );
                           },

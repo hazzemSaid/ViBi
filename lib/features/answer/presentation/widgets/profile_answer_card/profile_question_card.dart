@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
+import 'package:vibi/core/common/widgets/drawing_question_card.dart';
+import 'package:vibi/core/common/widgets/full_screen_media_viewer.dart';
 import 'package:vibi/features/profile/domain/entities/answered_question.dart';
 
 import 'profile_sender_row.dart';
@@ -33,9 +36,9 @@ class ProfileQuestionCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ProfileSenderRow(answer: answer, displayName: displayName),
-          const SizedBox(height: 12),
+          AppSizes.gapH12,
           Text(
-            'Ask',
+            answer.isDrawing ? 'DRAWING' : 'Tell',
             style: TextStyle(
               color: Theme.of(context).colorScheme.secondary,
               fontWeight: FontWeight.w900,
@@ -43,15 +46,24 @@ class ProfileQuestionCard extends StatelessWidget {
               letterSpacing: 1.5,
             ),
           ),
-          SizedBox(height: 8),
-          Text(
-            answer.questionText,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-              fontSize: questionFontSize,
-              fontWeight: FontWeight.bold,
+          AppSizes.gapH8,
+          if (answer.isDrawing)
+            DrawingQuestionCard(
+              drawingUrl: answer.drawingUrl!,
+              onTap: () => FullScreenMediaViewer.show(
+                context,
+                answer.drawingUrl!,
+              ),
+            )
+          else
+            Text(
+              answer.questionText,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface,
+                fontSize: questionFontSize,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
         ],
       ),
     );

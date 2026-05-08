@@ -15,6 +15,8 @@ class AnsweredQuestionModel extends AnsweredQuestion {
     super.senderAvatarUrl,
     super.answererUsername,
     super.answererAvatarUrl,
+    super.questionType,
+    super.drawingUrl,
   });
 
   factory AnsweredQuestionModel.fromMap(Map<String, dynamic> map) {
@@ -32,6 +34,8 @@ class AnsweredQuestionModel extends AnsweredQuestion {
           ? DateTime.parse(map['created_at'] as String)
           : DateTime.now(),
       isAnonymous: question?['is_anonymous'] as bool? ?? false,
+      questionType: question?['question_type'] as String? ?? 'text',
+      drawingUrl: map['drawing_url'] as String?,
     );
   }
 }

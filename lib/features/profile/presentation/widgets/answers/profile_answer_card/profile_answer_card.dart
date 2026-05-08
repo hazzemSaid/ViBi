@@ -63,6 +63,7 @@ class ProfileAnswerCard extends StatelessWidget {
                   'answerText': answer.answerText,
                   'username': answer.answererUsername ?? 'me',
                   'isAnonymous': answer.isAnonymous,
+                  'drawingUrl': answer.drawingUrl,
                 },
               );
             },

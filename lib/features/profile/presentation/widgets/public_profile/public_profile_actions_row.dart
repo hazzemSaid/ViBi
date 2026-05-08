@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/common/widgets/send_question_dialog.dart';
@@ -72,8 +73,14 @@ class PublicProfileActionsRow extends StatelessWidget {
             icon: const Icon(Icons.ios_share, size: 22),
             color: Theme.of(context).colorScheme.onSurface,
             onPressed: () {
+              final username = profile.username?.trim() ?? '';
+              final shareBaseUrl =
+                  dotenv.env['SHARE_BASE_URL'] ?? 'https://vibi.social';
+              final profileUrl = username.isEmpty
+                  ? shareBaseUrl
+                  : '$shareBaseUrl/u/$username';
               Share.share(
-                'Check out ${profile.username ?? "this user"}\'s profile on ViBi!',
+                'Check out ${profile.username ?? "this user"}\'s profile on ViBi!\n$profileUrl',
                 subject: '${profile.username ?? "user"}\'s ViBi profile',
               );
             },
@@ -109,7 +116,6 @@ class _AskOptionsBottomSheet extends StatelessWidget {
       MaterialPageRoute(
         builder: (_) => DrawingPage(
           recipientId: profile.id,
-          isAnonymous: false,
           senderId: Supabase.instance.client.auth.currentUser?.id,
         ),
       ),

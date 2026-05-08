@@ -27,7 +27,9 @@ class DrawingRemoteDataSource {
   }) async {
     // 1. Upload PNG to Storage
     final fileName = '${const Uuid().v4()}.png';
-    final storagePath = '${senderId ?? 'anon'}/$fileName';
+    final storagePath = isAnonymous
+        ? 'anon/$fileName'
+        : '${senderId ?? 'anon'}/$fileName';
 
     await _client.storage.from(_bucket).uploadBinary(
           storagePath,
@@ -45,7 +47,7 @@ class DrawingRemoteDataSource {
         .from('questions')
         .insert({
           'recipient_id': recipientId,
-          if (senderId != null) 'sender_id': senderId,
+          if (!isAnonymous && senderId != null) 'sender_id': senderId,
           'is_anonymous': isAnonymous,
           'question_text': '[drawing]', // NOT NULL placeholder
           'question_type': 'drawing',

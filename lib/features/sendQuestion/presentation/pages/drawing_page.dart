@@ -29,13 +29,11 @@ import '../widgets/drawing_toolbar.dart';
  */
 class DrawingPage extends StatefulWidget {
   final String recipientId;
-  final bool isAnonymous;
   final String? senderId;
 
   const DrawingPage({
     super.key,
     required this.recipientId,
-    required this.isAnonymous,
     this.senderId,
   });
 
@@ -83,7 +81,11 @@ class _DrawingPageState extends State<DrawingPage> {
    * strokes onto an offscreen [Canvas] at the target resolution.
    */
   Future<Uint8List> _rasterize(DrawingState drawingState) async {
-    final renderObject = _repaintKey.currentContext!.findRenderObject();
+    final repaintContext = _repaintKey.currentContext;
+    if (repaintContext == null) {
+      throw StateError('Drawing canvas is still loading. Please try again.');
+    }
+    final renderObject = repaintContext.findRenderObject();
     if (renderObject is! RenderBox || renderObject.size.isEmpty) {
       throw StateError('Drawing canvas is not ready to export.');
     }
@@ -109,7 +111,10 @@ class _DrawingPageState extends State<DrawingPage> {
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     image.dispose();
     picture.dispose();
-    return byteData!.buffer.asUint8List();
+    if (byteData == null) {
+      throw StateError('Failed to encode drawing image.');
+    }
+    return byteData.buffer.asUint8List();
   }
 
   /**
@@ -128,14 +133,23 @@ class _DrawingPageState extends State<DrawingPage> {
     final result = await DrawingSendDialog.show(context);
     if (result == null || !context.mounted) return;
 
-    final pngBytes = await _rasterize(drawingCubit.state);
+    Uint8List pngBytes;
+    try {
+      pngBytes = await _rasterize(drawingCubit.state);
+    } on StateError catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('${e.message}')));
+      return;
+    }
     if (!context.mounted) return;
 
     context.read<SendDrawingCubit>().send(
       recipientId: widget.recipientId,
       pngBytes: pngBytes,
       isAnonymous: result,
-      senderId: widget.senderId,
+      senderId: result ? null : widget.senderId,
     );
   }
 

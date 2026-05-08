@@ -3,9 +3,9 @@ import '../../domain/repositories/drawing_repository.dart';
 import '../datasources/drawing_remote_datasource.dart';
 
 /**
- * Implementation of [IDrawingRepository] that uses [DrawingRemoteDataSource].
+ * Implementation of [DrawingRepository] that uses [DrawingRemoteDataSource].
  */
-class DrawingRepositoryImpl implements IDrawingRepository {
+class DrawingRepositoryImpl implements DrawingRepository {
   final DrawingRemoteDataSource _dataSource;
 
   const DrawingRepositoryImpl(this._dataSource);

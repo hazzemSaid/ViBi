@@ -3,7 +3,7 @@ import 'dart:typed_data';
 /**
  * Repository interface for managing drawing-related operations.
  */
-abstract class IDrawingRepository {
+abstract class DrawingRepository {
   /// Uploads PNG bytes to Supabase Storage and inserts a question row.
   /// Returns the public URL of the uploaded drawing.
   Future<String> sendDrawingQuestion({

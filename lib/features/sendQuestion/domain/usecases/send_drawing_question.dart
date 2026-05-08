@@ -5,7 +5,7 @@ import '../repositories/drawing_repository.dart';
  * Use case for sending a drawing question.
  */
 class SendDrawingQuestion {
-  final IDrawingRepository _repository;
+  final DrawingRepository _repository;
 
   const SendDrawingQuestion(this._repository);
 

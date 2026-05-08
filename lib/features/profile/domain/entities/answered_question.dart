@@ -74,15 +74,21 @@ class AnsweredQuestion extends Equatable {
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is AnsweredQuestion &&
-          runtimeType == other.runtimeType &&
-          id == other.id;
-
-  @override
-  int get hashCode => id.hashCode;
-
-  @override
-  List<Object?> get props => [id];
+  List<Object?> get props => [
+    id,
+    userId,
+    questionText,
+    answerText,
+    likesCount,
+    commentsCount,
+    sharesCount,
+    createdAt,
+    isAnonymous,
+    senderUsername,
+    senderAvatarUrl,
+    answererUsername,
+    answererAvatarUrl,
+    questionType,
+    drawingUrl,
+  ];
 }

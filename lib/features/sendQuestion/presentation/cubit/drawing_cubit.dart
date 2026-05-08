@@ -24,10 +24,6 @@ class Stroke extends Equatable {
   Stroke copyWithPoint(Offset point) =>
       Stroke(points: [...points, point], color: color, width: width);
 
-  void addPoint(Offset point) {
-    points.add(point);
-  }
-
   Path? get cachedPath => _cachedPath;
   int get cachedPathPointCount => _cachedPathPointCount;
 
@@ -135,6 +131,7 @@ class DrawingCubit extends Cubit<DrawingState> {
           color: state.selectedColor,
           width: state.selectedWidth,
         ),
+        undoStack: [],
       ),
     );
     _requestRepaint();
@@ -150,7 +147,7 @@ class DrawingCubit extends Cubit<DrawingState> {
         (current.points.last - point).distance < _minPointDistance) {
       return;
     }
-    current.addPoint(point);
+    emit(state.copyWith(currentStroke: current.copyWithPoint(point)));
     _requestRepaint();
   }
 

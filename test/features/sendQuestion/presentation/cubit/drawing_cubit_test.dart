@@ -35,7 +35,7 @@ void main() {
         cubit.continueStroke(const Offset(20, 20));
         cubit.endStroke();
       },
-      skip: 1,
+      skip: 2,
       expect: () => [
         DrawingState(
           strokes: [
@@ -46,6 +46,28 @@ void main() {
             ),
           ],
           currentStroke: null,
+          undoStack: [],
+        ),
+      ],
+    );
+
+    blocTest<DrawingCubit, DrawingState>(
+      'startStroke clears redo stack after undo',
+      build: () => DrawingCubit(),
+      act: (cubit) {
+        cubit.startStroke(const Offset(10, 10));
+        cubit.endStroke();
+        cubit.undo();
+        cubit.startStroke(const Offset(20, 20));
+      },
+      skip: 3,
+      expect: () => [
+        DrawingState(
+          currentStroke: Stroke(
+            points: [const Offset(20, 20)],
+            color: const Color(0xFF000000),
+            width: 4.0,
+          ),
           undoStack: [],
         ),
       ],

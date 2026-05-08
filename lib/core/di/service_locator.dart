@@ -395,11 +395,11 @@ void _initDrawing() {
   getIt.registerLazySingleton<DrawingRemoteDataSource>(
     () => DrawingRemoteDataSource(Supabase.instance.client),
   );
-  getIt.registerLazySingleton<IDrawingRepository>(
+  getIt.registerLazySingleton<DrawingRepository>(
     () => DrawingRepositoryImpl(getIt<DrawingRemoteDataSource>()),
   );
   getIt.registerLazySingleton<SendDrawingQuestion>(
-    () => SendDrawingQuestion(getIt<IDrawingRepository>()),
+    () => SendDrawingQuestion(getIt<DrawingRepository>()),
   );
   getIt.registerFactory<SendDrawingCubit>(
     () => SendDrawingCubit(getIt<SendDrawingQuestion>()),

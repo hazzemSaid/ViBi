@@ -9,6 +9,8 @@ import 'package:vibi/features/profile/presentation/widgets/common/follow_button.
 import 'package:vibi/features/recommendation/presentation/screens/recommend_search_screen.dart';
 import 'package:vibi/features/sendQuestion/presentation/pages/drawing_page.dart';
 
+const _defaultShareBaseUrl = 'https://vibi.social';
+
 class PublicProfileActionsRow extends StatelessWidget {
   final PublicProfile profile;
 
@@ -75,12 +77,12 @@ class PublicProfileActionsRow extends StatelessWidget {
             onPressed: () {
               final username = profile.username?.trim() ?? '';
               final shareBaseUrl =
-                  dotenv.env['SHARE_BASE_URL'] ?? 'https://vibi.social';
+                  dotenv.env['SHARE_BASE_URL'] ?? _defaultShareBaseUrl;
               final profileUrl = username.isEmpty
                   ? shareBaseUrl
                   : '$shareBaseUrl/u/$username';
               Share.share(
-                'Check out ${profile.username ?? "this user"}\'s profile on ViBi!\n$profileUrl',
+                'View ${profile.username ?? "this user"} on ViBi\n$profileUrl',
                 subject: '${profile.username ?? "user"}\'s ViBi profile',
               );
             },

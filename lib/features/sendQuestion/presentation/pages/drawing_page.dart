@@ -142,7 +142,7 @@ class _DrawingPageState extends State<DrawingPage> {
         context,
       ).showSnackBar(
         const SnackBar(
-          content: Text('Couldn\'t capture your drawing. Please try again.'),
+          content: Text('Could not capture your drawing. Please try again.'),
         ),
       );
       return;

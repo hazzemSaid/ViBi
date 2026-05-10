@@ -65,14 +65,6 @@ class QuestionCard extends StatelessWidget {
           ),
           AppSizes.gapH12,
           if (_isRecommendation) ...[
-            if (questionText.trim().isNotEmpty) ...[
-              _QuestionText(
-                text: questionText,
-                fontSize: questionFontSize,
-                color: colorScheme.onSurface,
-              ),
-              AppSizes.gapH12,
-            ],
             MediaCard(
               media: mediaRec!,
               compact: true,
@@ -81,51 +73,12 @@ class QuestionCard extends StatelessWidget {
                   FullScreenMediaViewer.show(context, mediaRec!.posterUrl),
             ),
           ] else if (_isDrawing) ...[
-            if (questionText.trim().isNotEmpty) ...[
-              _QuestionText(
-                text: questionText,
-                fontSize: questionFontSize,
-                color: colorScheme.onSurface,
-              ),
-              AppSizes.gapH12,
-            ],
             DrawingQuestionCard(
               drawingUrl: drawingUrl!,
-              onTap: () =>
-                  FullScreenMediaViewer.show(context, drawingUrl!),
+              onTap: () => FullScreenMediaViewer.show(context, drawingUrl!),
             ),
-          ] else
-            _QuestionText(
-              text: questionText,
-              fontSize: questionFontSize,
-              color: colorScheme.onSurface,
-            ),
+          ],
         ],
-      ),
-    );
-  }
-}
-
-class _QuestionText extends StatelessWidget {
-  const _QuestionText({
-    required this.text,
-    required this.fontSize,
-    required this.color,
-  });
-
-  final String text;
-  final double fontSize;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyle(
-        color: color,
-        fontSize: fontSize,
-        fontWeight: FontWeight.w700,
-        height: 1.28,
       ),
     );
   }

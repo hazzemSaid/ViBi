@@ -42,7 +42,7 @@ class PublicProfileActionsRow extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(
                 context,
-              ).colorScheme.onSurface.withOpacity(0.08),
+              ).colorScheme.onSurface.withValues(alpha: 0.08),
               foregroundColor: Theme.of(context).colorScheme.onSurface,
               shape: const StadiumBorder(),
               minimumSize: const Size.fromHeight(52),
@@ -56,7 +56,9 @@ class PublicProfileActionsRow extends StatelessWidget {
               size: 20,
               color: profile.allowAnonymousQuestions
                   ? Theme.of(context).colorScheme.onSurface
-                  : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                  : Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             label: Text(
               profile.allowAnonymousQuestions ? 'Ask' : 'Questions Off',
@@ -70,22 +72,29 @@ class PublicProfileActionsRow extends StatelessWidget {
           width: 52,
           height: 52,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.08),
             shape: BoxShape.circle,
           ),
           child: IconButton(
             icon: const Icon(Icons.ios_share, size: 22),
             color: canShare
                 ? Theme.of(context).colorScheme.onSurface
-                : Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                : Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
             onPressed: canShare
                 ? () {
                     final shareBaseUrl =
                         dotenv.env['SHARE_BASE_URL'] ?? _defaultShareBaseUrl;
                     final profileUrl = '$shareBaseUrl/u/$username';
-                    Share.share(
-                      'Check out $username\'s profile on Vibi\n$profileUrl',
-                      subject: '$username\'s Vibi profile',
+                    SharePlus.instance.share(
+                      ShareParams(
+                        text:
+                            'Check out $username\'s profile on Vibi\n$profileUrl',
+                        subject: '$username\'s Vibi profile',
+                      ),
                     );
                   }
                 : null,
@@ -96,10 +105,19 @@ class PublicProfileActionsRow extends StatelessWidget {
   }
 }
 
-class _AskOptionsBottomSheet extends StatelessWidget {
+class _AskOptionsBottomSheet extends StatefulWidget {
   final PublicProfile profile;
 
   const _AskOptionsBottomSheet({required this.profile});
+
+  @override
+  State<_AskOptionsBottomSheet> createState() => _AskOptionsBottomSheetState();
+}
+
+class _AskOptionsBottomSheetState extends State<_AskOptionsBottomSheet> {
+  bool _sendAnonymously = true;
+
+  PublicProfile get profile => widget.profile;
 
   Future<void> _openTextQuestion(BuildContext context) async {
     final navigator = Navigator.of(context);
@@ -109,6 +127,8 @@ class _AskOptionsBottomSheet extends StatelessWidget {
       builder: (_) => SendQuestionDialog(
         recipientId: profile.id,
         recipientUsername: profile.username ?? 'user',
+        initialAnonymous: _sendAnonymously,
+        showAnonymousSwitch: false,
       ),
     );
   }
@@ -122,60 +142,22 @@ class _AskOptionsBottomSheet extends StatelessWidget {
         builder: (_) => DrawingPage(
           recipientId: profile.id,
           senderId: Supabase.instance.client.auth.currentUser?.id,
+          initialAnonymous: _sendAnonymously,
+          askBeforeSend: false,
         ),
       ),
     );
   }
 
   Future<void> _openRecommendation(BuildContext context) async {
-    final theme = Theme.of(context);
-    final anonymous = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        var isAnon = false;
-        return StatefulBuilder(
-          builder: (ctx, setState) => AlertDialog(
-            backgroundColor: theme.colorScheme.surface,
-            title: Text(
-              'Send anonymously?',
-              style: TextStyle(color: theme.colorScheme.onSurface),
-            ),
-            content: SwitchListTile(
-              title: Text(
-                'Send anonymously',
-                style: TextStyle(color: theme.colorScheme.onSurface),
-              ),
-              value: isAnon,
-              activeThumbColor: theme.colorScheme.primary,
-              onChanged: (v) => setState(() => isAnon = v),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                child: Text(
-                  'Cancel',
-                  style: TextStyle(color: theme.colorScheme.onSurface),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(ctx).pop(isAnon),
-                child: const Text('Continue'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-
-    if (anonymous == null) return;
-
     final navigator = Navigator.of(context);
     navigator.pop();
     await navigator.push(
       MaterialPageRoute(
         builder: (_) => RecommendSearchScreen(
           recipientId: profile.id,
-          initialAnonymous: anonymous,
+          initialAnonymous: _sendAnonymously,
+          showAnonymousSwitch: false,
         ),
       ),
     );
@@ -221,7 +203,10 @@ class _AskOptionsBottomSheet extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.close, color: theme.colorScheme.onSurface.withValues(alpha: 0.54)),
+                  icon: Icon(
+                    Icons.close,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
+                  ),
                   onPressed: () => Navigator.of(context).pop(),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -230,7 +215,23 @@ class _AskOptionsBottomSheet extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+            child: Text(
+              'Pick how you want to send, then choose what to create.',
+              style: TextStyle(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.62),
+                fontSize: 13,
+                height: 1.25,
+              ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: _buildIdentityToggle(context),
+          ),
+          const SizedBox(height: 14),
 
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -243,7 +244,9 @@ class _AskOptionsBottomSheet extends StatelessWidget {
                   iconColor: const Color(0xFFE57373),
                   iconBgColor: const Color(0xFF4A2525),
                   title: 'Ask Question',
-                  subtitle: 'Send a text question',
+                  subtitle: _sendAnonymously
+                      ? 'Send a text question anonymously'
+                      : 'Send a text question with your profile',
                 ),
                 const SizedBox(height: 12),
                 _buildMenuItem(
@@ -253,7 +256,9 @@ class _AskOptionsBottomSheet extends StatelessWidget {
                   iconColor: const Color(0xFFBA68C8),
                   iconBgColor: const Color(0xFF381F4A),
                   title: 'Share Drawing',
-                  subtitle: 'Send a drawing or sketch',
+                  subtitle: _sendAnonymously
+                      ? 'Send a drawing anonymously'
+                      : 'Send a drawing with your profile',
                 ),
                 const SizedBox(height: 12),
                 _buildMenuItem(
@@ -263,12 +268,97 @@ class _AskOptionsBottomSheet extends StatelessWidget {
                   iconColor: const Color(0xFF64B5F6),
                   iconBgColor: const Color(0xFF1B314B),
                   title: 'Recommend Film',
-                  subtitle: 'Share a movie recommendation',
+                  subtitle: _sendAnonymously
+                      ? 'Share a movie recommendation anonymously'
+                      : 'Share a movie recommendation with your profile',
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildIdentityToggle(BuildContext context) {
+    final theme = Theme.of(context);
+    final title = _sendAnonymously ? 'Sending anonymously' : 'Sending as you';
+    final subtitle = _sendAnonymously
+        ? 'Your name will stay hidden for any option below.'
+        : 'Your profile will be attached to any option below.';
+
+    return Material(
+      color: Colors.transparent,
+      child: Ink(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: theme.colorScheme.primary.withValues(alpha: 0.22),
+          ),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => setState(() {
+            _sendAnonymously = !_sendAnonymously;
+          }),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.16),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    _sendAnonymously
+                        ? Icons.visibility_off_rounded
+                        : Icons.person_outline_rounded,
+                    color: theme.colorScheme.primary,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.62,
+                          ),
+                          fontSize: 12,
+                          height: 1.25,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Switch(
+                  value: _sendAnonymously,
+                  activeThumbColor: theme.colorScheme.primary,
+                  onChanged: (value) => setState(() {
+                    _sendAnonymously = value;
+                  }),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -324,7 +414,9 @@ class _AskOptionsBottomSheet extends StatelessWidget {
                       subtitle,
                       style: TextStyle(
                         fontSize: 13,
-                        color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.54,
+                        ),
                       ),
                     ),
                   ],

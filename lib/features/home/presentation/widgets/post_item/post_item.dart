@@ -80,16 +80,16 @@ class PostItem extends StatelessWidget {
                         mediaRec: currentItem.mediaRec,
                         drawingUrl: currentItem.drawingUrl,
                       ),
-                      AppSizes.gapH16,
+                      AppSizes.gapH12,
                       UserAnswerText(answerText: currentItem.answerText),
-                      AppSizes.gapH16,
+                      AppSizes.gapH12,
                       Divider(
                         height: 1,
                         color: Theme.of(
                           context,
                         ).colorScheme.onSurface.withValues(alpha: 0.06),
                       ),
-                      AppSizes.gapH8,
+                      AppSizes.gapH4,
                       ActionRow(
                         answerId: currentItem.id,
                         fallbackAnswerText: currentItem.answerText,

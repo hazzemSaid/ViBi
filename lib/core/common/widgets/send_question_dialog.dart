@@ -8,11 +8,15 @@ import 'package:vibi/features/sendQuestion/presentation/cubit/send_question_stat
 class SendQuestionDialog extends StatefulWidget {
   final String recipientId;
   final String recipientUsername;
+  final bool initialAnonymous;
+  final bool showAnonymousSwitch;
 
   const SendQuestionDialog({
     super.key,
     required this.recipientId,
     required this.recipientUsername,
+    this.initialAnonymous = false,
+    this.showAnonymousSwitch = true,
   });
 
   @override
@@ -29,6 +33,7 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
   void initState() {
     super.initState();
     _sendQuestionCubit = getIt<SendQuestionCubit>();
+    _isAnonymous = widget.initialAnonymous;
   }
 
   @override
@@ -145,52 +150,59 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
                     ),
                     SizedBox(height: AppSizes.r16),
 
-                    // Anonymous Switch
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: AppSizes.r12,
-                        vertical: AppSizes.r12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).scaffoldBackgroundColor,
-                        borderRadius: BorderRadius.circular(AppSizes.r12),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.visibility_off,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                            size: 20,
-                          ),
-                          SizedBox(width: AppSizes.r12),
-                          Expanded(
-                            child: Text(
-                              'Ask anonymously',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface,
-                                fontSize: 14,
+                    if (widget.showAnonymousSwitch) ...[
+                      // Anonymous Switch
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSizes.r12,
+                          vertical: AppSizes.r12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                          borderRadius: BorderRadius.circular(AppSizes.r12),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.visibility_off,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                              size: 20,
+                            ),
+                            SizedBox(width: AppSizes.r12),
+                            Expanded(
+                              child: Text(
+                                'Ask anonymously',
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
-                          ),
-                          Switch(
-                            value: _isAnonymous,
-                            onChanged: isLoading
-                                ? null
-                                : (value) {
-                                    setState(() {
-                                      _isAnonymous = value;
-                                    });
-                                  },
-                            activeThumbColor: Theme.of(
-                              context,
-                            ).colorScheme.primary,
-                          ),
-                        ],
+                            Switch(
+                              value: _isAnonymous,
+                              onChanged: isLoading
+                                  ? null
+                                  : (value) {
+                                      setState(() {
+                                        _isAnonymous = value;
+                                      });
+                                    },
+                              activeThumbColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    SizedBox(height: AppSizes.r20),
+                      SizedBox(height: AppSizes.r20),
+                    ] else ...[
+                      _buildIdentityStatus(context),
+                      SizedBox(height: AppSizes.r20),
+                    ],
 
                     // Error Message
                     if (sendState is SendQuestionFailure)
@@ -244,6 +256,42 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildIdentityStatus(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSizes.r12,
+        vertical: AppSizes.r12,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(AppSizes.r12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            _isAnonymous
+                ? Icons.visibility_off_rounded
+                : Icons.person_outline_rounded,
+            color: theme.colorScheme.onSurfaceVariant,
+            size: 20,
+          ),
+          SizedBox(width: AppSizes.r12),
+          Expanded(
+            child: Text(
+              _isAnonymous ? 'Sending anonymously' : 'Sending as you',
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

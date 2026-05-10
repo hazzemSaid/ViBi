@@ -5,15 +5,18 @@ import 'package:vibi/features/recommendation/presentation/cubits/recommendation_
 import 'package:vibi/features/recommendation/presentation/cubits/recommendation_flow_state.dart';
 import 'package:vibi/core/common/widgets/media_card.dart';
 import 'package:vibi/features/recommendation/presentation/widgets/trending_view.dart';
+
 class RecommendSearchScreen extends StatefulWidget {
   const RecommendSearchScreen({
     super.key,
     required this.recipientId,
     this.initialAnonymous = false,
+    this.showAnonymousSwitch = true,
   });
 
   final String recipientId;
   final bool initialAnonymous;
+  final bool showAnonymousSwitch;
 
   @override
   State<RecommendSearchScreen> createState() => _RecommendSearchScreenState();
@@ -21,7 +24,6 @@ class RecommendSearchScreen extends StatefulWidget {
 
 class _RecommendSearchScreenState extends State<RecommendSearchScreen> {
   final _searchController = TextEditingController();
-
 
   @override
   void dispose() {
@@ -150,13 +152,26 @@ class _RecommendSearchScreenState extends State<RecommendSearchScreen> {
                         onChanged: cubit.onQueryChanged,
                         enabled: !state.isSending,
                         autofocus: true,
-                        style: const TextStyle(color: Color(0xFFF5F6F8), fontSize: 15),
+                        style: const TextStyle(
+                          color: Color(0xFFF5F6F8),
+                          fontSize: 15,
+                        ),
                         decoration: InputDecoration(
                           hintText: 'Search movies, actors...',
-                          hintStyle: const TextStyle(color: Color(0xFF8F9198), fontSize: 15),
-                          prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF8F9198), size: 18),
+                          hintStyle: const TextStyle(
+                            color: Color(0xFF8F9198),
+                            fontSize: 15,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.search_rounded,
+                            color: Color(0xFF8F9198),
+                            size: 18,
+                          ),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
                           suffixIcon: state.query.trim().isEmpty
                               ? null
                               : IconButton(
@@ -164,58 +179,69 @@ class _RecommendSearchScreenState extends State<RecommendSearchScreen> {
                                     _searchController.clear();
                                     cubit.onQueryChanged('');
                                   },
-                                  icon: const Icon(Icons.close_rounded, color: Color(0xFF8F9198)),
+                                  icon: const Icon(
+                                    Icons.close_rounded,
+                                    color: Color(0xFF8F9198),
+                                  ),
                                 ),
                         ),
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surface,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.08,
+                  if (widget.showAnonymousSwitch)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surface,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.08,
+                            ),
                           ),
                         ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.visibility_off_rounded,
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.72,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.visibility_off_rounded,
+                              color: theme.colorScheme.onSurface.withValues(
+                                alpha: 0.72,
+                              ),
+                              size: 18,
                             ),
-                            size: 18,
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              'Send anonymously',
-                              style: TextStyle(
-                                color: theme.colorScheme.onSurface,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Send anonymously',
+                                style: TextStyle(
+                                  color: theme.colorScheme.onSurface,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
-                          ),
-                          Switch(
-                            value: state.isAnonymous,
-                            onChanged: state.isSending
-                                ? null
-                                : cubit.setAnonymous,
-                          ),
-                        ],
+                            Switch(
+                              value: state.isAnonymous,
+                              onChanged: state.isSending
+                                  ? null
+                                  : cubit.setAnonymous,
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      child: _IdentityModeBanner(
+                        isAnonymous: state.isAnonymous,
                       ),
                     ),
-                  ),
                   if (state.errorMessage != null)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
@@ -248,9 +274,8 @@ class _RecommendSearchScreenState extends State<RecommendSearchScreen> {
                                   'No results found. Try another title.',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: theme.colorScheme.onSurface.withValues(
-                                      alpha: 0.62,
-                                    ),
+                                    color: theme.colorScheme.onSurface
+                                        .withValues(alpha: 0.62),
                                     fontSize: 13,
                                   ),
                                 ),
@@ -342,5 +367,46 @@ class _RecommendSearchScreenState extends State<RecommendSearchScreen> {
       ),
     );
   }
+}
 
+class _IdentityModeBanner extends StatelessWidget {
+  const _IdentityModeBanner({required this.isAnonymous});
+
+  final bool isAnonymous;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            isAnonymous
+                ? Icons.visibility_off_rounded
+                : Icons.person_outline_rounded,
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
+            size: 18,
+          ),
+          const SizedBox(width: 10),
+          Text(
+            isAnonymous ? 'Sending anonymously' : 'Sending as you',
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

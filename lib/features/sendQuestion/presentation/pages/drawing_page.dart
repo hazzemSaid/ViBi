@@ -30,11 +30,15 @@ import '../widgets/drawing_toolbar.dart';
 class DrawingPage extends StatefulWidget {
   final String recipientId;
   final String? senderId;
+  final bool initialAnonymous;
+  final bool askBeforeSend;
 
   const DrawingPage({
     super.key,
     required this.recipientId,
     this.senderId,
+    this.initialAnonymous = false,
+    this.askBeforeSend = true,
   });
 
   @override
@@ -118,29 +122,32 @@ class _DrawingPageState extends State<DrawingPage> {
   }
 
   /**
-   * Validates the drawing is non-empty, shows the [DrawingSendDialog], and
+   * Validates the drawing is non-empty, confirms anonymity when needed, and
    * uploads the rasterized PNG via [SendDrawingCubit].
    */
   void _onSend(BuildContext context) async {
     final drawingCubit = context.read<DrawingCubit>();
     if (drawingCubit.state.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Draw something first!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Draw something first!')));
       return;
     }
 
-    final result = await DrawingSendDialog.show(context);
-    if (result == null || !context.mounted) return;
+    final isAnonymous = widget.askBeforeSend
+        ? await DrawingSendDialog.show(
+            context,
+            initialAnonymous: widget.initialAnonymous,
+          )
+        : widget.initialAnonymous;
+    if (isAnonymous == null || !context.mounted) return;
 
     Uint8List pngBytes;
     try {
       pngBytes = await _rasterize(drawingCubit.state);
     } on StateError {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Could not capture your drawing. Please try again.'),
         ),
@@ -152,8 +159,8 @@ class _DrawingPageState extends State<DrawingPage> {
     context.read<SendDrawingCubit>().send(
       recipientId: widget.recipientId,
       pngBytes: pngBytes,
-      isAnonymous: result,
-      senderId: result ? null : widget.senderId,
+      isAnonymous: isAnonymous,
+      senderId: isAnonymous ? null : widget.senderId,
     );
   }
 
@@ -167,20 +174,20 @@ class _DrawingPageState extends State<DrawingPage> {
       child: BlocConsumer<SendDrawingCubit, SendDrawingState>(
         listener: (context, state) {
           if (state is SendDrawingSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Drawing sent!')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Drawing sent!')));
             Navigator.pop(context, true);
           } else if (state is SendDrawingFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed: ${state.message}')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Failed: ${state.message}')));
             context.read<SendDrawingCubit>().reset();
           }
         },
         builder: (context, sendState) {
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             appBar: AppBar(
               title: const Text('Send Drawing'),
               centerTitle: true,
@@ -237,16 +244,15 @@ class _DrawingPageState extends State<DrawingPage> {
 
                 return Column(
                   children: [
-                    DrawingModeBanner(
-                      isZoomMode: _mode == _CanvasMode.zoom,
-                    ),
+                    if (!widget.askBeforeSend)
+                      _IdentityModeBanner(isAnonymous: widget.initialAnonymous),
+                    DrawingModeBanner(isZoomMode: _mode == _CanvasMode.zoom),
                     Expanded(
                       child: DecoratedBox(
                         decoration: BoxDecoration(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withValues(alpha: 0.035),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.035),
                         ),
                         child: DrawingCanvasArea(
                           state: drawState,
@@ -271,6 +277,43 @@ class _DrawingPageState extends State<DrawingPage> {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _IdentityModeBanner extends StatelessWidget {
+  const _IdentityModeBanner({required this.isAnonymous});
+
+  final bool isAnonymous;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      color: theme.colorScheme.primary.withValues(alpha: 0.08),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            isAnonymous
+                ? Icons.visibility_off_rounded
+                : Icons.person_outline_rounded,
+            color: theme.colorScheme.primary,
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            isAnonymous ? 'Sending anonymously' : 'Sending as you',
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }

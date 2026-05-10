@@ -7,17 +7,24 @@ import 'package:flutter/material.dart';
  * Returns `null` on cancel, `false` for named send, `true` for anonymous.
  */
 class DrawingSendDialog extends StatelessWidget {
-  const DrawingSendDialog({super.key});
+  const DrawingSendDialog({super.key, this.initialAnonymous = false});
 
-  static Future<bool?> show(BuildContext context) {
+  final bool initialAnonymous;
+
+  static Future<bool?> show(
+    BuildContext context, {
+    bool initialAnonymous = false,
+  }) {
     return showDialog<bool>(
       context: context,
-      builder: (_) => const DrawingSendDialog(),
+      builder: (_) => DrawingSendDialog(initialAnonymous: initialAnonymous),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final primaryAnonymous = initialAnonymous;
+
     return AlertDialog(
       title: const Text('Send Drawing'),
       content: const Text('How would you like to send this drawing?'),
@@ -26,14 +33,29 @@ class DrawingSendDialog extends StatelessWidget {
           onPressed: () => Navigator.pop(context, null),
           child: const Text('Cancel'),
         ),
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Send as Myself'),
-        ),
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context, true),
-          child: const Text('Send Anonymously'),
-        ),
+        if (primaryAnonymous) ...[
+          OutlinedButton.icon(
+            onPressed: () => Navigator.pop(context, false),
+            icon: const Icon(Icons.person_outline_rounded),
+            label: const Text('Send as me'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(context, true),
+            icon: const Icon(Icons.visibility_off_rounded),
+            label: const Text('Send anonymously'),
+          ),
+        ] else ...[
+          OutlinedButton.icon(
+            onPressed: () => Navigator.pop(context, true),
+            icon: const Icon(Icons.visibility_off_rounded),
+            label: const Text('Send anonymously'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(context, false),
+            icon: const Icon(Icons.person_outline_rounded),
+            label: const Text('Send as me'),
+          ),
+        ],
       ],
     );
   }

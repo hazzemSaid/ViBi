@@ -180,7 +180,7 @@ class _DrawingToolbarState extends State<DrawingToolbar> {
                     onTap: () => cubit.setWidth(w),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 150),
-                      margin: EdgeInsets.only(right: AppSizes.s10),
+                      margin: EdgeInsets.only(right: AppSizes.s6),
                       width: AppSizes.s32 + 4,
                       height: AppSizes.s32 + 4,
                       decoration: BoxDecoration(
@@ -218,6 +218,10 @@ class _DrawingToolbarState extends State<DrawingToolbar> {
                   onPressed: () => cubit.toggleEraser(widget.backgroundColor),
                   tooltip: 'Eraser',
                   iconSize: AppSizes.iconNormal,
+                  constraints: const BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 40,
+                  ),
                   color: state.isEraser
                       ? Theme.of(context).colorScheme.primary
                       : null,
@@ -228,6 +232,10 @@ class _DrawingToolbarState extends State<DrawingToolbar> {
                   onPressed: state.strokes.isEmpty ? null : cubit.undo,
                   tooltip: 'Undo',
                   iconSize: AppSizes.iconNormal,
+                  constraints: const BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 40,
+                  ),
                 ),
                 // Redo
                 IconButton(
@@ -235,6 +243,10 @@ class _DrawingToolbarState extends State<DrawingToolbar> {
                   onPressed: state.canRedo ? cubit.redo : null,
                   tooltip: 'Redo',
                   iconSize: AppSizes.iconNormal,
+                  constraints: const BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 40,
+                  ),
                 ),
                 // Clear
                 IconButton(
@@ -242,6 +254,10 @@ class _DrawingToolbarState extends State<DrawingToolbar> {
                   onPressed: state.isEmpty ? null : cubit.clear,
                   tooltip: 'Clear',
                   iconSize: AppSizes.iconNormal,
+                  constraints: const BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 40,
+                  ),
                 ),
               ],
             ),

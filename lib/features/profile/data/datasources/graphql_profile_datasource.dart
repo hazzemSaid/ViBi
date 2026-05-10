@@ -5,6 +5,7 @@ import 'package:ferry/ferry.dart' as ferry;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:vibi/core/errors/errors_handel.dart';
 import 'package:vibi/core/graphql/graphql_config.dart';
+import 'package:vibi/core/common/utils/question_media.dart';
 import 'package:vibi/core/graphql/mutations/profile_mutations.dart';
 import 'package:vibi/core/graphql/queries/profile_queries.dart';
 import 'package:vibi/features/profile/data/datasources/profile_datasource.dart';
@@ -350,6 +351,14 @@ class GraphQLProfileDataSource implements ProfileDataSource {
           }
         }
 
+        final rawQuestionType = (question?['question_type'] as String? ?? 'text')
+            .trim()
+            .toLowerCase();
+        final questionType = rawQuestionType.isEmpty ? 'text' : rawQuestionType;
+        final drawingUrl = parseDrawingUrl(
+          question?['question_mediaCollection'],
+        );
+
         return AnsweredQuestionModel(
           id: node['id'] as String,
           userId: node['user_id'] as String,
@@ -370,8 +379,11 @@ class GraphQLProfileDataSource implements ProfileDataSource {
           answererAvatarUrl: answererAvatarUrls.isNotEmpty
               ? answererAvatarUrls.first
               : null,
+          questionType: questionType,
+          drawingUrl: drawingUrl,
         );
       }).toList(),
     );
   }
+
 }

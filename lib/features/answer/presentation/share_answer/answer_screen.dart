@@ -9,6 +9,8 @@ import 'package:vibi/features/answer/presentation/widgets/answer_screen_helpers.
 import 'package:vibi/features/inbox/presentation/helpers/question_media_helpers.dart';
 import 'package:vibi/features/recommendation/data/models/tmdb_media.dart';
 import 'package:vibi/core/common/widgets/media_card.dart';
+import 'package:vibi/core/common/widgets/drawing_question_card.dart';
+import 'package:vibi/core/common/widgets/full_screen_media_viewer.dart';
 
 /**
  * Full-screen answer composer for one inbox question.
@@ -30,6 +32,7 @@ class AnswerScreen extends StatefulWidget {
     this.isAnonymous = false,
     this.questionType = 'text',
     this.mediaRec,
+    this.drawingUrl,
   });
 
   final String questionId;
@@ -37,6 +40,7 @@ class AnswerScreen extends StatefulWidget {
   final bool isAnonymous;
   final String questionType;
   final TmdbMedia? mediaRec;
+  final String? drawingUrl;
 
   @override
   State<AnswerScreen> createState() => _AnswerScreenState();
@@ -153,6 +157,7 @@ class _AnswerScreenState extends State<AnswerScreen> {
         'answerText': text,
         'isAnonymous': widget.isAnonymous,
         'username': getUsername(context),
+        'drawingUrl': widget.drawingUrl,
       },
     );
 
@@ -317,6 +322,10 @@ class _AnswerScreenState extends State<AnswerScreen> {
   Widget _buildQuestionBubble() {
     final theme = Theme.of(context);
     if (isRecommendationQuestion(widget.questionType)) {
+      final media = buildRecommendationMedia(
+        widget.mediaRec,
+        widget.questionText,
+      );
       return Container(
         width: double.infinity,
         padding: EdgeInsets.all(AppSizes.s16),
@@ -347,12 +356,54 @@ class _AnswerScreenState extends State<AnswerScreen> {
             ),
             AppSizes.gapH12,
             MediaCard(
-              media: buildRecommendationMedia(
-                widget.mediaRec,
-                widget.questionText,
-              ),
+              media: media,
               compact: true,
               showOverview: true,
+              onTap: media.posterUrl.isNotEmpty
+                  ? () => FullScreenMediaViewer.show(context, media.posterUrl)
+                  : null,
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (widget.questionType == 'drawing' && widget.drawingUrl != null) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(AppSizes.s16),
+        decoration: BoxDecoration(
+          color: pinkColor,
+          borderRadius: BorderRadius.circular(AppSizes.r20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSizes.s10,
+                vertical: AppSizes.s4,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.20),
+                borderRadius: BorderRadius.circular(AppSizes.rMax),
+              ),
+              child: Text(
+                'DRAWING',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.7,
+                  color: theme.colorScheme.onPrimary,
+                ),
+              ),
+            ),
+            AppSizes.gapH12,
+            DrawingQuestionCard(
+              drawingUrl: widget.drawingUrl!,
+              onTap: () => FullScreenMediaViewer.show(
+                context,
+                widget.drawingUrl!,
+              ),
             ),
           ],
         ),

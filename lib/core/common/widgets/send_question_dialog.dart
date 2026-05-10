@@ -2,18 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
-import 'package:vibi/features/sendQuestion/presentation/cubit/question_providers.dart';
-import 'package:vibi/features/sendQuestion/presentation/cubit/question_state.dart';
-import 'package:vibi/features/recommendation/presentation/screens/recommend_search_screen.dart';
+import 'package:vibi/features/sendQuestion/presentation/cubit/send_question_cubit.dart';
+import 'package:vibi/features/sendQuestion/presentation/cubit/send_question_state.dart';
 
 class SendQuestionDialog extends StatefulWidget {
   final String recipientId;
   final String recipientUsername;
+  final bool initialAnonymous;
+  final bool showAnonymousSwitch;
 
   const SendQuestionDialog({
     super.key,
     required this.recipientId,
     required this.recipientUsername,
+    this.initialAnonymous = false,
+    this.showAnonymousSwitch = true,
   });
 
   @override
@@ -30,6 +33,7 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
   void initState() {
     super.initState();
     _sendQuestionCubit = getIt<SendQuestionCubit>();
+    _isAnonymous = widget.initialAnonymous;
   }
 
   @override
@@ -61,20 +65,6 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
         );
       }
     }
-  }
-
-  Future<void> _openRecommendationSheet() async {
-    final didSend = await Navigator.of(context).push<bool>(
-      MaterialPageRoute<bool>(
-        builder: (_) => RecommendSearchScreen(
-          recipientId: widget.recipientId,
-          initialAnonymous: _isAnonymous,
-        ),
-      ),
-    );
-
-    if (!mounted || didSend != true) return;
-    Navigator.of(context).pop();
   }
 
   @override
@@ -160,73 +150,59 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
                     ),
                     SizedBox(height: AppSizes.r16),
 
-                    // Anonymous Switch
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: AppSizes.r12,
-                        vertical: AppSizes.r12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).scaffoldBackgroundColor,
-                        borderRadius: BorderRadius.circular(AppSizes.r12),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.visibility_off,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                            size: 20,
-                          ),
-                          SizedBox(width: AppSizes.r12),
-                          Expanded(
-                            child: Text(
-                              'Ask anonymously',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                          Switch(
-                            value: _isAnonymous,
-                            onChanged: isLoading
-                                ? null
-                                : (value) {
-                                    setState(() {
-                                      _isAnonymous = value;
-                                    });
-                                  },
-                            activeThumbColor: Theme.of(
-                              context,
-                            ).colorScheme.primary,
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: AppSizes.r20),
-
-                    OutlinedButton.icon(
-                      onPressed: isLoading ? null : _openRecommendationSheet,
-                      icon: const Icon(Icons.movie_creation_outlined),
-                      label: const Text('Recommend Movie/TV'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Theme.of(
-                          context,
-                        ).colorScheme.onSurface,
-                        side: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.16),
+                    if (widget.showAnonymousSwitch) ...[
+                      // Anonymous Switch
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: AppSizes.r12,
+                          vertical: AppSizes.r12,
                         ),
-                        minimumSize: const Size.fromHeight(48),
-                        shape: RoundedRectangleBorder(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).scaffoldBackgroundColor,
                           borderRadius: BorderRadius.circular(AppSizes.r12),
                         ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.visibility_off,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                              size: 20,
+                            ),
+                            SizedBox(width: AppSizes.r12),
+                            Expanded(
+                              child: Text(
+                                'Ask anonymously',
+                                style: TextStyle(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                            Switch(
+                              value: _isAnonymous,
+                              onChanged: isLoading
+                                  ? null
+                                  : (value) {
+                                      setState(() {
+                                        _isAnonymous = value;
+                                      });
+                                    },
+                              activeThumbColor: Theme.of(
+                                context,
+                              ).colorScheme.primary,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    SizedBox(height: AppSizes.r12),
+                      SizedBox(height: AppSizes.r20),
+                    ] else ...[
+                      _buildIdentityStatus(context),
+                      SizedBox(height: AppSizes.r20),
+                    ],
 
                     // Error Message
                     if (sendState is SendQuestionFailure)
@@ -280,6 +256,42 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildIdentityStatus(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSizes.r12,
+        vertical: AppSizes.r12,
+      ),
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(AppSizes.r12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            _isAnonymous
+                ? Icons.visibility_off_rounded
+                : Icons.person_outline_rounded,
+            color: theme.colorScheme.onSurfaceVariant,
+            size: 20,
+          ),
+          SizedBox(width: AppSizes.r12),
+          Expanded(
+            child: Text(
+              _isAnonymous ? 'Sending anonymously' : 'Sending as you',
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

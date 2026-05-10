@@ -18,6 +18,7 @@ class InboxQuestionModel extends InboxQuestion {
     super.questionType,
     super.mediaRecId,
     super.mediaRec,
+    super.drawingUrl,
     required super.isAnonymous,
     required super.status,
     required super.createdAt,
@@ -58,6 +59,7 @@ class InboxQuestionModel extends InboxQuestion {
       questionType: questionType,
       mediaRecId: _asInt(map['media_rec_id']),
       mediaRec: mediaRecommendation,
+      drawingUrl: map['drawing_url'] as String?,
       isAnonymous: map['is_anonymous'] as bool? ?? false,
       status:
           (map['status']?.toString().trim().toLowerCase().isNotEmpty ?? false)
@@ -132,6 +134,7 @@ class InboxQuestionModel extends InboxQuestion {
             },
       'is_anonymous': isAnonymous,
       'status': status,
+      'drawing_url': drawingUrl,
       'created_at': createdAt.toIso8601String(),
     };
   }

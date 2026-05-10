@@ -124,6 +124,7 @@ class _InboxScreenState extends State<InboxScreen> {
             isAnonymous: question.isAnonymous,
             questionType: question.questionType,
             mediaRec: question.mediaRec,
+            drawingUrl: question.drawingUrl,
           ),
         ),
         transitionsBuilder: (_, animation, _, child) {

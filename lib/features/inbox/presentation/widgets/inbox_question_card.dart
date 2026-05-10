@@ -7,6 +7,8 @@ import 'package:vibi/features/inbox/domain/entities/inbox_question.dart';
 import 'package:vibi/features/inbox/presentation/helpers/question_media_helpers.dart';
 import 'package:vibi/features/inbox/presentation/widgets/icon_action.dart';
 import 'package:vibi/core/common/widgets/media_card.dart';
+import 'package:vibi/core/common/widgets/drawing_question_card.dart';
+import 'package:vibi/core/common/widgets/full_screen_media_viewer.dart';
 
 /**
  * Individual question card with answer, delete, and archive actions.
@@ -253,6 +255,29 @@ class QuestionCard extends StatelessWidget {
                     media: recommendationMedia,
                     compact: true,
                     showOverview: true,
+                    onTap: () => FullScreenMediaViewer.show(
+                      context,
+                      recommendationMedia.posterUrl,
+                    ),
+                  ),
+                ] else if (question.isDrawing && question.drawingUrl != null) ...[
+                  Text(
+                    'Drawing',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.72,
+                      ),
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                  AppSizes.gapH8,
+                  DrawingQuestionCard(
+                    drawingUrl: question.drawingUrl!,
+                    onTap: () => FullScreenMediaViewer.show(
+                      context,
+                      question.drawingUrl!,
+                    ),
                   ),
                 ] else
                   Text(

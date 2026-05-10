@@ -37,6 +37,14 @@ class InboxQueries {
               username
               avatar_urls
             }
+            question_mediaCollection {
+              edges {
+                node {
+                  media_url
+                  media_type
+                }
+              }
+            }
           }
         }
       }

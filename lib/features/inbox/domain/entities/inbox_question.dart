@@ -12,6 +12,7 @@ class InboxQuestion {
   final TmdbMedia? mediaRec;
   final bool isAnonymous;
   final String status; // pending, answered, deleted , archive
+  final String? drawingUrl;
   final DateTime createdAt;
 
   InboxQuestion({
@@ -24,6 +25,7 @@ class InboxQuestion {
     this.questionType = 'text',
     this.mediaRecId,
     this.mediaRec,
+    this.drawingUrl,
     required this.isAnonymous,
     required this.status,
     required this.createdAt,
@@ -31,4 +33,5 @@ class InboxQuestion {
 
   bool get isFromUser => !isAnonymous && senderId != null;
   bool get isRecommendation => questionType == 'recommendation';
+  bool get isDrawing => questionType == 'drawing';
 }

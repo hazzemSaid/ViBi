@@ -18,6 +18,7 @@ class ActionRow extends StatelessWidget {
     required this.fallbackQuestionText,
     required this.fallbackUsername,
     required this.fallbackIsAnonymous,
+    this.fallbackDrawingUrl,
   });
 
   final String answerId;
@@ -25,6 +26,7 @@ class ActionRow extends StatelessWidget {
   final String fallbackQuestionText;
   final String fallbackUsername;
   final bool fallbackIsAnonymous;
+  final String? fallbackDrawingUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -33,16 +35,17 @@ class ActionRow extends StatelessWidget {
         _ReactionSection(answerId: answerId),
         const Spacer(),
         _CommentActionButton(answerId: answerId),
-        AppSizes.gapW12,
+        AppSizes.gapW6,
         _ShareActionButton(
           answerId: answerId,
           fallbackAnswerText: fallbackAnswerText,
           fallbackQuestionText: fallbackQuestionText,
           fallbackUsername: fallbackUsername,
           fallbackIsAnonymous: fallbackIsAnonymous,
+          fallbackDrawingUrl: fallbackDrawingUrl,
         ),
-        AppSizes.gapW12,
-        const _SendTellButton(),
+        AppSizes.gapW6,
+        const Flexible(child: _SendTellButton()),
       ],
     );
   }
@@ -130,6 +133,7 @@ class _ShareActionButton extends StatelessWidget {
     required this.fallbackQuestionText,
     required this.fallbackUsername,
     required this.fallbackIsAnonymous,
+    this.fallbackDrawingUrl,
   });
 
   final String answerId;
@@ -137,6 +141,7 @@ class _ShareActionButton extends StatelessWidget {
   final String fallbackQuestionText;
   final String fallbackUsername;
   final bool fallbackIsAnonymous;
+  final String? fallbackDrawingUrl;
   /**
    * Opens the share screen for the given answer.
    */
@@ -147,6 +152,7 @@ class _ShareActionButton extends StatelessWidget {
       String questionText,
       String username,
       bool isAnonymous,
+      String? drawingUrl,
       bool canShare,
     })
     payload,
@@ -167,6 +173,7 @@ class _ShareActionButton extends StatelessWidget {
         'answerText': payload.answerText,
         'username': payload.username,
         'isAnonymous': payload.isAnonymous,
+        'drawingUrl': payload.drawingUrl,
       },
     );
   }
@@ -182,6 +189,7 @@ class _ShareActionButton extends StatelessWidget {
         String questionText,
         String username,
         bool isAnonymous,
+        String? drawingUrl,
         bool canShare,
       })
     >(
@@ -196,6 +204,7 @@ class _ShareActionButton extends StatelessWidget {
             questionText: fallbackQuestionText,
             username: fallbackUsername,
             isAnonymous: fallbackIsAnonymous,
+            drawingUrl: fallbackDrawingUrl,
             canShare: false,
           );
         }
@@ -211,6 +220,7 @@ class _ShareActionButton extends StatelessWidget {
           questionText: item.questionText,
           username: item.answerAuthorUsername,
           isAnonymous: item.isAnonymous,
+          drawingUrl: item.drawingUrl,
           canShare: canShare,
         );
       },
@@ -236,6 +246,7 @@ class _SendTellButton extends StatelessWidget {
         // TODO: implement send tell , to send question to the user related to the post
       },
       child: Container(
+        clipBehavior: Clip.hardEdge,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSizes.s10,
           vertical: AppSizes.s10,
@@ -257,15 +268,7 @@ class _SendTellButton extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurface,
               size: AppSizes.iconSmall,
             ),
-            AppSizes.gapW4, // Using gapW6 as closest to 7
-            Text(
-              'Send Ask',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.w700,
-                fontSize: AppSizes.s12,
-              ),
-            ),
+            AppSizes.gapW4,
           ],
         ),
       ),

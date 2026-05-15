@@ -9,7 +9,11 @@ import 'package:vibi/features/answer/presentation/screen/share_answer_screen.dar
 import 'package:vibi/features/auth/domain/repositories/auth_repository.dart';
 import 'package:vibi/features/auth/presentation/cubit/auth_action_cubit.dart';
 import 'package:vibi/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:vibi/features/auth/presentation/cubit/anonymous_auth_cubit.dart';
+import 'package:vibi/features/auth/presentation/cubit/password_reset_cubit.dart';
+import 'package:vibi/features/auth/presentation/pages/forgot_password_screen.dart';
 import 'package:vibi/features/auth/presentation/pages/login_screen.dart';
+import 'package:vibi/features/auth/presentation/pages/set_new_password_screen.dart';
 import 'package:vibi/features/auth/presentation/pages/signup_screen.dart';
 import 'package:vibi/features/auth/presentation/pages/verify_email_screen.dart';
 import 'package:vibi/features/auth/presentation/pages/welcome_screen.dart';
@@ -55,7 +59,14 @@ GoRouter createAppRouter(AuthCubit authCubit) {
       ),
       GoRoute(
         path: '/welcome',
-        builder: (context, state) => const WelcomeScreen(),
+        builder: (context, state) => MultiBlocProvider(
+          providers: [
+            BlocProvider<AnonymousAuthCubit>.value(
+              value: getIt<AnonymousAuthCubit>(),
+            ),
+          ],
+          child: const WelcomeScreen(),
+        ),
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
@@ -66,17 +77,25 @@ GoRouter createAppRouter(AuthCubit authCubit) {
         path: '/verify-email',
         builder: (context, state) => const VerifyEmailScreen(),
       ),
-      // Move edit-profile to top level so pushNamed works reliably
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => BlocProvider(
+          create: (context) => getIt<PasswordResetCubit>(),
+          child: const ForgotPasswordScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/set-new-password',
+        builder: (context, state) => BlocProvider(
+          create: (context) => getIt<PasswordResetCubit>(),
+          child: const SetNewPasswordScreen(),
+        ),
+      ),
       GoRoute(
         path: '/edit-profile',
         name: 'edit-profile',
         builder: (context, state) => EditProfileScreen(),
       ),
-      // GoRoute(
-      //   path: '/edit-profile/basic',
-      //   name: 'edit-profile-basic',
-      //   // builder: (context, state) => const EditProfileBasicInfoSection(),
-      // ),
       GoRoute(
         path: '/edit-profile/public-web',
         name: 'edit-profile-public-web',
@@ -97,14 +116,12 @@ GoRouter createAppRouter(AuthCubit authCubit) {
           );
         },
       ),
-      // Public profile route with user ID parameter
       GoRoute(
         path: '/profile/:userId',
         name: 'public-profile',
         builder: (context, state) {
           final userId = state.pathParameters['userId']!;
           final currentId = authCubit.currentUser?.id;
-          // if currentId is null, treat as own profile to avoid self-follow
           if (currentId == null || userId == currentId) {
             return ProfileScreen();
           }
@@ -119,7 +136,6 @@ GoRouter createAppRouter(AuthCubit authCubit) {
           return PublicProfileScreen.byUsername(username: username);
         },
       ),
-      // Followers list route
       GoRoute(
         path: '/:userId/followers',
         name: 'followers-list',
@@ -132,7 +148,6 @@ GoRouter createAppRouter(AuthCubit authCubit) {
           );
         },
       ),
-      // Following list route
       GoRoute(
         path: '/:userId/following',
         name: 'following-list',
@@ -206,22 +221,29 @@ GoRouter createAppRouter(AuthCubit authCubit) {
     ],
     redirect: (context, state) {
       final authActionState = context.read<AuthActionCubit>().state;
+
       final loggingIn =
           state.matchedLocation == '/login' ||
           state.matchedLocation == '/signup' ||
-          state.matchedLocation == '/welcome';
+          state.matchedLocation == '/welcome' ||
+          state.matchedLocation == '/forgot-password' ||
+          state.matchedLocation == '/set-new-password';
 
       final user = authCubit.currentUser;
       if (user != null) {
-        // User is authenticated
+        if (user.isAnonymous) {
+          if (state.matchedLocation == '/splash' ||
+              state.matchedLocation == '/verify-email') {
+            return '/home';
+          }
+          return null;
+        }
         if (!user.emailVerified) {
-          // Need verification
           if (state.matchedLocation != '/verify-email') {
             return '/verify-email';
           }
           return null;
         } else {
-          // User is verified
           if (loggingIn ||
               state.matchedLocation == '/splash' ||
               state.matchedLocation == '/verify-email') {
@@ -229,7 +251,6 @@ GoRouter createAppRouter(AuthCubit authCubit) {
           }
         }
       } else {
-        // If logged out and not on auth screens, go welcome (after splash)
         if (!loggingIn &&
             state.matchedLocation != '/splash' &&
             state.matchedLocation != '/onboarding' &&

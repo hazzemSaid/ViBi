@@ -15,12 +15,12 @@ class SendQuestionCubit extends Cubit<SendQuestionState> {
     emit(const SendQuestionLoading());
     try {
       final currentUserId = Supabase.instance.client.auth.currentUser?.id;
-      await _repository.sendQuestion(
-        recipientId: recipientId,
-        questionText: questionText,
-        isAnonymous: isAnonymous,
-        senderId: isAnonymous ? null : currentUserId,
-      );
+       await _repository.sendQuestion(
+         recipientId: recipientId,
+         questionText: questionText,
+         isAnonymous: isAnonymous,
+         senderId: isAnonymous ? null : currentUserId,
+       );
       emit(const SendQuestionSuccess());
     } catch (e) {
       emit(SendQuestionFailure('$e'));

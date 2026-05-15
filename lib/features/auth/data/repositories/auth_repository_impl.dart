@@ -11,14 +11,17 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this.dataSource);
 
   AppUser _mapUser(User user) {
+    final isAnonymous = user.appMetadata['provider'] == 'anonymous' ||
+        (user.identities?.isEmpty ?? false);
+
     return AppUser(
       id: user.id,
       email: user.email ?? '',
       displayName:
           user.userMetadata?['full_name'] as String? ??
           user.userMetadata?['name'] as String?,
-      // Supabase sets emailConfirmedAt once the user clicks the confirmation link
       emailVerified: user.emailConfirmedAt != null,
+      isAnonymous: isAnonymous,
     );
   }
 
@@ -52,6 +55,12 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<String, AppUser>> signInAnonymously() async {
+    final result = await dataSource.signInAnonymously();
+    return result.map((user) => _mapUser(user));
+  }
+
+  @override
   Future<Either<String, void>> signOut() => dataSource.signOut();
 
   @override
@@ -59,4 +68,12 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<String, void>> reloadUser() => dataSource.reloadUser();
+
+  @override
+  Future<Either<String, void>> resetPasswordForEmail(String email) =>
+      dataSource.resetPasswordForEmail(email);
+
+  @override
+  Future<Either<String, void>> updatePassword(String newPassword) =>
+      dataSource.updatePassword(newPassword);
 }

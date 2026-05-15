@@ -31,7 +31,9 @@ class DrawingRemoteDataSource {
         ? 'anon/$fileName'
         : '${senderId ?? 'anon'}/$fileName';
 
-    await _client.storage.from(_bucket).uploadBinary(
+    await _client.storage
+        .from(_bucket)
+        .uploadBinary(
           storagePath,
           pngBytes,
           fileOptions: const FileOptions(
@@ -47,7 +49,7 @@ class DrawingRemoteDataSource {
         .from('questions')
         .insert({
           'recipient_id': recipientId,
-          if (!isAnonymous && senderId != null) 'sender_id': senderId,
+          'sender_id': senderId,
           'is_anonymous': isAnonymous,
           'question_text': '[drawing]', // NOT NULL placeholder
           'question_type': 'drawing',

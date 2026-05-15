@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibi/core/auth/login_required_guard.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 
 import '../../../../core/di/service_locator.dart';
@@ -126,6 +127,11 @@ class _DrawingPageState extends State<DrawingPage> {
    * uploads the rasterized PNG via [SendDrawingCubit].
    */
   void _onSend(BuildContext context) async {
+    if (LoginRequiredGuard.isGuest(context)) {
+      await LoginRequiredGuard.showLoginRequiredAlert(context);
+      return;
+    }
+
     final drawingCubit = context.read<DrawingCubit>();
     if (drawingCubit.state.isEmpty) {
       ScaffoldMessenger.of(
@@ -157,11 +163,11 @@ class _DrawingPageState extends State<DrawingPage> {
     if (!context.mounted) return;
 
     context.read<SendDrawingCubit>().send(
-      recipientId: widget.recipientId,
-      pngBytes: pngBytes,
-      isAnonymous: isAnonymous,
-      senderId: isAnonymous ? null : widget.senderId,
-    );
+       recipientId: widget.recipientId,
+       pngBytes: pngBytes,
+       isAnonymous: isAnonymous,
+       senderId: isAnonymous ? null : widget.senderId,
+     );
   }
 
   @override

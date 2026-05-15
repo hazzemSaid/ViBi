@@ -14,7 +14,7 @@ class SendQuestionDto {
   Map<String, dynamic> toMap() {
     return {
       'recipient_id': recipientId,
-      'sender_id': isAnonymous ? null : senderId,
+      'sender_id': senderId,
       'question_text': questionText,
       'is_anonymous': isAnonymous,
       'status': 'pending',

@@ -50,12 +50,8 @@ class GraphQLFeedDataSource implements FeedRepository {
 
       debugPrint('GraphQL response data: ${result.data}');
 
-      // Handle both feed_itemsCollection and answersCollection responses
       final edges =
-          (result.data?['feed_itemsCollection']?['edges'] ??
-                  result.data?['answersCollection']?['edges'])
-              as List? ??
-          [];
+          (result.data?['answersCollection']?['edges'] as List?) ?? [];
 
       debugPrint('Feed edges count: ${edges.length}');
       if (edges.isEmpty) return [];
@@ -107,10 +103,43 @@ class GraphQLFeedDataSource implements FeedRepository {
     int offset = 0,
   }) async {
     try {
+      // First, fetch the list of user IDs that this user follows
+      final followingResult = await GraphQLConfig.ferryQuery(
+        'GetFollowingUserIds',
+        document: FeedQueries.getFollowingUserIds,
+        variables: {'userId': userId},
+        clientOverride: _ferryClient,
+      ).timeout(_queryTimeout);
+
+      if (followingResult.hasErrors) {
+        throw Exception(
+          'GraphQL error fetching following user IDs: ${SupabaseErrorHandler.getErrorMessage(followingResult)}',
+        );
+      }
+
+      final edges = followingResult.data?['followsCollection']?['edges']
+          as List? ??
+          [];
+
+      final followingIds = edges
+          .map((e) => (e['node'] as Map<String, dynamic>)['following_id'] as String?)
+          .where((id) => id != null)
+          .cast<String>()
+          .toList();
+
+      if (followingIds.isEmpty) {
+        return const Right([]);
+      }
+
+      // Then fetch answers from those followed users
       final result = await _loadFeedFromAnswers(
         query: FeedQueries.getFollowingFeedItems,
         operationName: 'GetFollowingFeedItems',
-        variables: {'userId': userId, 'limit': limit, 'offset': offset},
+        variables: {
+          'userIds': followingIds,
+          'limit': limit,
+          'offset': offset,
+        },
       );
       return Right(result);
     } catch (e) {

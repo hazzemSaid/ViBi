@@ -23,20 +23,19 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late ScrollController _scrollController;
   late final GlobalFeedCubit _globalFeedCubit;
+  late final FollowingFeedCubit _followingFeedCubit;
   bool _isBottomBarVisible = true;
+  int _selectedTab = 0;
 
   @override
   void initState() {
     super.initState();
     _globalFeedCubit = getIt<GlobalFeedCubit>();
+    _followingFeedCubit = getIt<FollowingFeedCubit>();
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
   }
 
-  /**
-   * Handles scroll events to show/hide the bottom navigation bar 
-   * based on the user's scroll direction.
-   */
   void _onScroll() {
     final direction = _scrollController.position.userScrollDirection;
     if (direction == ScrollDirection.reverse && _isBottomBarVisible) {
@@ -47,8 +46,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 200) {
-      _globalFeedCubit.fetchMore();
+      if (_selectedTab == 0) {
+        _globalFeedCubit.fetchMore();
+      } else {
+        _followingFeedCubit.fetchMore();
+      }
     }
+  }
+
+  void _onTabSelected(int index) {
+    if (index == _selectedTab) return;
+    setState(() {
+      _selectedTab = index;
+    });
+    _scrollController.jumpTo(0);
+  }
+
+  Future<void> _onRefresh() {
+    if (_selectedTab == 0) {
+      return _globalFeedCubit.refresh();
+    }
+    return _followingFeedCubit.refresh();
   }
 
   @override
@@ -59,89 +77,161 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<GlobalFeedCubit>.value(
-      value: _globalFeedCubit,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<GlobalFeedCubit>.value(value: _globalFeedCubit),
+        BlocProvider<FollowingFeedCubit>.value(value: _followingFeedCubit),
+      ],
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: RefreshIndicator(
-          onRefresh: _globalFeedCubit.refresh,
-          color: Theme.of(context).colorScheme.secondary,
-          backgroundColor: Theme.of(context).colorScheme.surface,
-          child: CustomScrollView(
-            controller: _scrollController,
-            cacheExtent: AppCaching.feedCacheExtent,
-            slivers: [
-              const HomeAppBar(),
-              SliverList(
-                delegate: SliverChildListDelegate(const [
-                  SizedBox(height: 8),
-                  // TODO: implement stories section
-                  // StoriesSection(),
-                  // TODO: implement suggested section
-                  // SuggestedSection(),
-                  // Divider(height: 1),
-                ]),
-              ),
-              BlocBuilder<GlobalFeedCubit, FeedState>(
-                buildWhen: (previous, current) {
-                  if (previous is FeedLoaded && current is FeedLoaded) {
-                    return previous.items.length != current.items.length ||
-                        previous.hasMore != current.hasMore;
-                  }
-                  return previous != current;
-                },
-                builder: (context, feedState) {
-                  return feedState.when(
-                    initial: () => const FeedLoadingState(),
-                    loading: () => const FeedLoadingState(),
-                    failure: (message, _) => FeedErrorState(message: message),
-                    loaded: (items, hasMore) {
-                      if (items.isEmpty) return const FeedEmptyState();
-                      // Create a map of item ids to their indices for efficient lookup
-                      final Map<String, int> itemIndexById = <String, int>{
-                        for (var i = 0; i < items.length; i++) items[i].id: i,
-                      };
-
-                      return SliverList(
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            if (index == items.length) {
-                              return const FeedLoadMoreIndicator();
-                            }
-
-                            final FeedItem item = items[index];
-
-                            return Column(
-                              key: ValueKey('column_${item.id}'),
-                              children: [
-                                RepaintBoundary(
-                                  child: PostItem(
-                                    key: ValueKey('post_${item.id}'),
-                                    item: item,
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                          childCount: items.length + (hasMore ? 1 : 0),
-                          findChildIndexCallback: (Key key) {
-                            if (key is ValueKey<String> &&
-                                key.value.startsWith('column_')) {
-                              final id = key.value.substring(7);
-                              return itemIndexById[id];
-                            }
-                            return null;
-                          },
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            return _buildFeed(constraints);
+          },
         ),
       ),
+    );
+  }
+
+  Widget _buildFeed(BoxConstraints constraints) {
+    final isLargeScreen = constraints.maxWidth > 800;
+    Widget feed = RefreshIndicator(
+      onRefresh: _onRefresh,
+      color: Theme.of(context).colorScheme.secondary,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      child: CustomScrollView(
+        controller: _scrollController,
+        cacheExtent: AppCaching.feedCacheExtent,
+        slivers: [
+          HomeAppBar(
+            selectedTab: _selectedTab,
+            onTabSelected: _onTabSelected,
+          ),
+          if (_selectedTab == 0)
+            _buildGlobalFeed()
+          else
+            _buildFollowingFeed(),
+        ],
+      ),
+    );
+    if (isLargeScreen) {
+      feed = Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: feed,
+        ),
+      );
+    }
+    return feed;
+  }
+
+  Widget _buildGlobalFeed() {
+    return BlocBuilder<GlobalFeedCubit, FeedState>(
+      buildWhen: (previous, current) {
+        if (previous is FeedLoaded && current is FeedLoaded) {
+          return previous.items.length != current.items.length ||
+              previous.hasMore != current.hasMore;
+        }
+        return previous != current;
+      },
+      builder: (context, feedState) {
+        return feedState.when(
+          initial: () => const FeedLoadingState(),
+          loading: () => const FeedLoadingState(),
+          failure: (message, _) => FeedErrorState(message: message),
+          loaded: (items, hasMore) {
+            if (items.isEmpty) return const FeedEmptyState();
+            final Map<String, int> itemIndexById = <String, int>{
+              for (var i = 0; i < items.length; i++) items[i].id: i,
+            };
+            return SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  if (index == items.length) {
+                    return const FeedLoadMoreIndicator();
+                  }
+                  final FeedItem item = items[index];
+                  return Column(
+                    key: ValueKey('column_${item.id}'),
+                    children: [
+                      RepaintBoundary(
+                        child: PostItem(
+                          key: ValueKey('post_${item.id}'),
+                          item: item,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+                childCount: items.length + (hasMore ? 1 : 0),
+                findChildIndexCallback: (Key key) {
+                  if (key is ValueKey<String> &&
+                      key.value.startsWith('column_')) {
+                    final id = key.value.substring(7);
+                    return itemIndexById[id];
+                  }
+                  return null;
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildFollowingFeed() {
+    return BlocBuilder<FollowingFeedCubit, FeedState>(
+      buildWhen: (previous, current) {
+        if (previous is FeedLoaded && current is FeedLoaded) {
+          return previous.items.length != current.items.length ||
+              previous.hasMore != current.hasMore;
+        }
+        return previous != current;
+      },
+      builder: (context, feedState) {
+        return feedState.when(
+          initial: () => const FeedLoadingState(),
+          loading: () => const FeedLoadingState(),
+          failure: (message, _) => FeedErrorState(message: message),
+          loaded: (items, hasMore) {
+            if (items.isEmpty) return const FeedEmptyState();
+            final Map<String, int> itemIndexById = <String, int>{
+              for (var i = 0; i < items.length; i++) items[i].id: i,
+            };
+            return SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  if (index == items.length) {
+                    return const FeedLoadMoreIndicator();
+                  }
+                  final FeedItem item = items[index];
+                  return Column(
+                    key: ValueKey('column_${item.id}'),
+                    children: [
+                      RepaintBoundary(
+                        child: PostItem(
+                          key: ValueKey('post_${item.id}'),
+                          item: item,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+                childCount: items.length + (hasMore ? 1 : 0),
+                findChildIndexCallback: (Key key) {
+                  if (key is ValueKey<String> &&
+                      key.value.startsWith('column_')) {
+                    final id = key.value.substring(7);
+                    return itemIndexById[id];
+                  }
+                  return null;
+                },
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

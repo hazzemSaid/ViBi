@@ -15,8 +15,12 @@ class _FakeAuthRepository implements AuthRepository {
   bool signInWithGoogleCalled = false;
   bool sendVerificationCalled = false;
   bool reloadUserCalled = false;
+  bool resetPasswordCalled = false;
+  bool updatePasswordCalled = false;
+  bool signInAnonymouslyCalled = false;
   bool throwOnSignIn = false;
   String? lastUsedEmail;
+  String? lastUsedPassword;
 
   @override
   Stream<AppUser?> get authStateChanges => Stream.value(null);
@@ -67,6 +71,26 @@ class _FakeAuthRepository implements AuthRepository {
   Future<Either<String, void>> reloadUser() async {
     reloadUserCalled = true;
     return Right(null);
+  }
+
+  @override
+  Future<Either<String, void>> resetPasswordForEmail(String email) async {
+    resetPasswordCalled = true;
+    lastUsedEmail = email;
+    return Right(null);
+  }
+
+  @override
+  Future<Either<String, void>> updatePassword(String newPassword) async {
+    updatePasswordCalled = true;
+    lastUsedPassword = newPassword;
+    return Right(null);
+  }
+
+  @override
+  Future<Either<String, AppUser>> signInAnonymously() async {
+    signInAnonymouslyCalled = true;
+    return Right(AppUser(id: 'mock-anon-id', email: '', isAnonymous: true));
   }
 }
 

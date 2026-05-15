@@ -70,9 +70,10 @@ class FeedItemModel extends FeedItem {
         (node['answer_id'] as String?) ??
         (node['id'] as String);
 
-    // Get answer author's profile
+    // Get answer author's profile (nested in feed_itemsCollection or direct in answersCollection)
     final answerAuthorProfile =
-        answersData?['profiles'] as Map<String, dynamic>?;
+        answersData?['profiles'] as Map<String, dynamic>? ??
+        node['profiles'] as Map<String, dynamic>?;
 
     // Questions can be nested in answers or at root level
     final question =

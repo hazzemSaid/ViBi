@@ -4,59 +4,72 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/features/auth/presentation/cubit/auth_action_cubit.dart';
+import 'package:vibi/features/auth/presentation/cubit/password_reset_cubit.dart';
 import 'package:vibi/features/auth/presentation/helpers/auth_validators.dart';
 import 'package:vibi/features/auth/presentation/widgets/auth_video_background.dart';
-import 'package:vibi/features/auth/presentation/widgets/password_text_field.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class ForgotPasswordScreen extends StatefulWidget {
+  const ForgotPasswordScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool _submitted = false;
 
   @override
   void dispose() {
     _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
   }
 
   void _submit() {
     if (_formKey.currentState!.validate()) {
-      context.read<AuthActionCubit>().signInWithEmail(
+      setState(() => _submitted = true);
+      context.read<PasswordResetCubit>().sendResetEmail(
         _emailController.text.trim(),
-        _passwordController.text.trim(),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final authState = context.watch<AuthActionCubit>().state;
+    final authState = context.watch<PasswordResetCubit>().state;
 
-    return BlocListener<AuthActionCubit, AuthActionState>(
+    return BlocListener<PasswordResetCubit, AuthActionState>(
       listener: (context, state) {
-        if (state is AuthActionSuccess) {
+        if (!_submitted) return;
+        if (state is AuthActionLoading) return;
+        if (state is AuthActionFailure) {
+          setState(() => _submitted = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Login successful!'),
+            SnackBar(
+              content: Text(state.message),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+          return;
+        }
+        if (state is AuthActionSuccess) {
+          setState(() => _submitted = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Reset link sent to ${_emailController.text}'),
               behavior: SnackBarBehavior.floating,
             ),
           );
+          context.go('/login');
         }
       },
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: const Text('Login', style: TextStyle(fontWeight: FontWeight.bold)),
+          title: const Text('Reset Password', style: TextStyle(fontWeight: FontWeight.bold)),
           backgroundColor: Colors.transparent,
           elevation: 0,
           foregroundColor: Theme.of(context).colorScheme.onSurface,
@@ -71,26 +84,33 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 40),
-                    const Text(
-                      'Welcome Back',
+                    const SizedBox(height: 60),
+                    Icon(
+                      Icons.lock_reset,
+                      size: 80,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(height: AppSizes.s24),
+                    Text(
+                      'Forgot Your Password?',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 32,
+                        fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    const Text(
-                      'Login to your account to continue',
+                    const SizedBox(height: AppSizes.s12),
+                    Text(
+                      'Enter your email address and we will send you a link to reset your password.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.white70,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        height: 1.5,
                       ),
                     ),
-                    SizedBox(height: MediaQuery.sizeOf(context).height * 0.1),
+                    const SizedBox(height: 48),
 
                     ClipRRect(
                       borderRadius: BorderRadius.circular(AppSizes.r24),
@@ -109,57 +129,30 @@ class _LoginScreenState extends State<LoginScreen> {
                               ).colorScheme.onSurface.withValues(alpha: 0.1),
                             ),
                           ),
-                          child: Column(
-                            children: [
-                              TextFormField(
-                                controller: _emailController,
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onSurface,
-                                ),
-                                decoration: InputDecoration(
-                                  labelText: 'Email',
-                                  prefixIcon: Icon(
-                                    Icons.email_outlined,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                keyboardType: TextInputType.emailAddress,
-                                textInputAction: TextInputAction.next,
-                                validator: AuthValidators.email,
+                          child: TextFormField(
+                            controller: _emailController,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                            decoration: InputDecoration(
+                              labelText: 'Email Address',
+                              prefixIcon: Icon(
+                                Icons.email_outlined,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
-                              const SizedBox(height: 16),
-                              PasswordTextField(
-                                controller: _passwordController,
-                                labelText: 'Password',
-                                validator: AuthValidators.password,
-                                textInputAction: TextInputAction.done,
-                                onFieldSubmitted: (_) => _submit(),
-                              ),
-                            ],
+                            ),
+                            keyboardType: TextInputType.emailAddress,
+                            textInputAction: TextInputAction.done,
+                            validator: AuthValidators.email,
+                            onFieldSubmitted: (_) => _submit(),
                           ),
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: AppSizes.s12),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () => context.push('/forgot-password'),
-                        child: Text(
-                          'Forgot Password?',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: AppSizes.s24),
+                    const SizedBox(height: 48),
 
                     if (authState is AuthActionLoading)
                       Center(
@@ -182,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           onPressed: _submit,
                           child: const Text(
-                            'Login',
+                            'Send Reset Link',
                             style: TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w700,
@@ -191,18 +184,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
 
-                    const SizedBox(height: AppSizes.s12),
+                    const SizedBox(height: AppSizes.s16),
                     TextButton(
-                      onPressed: () => context.pop(),
+                      onPressed: () => context.go('/login'),
                       child: Text(
-                        "Don't have an account? Sign Up",
+                        'Back to Login',
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
 
-                    if (authState is AuthActionFailure)
+                    if (authState is AuthActionFailure && !_submitted)
                       Padding(
                         padding: const EdgeInsets.only(top: AppSizes.s16),
                         child: Text(

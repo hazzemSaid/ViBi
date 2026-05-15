@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibi/core/auth/login_required_guard.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/features/sendQuestion/presentation/cubit/send_question_cubit.dart';
@@ -45,6 +46,8 @@ class _SendQuestionDialogState extends State<SendQuestionDialog> {
 
   Future<void> _sendQuestion() async {
     if (!_formKey.currentState!.validate()) return;
+    if (!await LoginRequiredGuard.ensureLoggedIn(context)) return;
+    if (!mounted) return;
 
     final questionText = _questionController.text.trim();
     await _sendQuestionCubit.sendQuestion(

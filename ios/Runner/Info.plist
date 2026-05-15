@@ -56,6 +56,8 @@
 				<string>com.googleusercontent.apps.486602688494-2uj833ese2iv89089c93n9s6452eadr0</string>
 				<!-- Supabase Scheme -->
 				<string>supabase-vibi-flutter</string>
+				<!-- Custom Scheme for Password Reset -->
+				<string>vibi</string>
 			</array>
 		</dict>
 	</array>
@@ -67,7 +69,6 @@
 	<array>
 		<string>instagram-stories</string>
 	</array>
-	<!-- Gallery save fallback -->
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>ViBi saves your answer card to your photo library when Instagram is not installed.</string>
 	<key>UIBackgroundModes</key>

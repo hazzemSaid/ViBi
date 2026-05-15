@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:vibi/core/auth/login_required_guard.dart';
 import 'package:vibi/core/common/widgets/send_question_dialog.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/profile/domain/entities/public_profile.dart';
@@ -49,7 +50,13 @@ class PublicProfileActionsRow extends StatelessWidget {
               elevation: 0,
             ),
             onPressed: profile.allowAnonymousQuestions
-                ? () => _showAskBottomSheet(context)
+                ? () async {
+                    if (LoginRequiredGuard.isGuest(context)) {
+                      await LoginRequiredGuard.showLoginRequiredAlert(context);
+                      return;
+                    }
+                    _showAskBottomSheet(context);
+                  }
                 : null,
             icon: Icon(
               Icons.send_outlined,
@@ -120,6 +127,10 @@ class _AskOptionsBottomSheetState extends State<_AskOptionsBottomSheet> {
   PublicProfile get profile => widget.profile;
 
   Future<void> _openTextQuestion(BuildContext context) async {
+    if (LoginRequiredGuard.isGuest(context)) {
+      await LoginRequiredGuard.showLoginRequiredAlert(context);
+      return;
+    }
     final navigator = Navigator.of(context);
     navigator.pop();
     await showDialog(
@@ -134,6 +145,10 @@ class _AskOptionsBottomSheetState extends State<_AskOptionsBottomSheet> {
   }
 
   Future<void> _openDrawing(BuildContext context) async {
+    if (LoginRequiredGuard.isGuest(context)) {
+      await LoginRequiredGuard.showLoginRequiredAlert(context);
+      return;
+    }
     final navigator = Navigator.of(context);
     navigator.pop();
 
@@ -150,6 +165,10 @@ class _AskOptionsBottomSheetState extends State<_AskOptionsBottomSheet> {
   }
 
   Future<void> _openRecommendation(BuildContext context) async {
+    if (LoginRequiredGuard.isGuest(context)) {
+      await LoginRequiredGuard.showLoginRequiredAlert(context);
+      return;
+    }
     final navigator = Navigator.of(context);
     navigator.pop();
     await navigator.push(

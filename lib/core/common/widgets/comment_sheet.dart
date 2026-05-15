@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibi/core/auth/login_required_guard.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/features/reactions/presentation/cubit/comments_cubit.dart';
-import 'package:vibi/features/reactions/presentation/cubit/comments_state.dart';
 
 class CommentSheet extends StatefulWidget {
   const CommentSheet({super.key, required this.answerId});
@@ -46,6 +46,8 @@ class _CommentSheetState extends State<CommentSheet> {
   Future<void> _send() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
+    if (!await LoginRequiredGuard.ensureLoggedIn(context)) return;
+    if (!mounted) return;
 
     HapticFeedback.selectionClick();
     _controller.clear();
@@ -91,7 +93,8 @@ class _CommentSheetState extends State<CommentSheet> {
                     Expanded(
                       child: BlocBuilder<CommentsCubit, CommentsState>(
                         builder: (context, state) {
-                          if (state is CommentsLoading && state.comments.isEmpty) {
+                          if (state is CommentsLoading &&
+                              state.comments.isEmpty) {
                             return const Center(
                               child: CircularProgressIndicator(),
                             );

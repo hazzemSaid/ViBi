@@ -1,7 +1,8 @@
 class FeedQueries {
+  /// Queries all answers globally (for the "For You" tab).
   static const String getGlobalFeedItems = r'''
-     query GetGlobalFeedItems($limit: Int!, $offset: Int!) {
-      feed_itemsCollection(
+    query GetGlobalFeedItems($limit: Int!, $offset: Int!) {
+      answersCollection(
         orderBy: [{ created_at: DescNullsLast }]
         first: $limit
         offset: $offset
@@ -9,50 +10,44 @@ class FeedQueries {
         edges {
           node {
             id
-            user_id
-            answer_id
+            answer_text
+            likes_count
+            comments_count
+            shares_count
             created_at
-            answers {
+            user_id
+            profiles {
               id
-              answer_text
-              likes_count
-              comments_count
-              shares_count
-              created_at
-              user_id
+              username
+              avatar_urls
+            }
+            questions {
+              id
+              question_text
+              question_type
+              media_rec_id
+              is_anonymous
+              sender_id
               profiles {
                 id
                 username
                 avatar_urls
               }
-              questions {
-                question_text
-                question_type
-                media_rec_id
-                is_anonymous
-                sender_id
-                
-                profiles {
-                  id
-                  username
-                  avatar_urls
-                }
-                media_recommendations {
-                  id
-                  tmdb_id
-                  media_type
-                  title
-                  poster_path
-                  overview
-                  release_date
-                  vote_average
-                }
-                question_mediaCollection {
-                  edges {
-                    node {
-                      media_url
-                      media_type
-                    }
+              media_recommendations {
+                id
+                tmdb_id
+                media_type
+                title
+                poster_path
+                overview
+                release_date
+                vote_average
+              }
+              question_mediaCollection {
+                edges {
+                  node {
+                    media_url
+                    media_type
                   }
                 }
               }
@@ -63,22 +58,31 @@ class FeedQueries {
     }
   ''';
 
-  static const String getFollowingFeedItems = r'''
-    query GetFollowingFeedItems($userId: UUID!, $limit: Int!, $offset: Int!) {
-      answersCollection(
-        filter: {
-          user: {
-            followers: {
-               follower_id: { eq: $userId }
-            }
+  static const String getFollowingUserIds = r'''
+    query GetFollowingUserIds($userId: UUID!) {
+      followsCollection(
+        filter: { follower_id: { eq: $userId } }
+        first: 1000
+      ) {
+        edges {
+          node {
+            following_id
           }
         }
+      }
+    }
+  ''';
+
+  static const String getFollowingFeedItems = r'''
+    query GetFollowingFeedItems($userIds: [UUID!]!, $limit: Int!, $offset: Int!) {
+      answersCollection(
+        filter: { user_id: { in: $userIds } }
         orderBy: [{ created_at: DescNullsLast }]
         first: $limit
         offset: $offset
       ) {
         edges {
-           node {
+          node {
             id
             answer_text
             likes_count

@@ -11,7 +11,10 @@ abstract class AuthRepository {
     Map<String, dynamic>? data,
   });
   Future<Either<String, AppUser>> signInWithGoogle();
+  Future<Either<String, AppUser>> signInAnonymously();
   Future<Either<String, void>> signOut();
   Future<Either<String, void>> sendEmailVerification();
   Future<Either<String, void>> reloadUser();
+  Future<Either<String, void>> resetPasswordForEmail(String email);
+  Future<Either<String, void>> updatePassword(String newPassword);
 }

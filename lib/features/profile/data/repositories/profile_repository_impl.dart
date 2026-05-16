@@ -41,7 +41,16 @@ class ProfileRepositoryImpl implements ProfileRepository {
       isVerified: profile.isVerified,
     );
     final result = await _dataSource.updateProfile(model);
-    return result;
+    return result.fold(
+      (error) async {
+        if (error.contains('No rows affected')) {
+          // Fallback to insert if the profile doesn't exist yet (upsert logic)
+          return await _dataSource.insertProfile(model);
+        }
+        return left(error);
+      },
+      (success) => right(success),
+    );
   }
 
   @override

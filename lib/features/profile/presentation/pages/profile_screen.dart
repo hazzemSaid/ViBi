@@ -111,20 +111,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       backgroundColor: Colors.transparent,
                       elevation: 0,
                       pinned: true,
-                      leading: IconButton(
-                        icon: ImageIcon(
-                          AssetImage(AppAssets.iconSettings),
-                          color: Theme.of(context).colorScheme.onSurface,
-                          size: 18,
+                      actions: [
+                        IconButton(
+                          icon: ImageIcon(
+                            AssetImage(AppAssets.iconSettings),
+                            color: Theme.of(context).colorScheme.onSurface,
+                            size: 18,
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.06),
+                            shape: const CircleBorder(),
+                          ),
+                          onPressed: () => context.pushNamed('edit-profile'),
                         ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.06),
-                          shape: const CircleBorder(),
-                        ),
-                        onPressed: () => context.pushNamed('edit-profile'),
-                      ),
+                        AppSizes.gapW8,
+                      ],
                     ),
                     SliverToBoxAdapter(
                       child: Column(

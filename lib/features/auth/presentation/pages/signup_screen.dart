@@ -17,7 +17,6 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
@@ -26,7 +25,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   void dispose() {
-    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
@@ -36,10 +34,13 @@ class _SignupScreenState extends State<SignupScreen> {
   void _submit() {
     if (_formKey.currentState!.validate()) {
       setState(() => _submitted = true);
+      final email = _emailController.text.trim();
+      final nameFromEmail = email.split('@').first;
+
       context.read<AuthActionCubit>().signUpWithEmail(
-        _emailController.text.trim(),
+        email,
         _passwordController.text.trim(),
-        data: {'full_name': _nameController.text.trim()},
+        data: {'full_name': nameFromEmail},
       );
     }
   }
@@ -120,24 +121,6 @@ class _SignupScreenState extends State<SignupScreen> {
                           ),
                           child: Column(
                             children: [
-                              TextFormField(
-                                controller: _nameController,
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onSurface,
-                                ),
-                                decoration: InputDecoration(
-                                  labelText: 'Full Name',
-                                  prefixIcon: Icon(
-                                    Icons.person_outline,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                textInputAction: TextInputAction.next,
-                                validator: AuthValidators.name,
-                              ),
-                              const SizedBox(height: 16),
                               TextFormField(
                                 controller: _emailController,
                                 style: TextStyle(

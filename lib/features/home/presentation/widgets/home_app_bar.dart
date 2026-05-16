@@ -20,40 +20,27 @@ class HomeAppBar extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       floating: true,
-      title: Row(
-        children: [
-          Image.asset(AppAssets.Newlogo, height: AppSizes.s24),
-          AppSizes.gapW16,
-          Text(
-            'FEED',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: AppSizes.s12,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+      title: Center(
+        child: Text.rich(
+          TextSpan(
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            children: [
+              TextSpan(
+                text: 'V',
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
+              ),
+              TextSpan(
+                text: 'iBi FEED',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-      actions: [
-        IconButton(
-          icon: Icon(
-            Icons.logout,
-            color: Theme.of(context).colorScheme.error,
-            size: AppSizes.s20,
-          ),
-          onPressed: () => context.read<AuthActionCubit>().signOut(),
-        ),
-        IconButton(
-          icon: Icon(
-            Icons.notifications_none,
-            color: Theme.of(context).colorScheme.onSurface,
-            size: AppSizes.s20,
-          ),
-          onPressed: () {
-            // TODO : implement notifications
-          },
-        ),
-      ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(AppSizes.s40),
         child: SizedBox(

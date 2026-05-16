@@ -12,6 +12,10 @@ import 'package:vibi/features/feed/presentation/widgets/feed_load_more_indicator
 import 'package:vibi/features/feed/presentation/widgets/feed_loading_state.dart';
 import 'package:vibi/features/home/presentation/widgets/home_app_bar.dart';
 import 'package:vibi/features/home/presentation/widgets/post_item/post_item.dart';
+import 'package:go_router/go_router.dart';
+import 'package:vibi/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:vibi/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:vibi/features/profile/presentation/cubit/profile_state.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late ScrollController _scrollController;
   late final GlobalFeedCubit _globalFeedCubit;
   late final FollowingFeedCubit _followingFeedCubit;
+  late final ProfileCubit _profileCubit;
   bool _isBottomBarVisible = true;
   int _selectedTab = 0;
 
@@ -32,6 +37,13 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _globalFeedCubit = getIt<GlobalFeedCubit>();
     _followingFeedCubit = getIt<FollowingFeedCubit>();
+    _profileCubit = getIt<ProfileCubit>();
+
+    final user = context.read<AuthCubit>().currentUser;
+    if (user != null && !user.isAnonymous) {
+      _profileCubit.load(user.id);
+    }
+
     _scrollController = ScrollController();
     _scrollController.addListener(_onScroll);
   }
@@ -72,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _profileCubit.close();
     super.dispose();
   }
 
@@ -81,13 +94,24 @@ class _HomeScreenState extends State<HomeScreen> {
       providers: [
         BlocProvider<GlobalFeedCubit>.value(value: _globalFeedCubit),
         BlocProvider<FollowingFeedCubit>.value(value: _followingFeedCubit),
+        BlocProvider<ProfileCubit>.value(value: _profileCubit),
       ],
-      child: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: LayoutBuilder(
-          builder: (context, constraints) {
-            return _buildFeed(constraints);
-          },
+      child: BlocListener<ProfileCubit, ProfileState>(
+        listener: (context, state) {
+          if (state is ProfileLoaded && state.profile.username.trim().isEmpty) {
+            context.go('/setup-profile');
+          } else if (state is ProfileFailure &&
+              state.message.toLowerCase().contains('not found')) {
+            context.go('/setup-profile');
+          }
+        },
+        child: Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              return _buildFeed(constraints);
+            },
+          ),
         ),
       ),
     );
@@ -103,14 +127,8 @@ class _HomeScreenState extends State<HomeScreen> {
         controller: _scrollController,
         cacheExtent: AppCaching.feedCacheExtent,
         slivers: [
-          HomeAppBar(
-            selectedTab: _selectedTab,
-            onTabSelected: _onTabSelected,
-          ),
-          if (_selectedTab == 0)
-            _buildGlobalFeed()
-          else
-            _buildFollowingFeed(),
+          HomeAppBar(selectedTab: _selectedTab, onTabSelected: _onTabSelected),
+          if (_selectedTab == 0) _buildGlobalFeed() else _buildFollowingFeed(),
         ],
       ),
     );

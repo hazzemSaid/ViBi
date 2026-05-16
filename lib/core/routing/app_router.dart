@@ -20,6 +20,7 @@ import 'package:vibi/features/auth/presentation/pages/welcome_screen.dart';
 import 'package:vibi/features/home/presentation/pages/home_screen.dart';
 import 'package:vibi/features/inbox/presentation/pages/inbox_screen.dart';
 import 'package:vibi/features/onboarding/presentation/pages/onboarding_screen.dart';
+import 'package:vibi/features/onboarding/presentation/pages/setup_profile_screen.dart';
 import 'package:vibi/features/profile/presentation/pages/edit_profile_public_web_screen.dart';
 import 'package:vibi/features/profile/presentation/pages/edit_profile_screen.dart';
 import 'package:vibi/features/profile/presentation/pages/followers_list_screen.dart';
@@ -56,6 +57,10 @@ GoRouter createAppRouter(AuthCubit authCubit) {
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: '/setup-profile',
+        builder: (context, state) => const SetupProfileScreen(),
       ),
       GoRoute(
         path: '/welcome',

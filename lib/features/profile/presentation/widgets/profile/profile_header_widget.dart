@@ -14,9 +14,7 @@ class ProfileHeaderWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final avatarUrls = profile?.avatarUrls ?? <String>[];
     final imageUrls = avatarUrls.length > 1 ? avatarUrls : <String>[];
-    final fallbackImageUrl = avatarUrls.isNotEmpty
-        ? avatarUrls.first
-        : AppAssets.mockProfile1;
+    final fallbackImageUrl = avatarUrls.isNotEmpty ? avatarUrls.first : null;
     final name = profile!.name;
     final username = profile!.username;
     final bio = profile?.bio ?? 'No bio yet...';
@@ -25,6 +23,7 @@ class ProfileHeaderWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const SizedBox(height: AppSizes.s8),
+
         ProfileImageStrip(
           favColor: AppColors.fromHex(profile?.favColor),
           imageUrls: imageUrls,

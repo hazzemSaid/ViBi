@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  static const Color primary = Color(0xFF7C6EFF);
-  static const Color secondary = Color(0xFF5B4FCC);
+  static const Color primary = Color.fromARGB(255, 223, 178, 236);
+  static const Color secondary = Color(0xFFd5ae3f);
 
   // Legacy dark tokens (backward compat)
   static const Color background = Color(0xFF08090F);

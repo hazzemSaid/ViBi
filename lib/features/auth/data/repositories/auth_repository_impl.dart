@@ -20,6 +20,7 @@ class AuthRepositoryImpl implements AuthRepository {
       displayName:
           user.userMetadata?['full_name'] as String? ??
           user.userMetadata?['name'] as String?,
+      avatarUrl: user.userMetadata?['avatar_url'] as String?,
       emailVerified: user.emailConfirmedAt != null,
       isAnonymous: isAnonymous,
     );

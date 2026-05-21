@@ -1,7 +1,6 @@
 class AppAssets {
   static const String _imagesPath = 'assets/images/';
   static const String _iconsPath = 'assets/icons/';
-  static const String _videosPath = 'assets/videos/';
   static const String _animationsPath = 'assets/animation/';
 
   // Animations
@@ -68,9 +67,6 @@ class AppAssets {
       '${_iconsPath}Platform=X (Twitter), Color=Negative.svg';
   static const String youtubeIcon =
       '${_iconsPath}Platform=YouTube, Color=Negative.svg';
-
-  // Videos
-  static const String backgroundVideo = '${_videosPath}background_video.mp4';
 
   // Mock URLs
   static const String mockProfile1 =

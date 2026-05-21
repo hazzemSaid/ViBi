@@ -15,21 +15,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToNext();
-  }
-
-  Future<void> _navigateToNext() async {
-    await Future.delayed(const Duration(seconds: 2));
-    final sharedPrefs = getIt<SharedPreferences>();
-    if (!mounted) return;
-    final hasSeenOnboarding =
-        sharedPrefs.getBool('has_seen_onboarding') ?? false;
-
-    if (hasSeenOnboarding) {
-      context.go('/welcome');
-    } else {
-      context.go('/onboarding');
-    }
+    // Navigation is now handled by the router's redirect logic in app_router.dart
   }
 
   @override

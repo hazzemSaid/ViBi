@@ -1,12 +1,15 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vibi/core/constants/app_assets.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/auth/presentation/cubit/password_reset_cubit.dart';
 import 'package:vibi/features/auth/presentation/helpers/auth_validators.dart';
-import 'package:vibi/features/auth/presentation/widgets/auth_video_background.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_button.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_error_text.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_form_card.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_header.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_scaffold.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -58,160 +61,78 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           setState(() => _submitted = false);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Reset link sent to ${_emailController.text}'),
+              content: Text('Code sent to ${_emailController.text}'),
               behavior: SnackBarBehavior.floating,
             ),
           );
-          context.go('/login');
+          context.go(
+            '/set-new-password',
+            extra: {'email': _emailController.text},
+          );
         }
       },
-      child: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          title: const Text('Reset Password', style: TextStyle(fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          foregroundColor: Theme.of(context).colorScheme.onSurface,
-        ),
-        body: AuthVideoBackground(
-          child: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.s32),
+      child: AuthScaffold(
+        title: 'Reset Password',
+        showBackButton: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: AppSizes.s56),
+            AuthHeader(
+              leading: Image.asset(AppAssets.Newlogo, width: 80, height: 80),
+              title: 'Forgot Your Password?',
+              subtitle: 'Enter your email and we will send an 8-digit code.',
+            ),
+            const SizedBox(height: AppSizes.s48),
+
+            AuthFormCard(
               child: Form(
                 key: _formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 60),
-                    Icon(
-                      Icons.lock_reset,
-                      size: 80,
-                      color: Theme.of(context).colorScheme.primary,
+                child: TextFormField(
+                  controller: _emailController,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Email Address',
+                    prefixIcon: Icon(
+                      Icons.email_outlined,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
-                    const SizedBox(height: AppSizes.s24),
-                    Text(
-                      'Forgot Your Password?',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: AppSizes.s12),
-                    Text(
-                      'Enter your email address and we will send you a link to reset your password.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 48),
-
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(AppSizes.r24),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                        child: Container(
-                          padding: const EdgeInsets.all(AppSizes.s24),
-                          decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(AppSizes.r24),
-                            border: Border.all(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurface.withValues(alpha: 0.1),
-                            ),
-                          ),
-                          child: TextFormField(
-                            controller: _emailController,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                            decoration: InputDecoration(
-                              labelText: 'Email Address',
-                              prefixIcon: Icon(
-                                Icons.email_outlined,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                            keyboardType: TextInputType.emailAddress,
-                            textInputAction: TextInputAction.done,
-                            validator: AuthValidators.email,
-                            onFieldSubmitted: (_) => _submit(),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 48),
-
-                    if (authState is AuthActionLoading)
-                      Center(
-                        child: CircularProgressIndicator(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      )
-                    else
-                      SizedBox(
-                        width: double.infinity,
-                        height: 58,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            foregroundColor: Theme.of(context).colorScheme.onSurface,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppSizes.r16),
-                            ),
-                            elevation: 0,
-                          ),
-                          onPressed: _submit,
-                          child: const Text(
-                            'Send Reset Link',
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                    const SizedBox(height: AppSizes.s16),
-                    TextButton(
-                      onPressed: () => context.go('/login'),
-                      child: Text(
-                        'Back to Login',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ),
-
-                    if (authState is AuthActionFailure && !_submitted)
-                      Padding(
-                        padding: const EdgeInsets.only(top: AppSizes.s16),
-                        child: Text(
-                          authState.message,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                  ],
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.done,
+                  validator: AuthValidators.email,
+                  onFieldSubmitted: (_) => _submit(),
                 ),
               ),
             ),
-          ),
+
+            const SizedBox(height: AppSizes.s48),
+
+            AuthPrimaryButton(
+              label: 'Send Code',
+              isLoading: authState is AuthActionLoading,
+              onPressed: _submit,
+            ),
+
+            const SizedBox(height: AppSizes.s16),
+            TextButton(
+              onPressed: () => context.go('/login'),
+              child: Text(
+                'Back to Login',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+
+            AuthErrorText(
+              message: authState is AuthActionFailure && !_submitted
+                  ? authState.message
+                  : null,
+            ),
+          ],
         ),
       ),
     );

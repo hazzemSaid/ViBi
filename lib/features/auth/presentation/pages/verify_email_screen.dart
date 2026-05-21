@@ -1,176 +1,171 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vibi/core/constants/app_assets.dart';
+import 'package:vibi/core/constants/app_sizes.dart';
+import 'package:vibi/features/auth/domain/repositories/auth_repository.dart';
 import 'package:vibi/features/auth/presentation/cubit/auth_action_cubit.dart';
 import 'package:vibi/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_error_text.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_header.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_scaffold.dart';
 
-/// Handles two states:
-/// 1. **Session exists, email unconfirmed** — user signed up & Supabase
-///    auto-created a session (auto-confirm OFF but OTP flow or similar).
-///    Shows resend + "I've verified" (refreshes session).
-/// 2. **No session** — Supabase email-confirmation is ON and the user must
-///    click the link in their inbox before a session is created.
-///    Shows instructions + "Go to Login after verifying".
-class VerifyEmailScreen extends StatelessWidget {
-  const VerifyEmailScreen({super.key});
+class VerifyEmailScreen extends StatefulWidget {
+  const VerifyEmailScreen({super.key, this.initialEmail = ''});
+
+  final String initialEmail;
+
+  @override
+  State<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
+}
+
+class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
+  final _emailController = TextEditingController();
+  final _otpController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialEmail.isNotEmpty) {
+      _emailController.text = widget.initialEmail;
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _otpController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final authState = context.watch<AuthActionCubit>().state;
     final user = context.watch<AuthCubit>().currentUser;
 
-    // If the user becomes verified (session updated), router redirects to /home.
     final hasSession = user != null;
     final email = user?.email ?? '';
+    final initialEmail = widget.initialEmail.trim();
+    final resolvedEmail = email.isNotEmpty
+        ? email
+        : (initialEmail.isNotEmpty
+              ? initialEmail
+              : _emailController.text.trim());
+    final showEmailField = !hasSession && initialEmail.isEmpty;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Theme.of(context).colorScheme.onSurface,
-        leading: hasSession
-            ? null
-            : IconButton(
-                icon: Icon(Icons.arrow_back),
-                onPressed: () => context.go('/welcome'),
+    return AuthScaffold(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: AppSizes.s48),
+          AuthHeader(
+            leading: Image.asset(AppAssets.Newlogo, width: 100, height: 100),
+            title: 'Verify Your Email',
+            subtitle: resolvedEmail.isNotEmpty
+                ? 'We sent an 8-digit verification code to\n$resolvedEmail'
+                : 'Enter the email you signed up with and the 8-digit code we sent.',
+          ),
+
+          if (showEmailField) ...[
+            const SizedBox(height: AppSizes.s16),
+            TextField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              textAlign: TextAlign.center,
+              decoration: const InputDecoration(
+                hintText: 'you@example.com',
+                border: OutlineInputBorder(),
               ),
-      ),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Icon
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.mark_email_unread_outlined,
-                    size: 52,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
+            ),
+          ],
 
-                const SizedBox(height: 32),
+          const SizedBox(height: AppSizes.s24),
 
-                Text(
-                  'Check Your Email',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                Text(
-                  hasSession
-                      ? 'We sent a confirmation link to\n$email'
-                      : 'A confirmation link was sent to your email address.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                Text(
-                  'Click the link in your email to verify your account, then tap the button below.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    height: 1.5,
-                  ),
-                ),
-
-                SizedBox(height: 48),
-
-                if (authState is AuthActionLoading)
-                  CircularProgressIndicator(
-                    color: Theme.of(context).colorScheme.primary,
-                  )
-                else if (hasSession) ...[
-                  // Case 1: session exists — can refresh to pick up confirmation
-                  ElevatedButton(
-                    onPressed: () =>
-                        context.read<AuthActionCubit>().reloadUser(),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(52),
-                    ),
-                    child: Text("I've Verified My Email"),
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton(
-                    onPressed: () =>
-                        context.read<AuthActionCubit>().sendEmailVerification(),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: Size.fromHeight(52),
-                      side: BorderSide(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                      foregroundColor: Theme.of(context).colorScheme.primary,
-                    ),
-                    child: Text('Resend Confirmation Email'),
-                  ),
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: () => context.read<AuthActionCubit>().signOut(),
-                    child: Text(
-                      'Sign Out',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ] else ...[
-                  // Case 2: no session yet — user must click link then sign in
-                  ElevatedButton(
-                    onPressed: () => context.go('/login'),
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(52),
-                    ),
-                    child: Text('Sign In After Verifying'),
-                  ),
-                  const SizedBox(height: 12),
-                  TextButton(
-                    onPressed: () => context.go('/welcome'),
-                    child: Text(
-                      'Back to Welcome',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-
-                if (authState is AuthActionFailure)
-                  Padding(
-                    padding: EdgeInsets.only(top: 20),
-                    child: Text(
-                      (authState as AuthActionFailure).message,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-              ],
+          TextField(
+            controller: _otpController,
+            keyboardType: TextInputType.number,
+            maxLength: 8,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 24, letterSpacing: 8),
+            decoration: const InputDecoration(
+              hintText: '00000000',
+              counterText: '',
+              border: OutlineInputBorder(),
             ),
           ),
-        ),
+
+          const SizedBox(height: AppSizes.s32),
+
+          if (authState is AuthActionLoading)
+            CircularProgressIndicator(
+              color: Theme.of(context).colorScheme.primary,
+            )
+          else ...[
+            ElevatedButton(
+              onPressed: () {
+                if (resolvedEmail.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter your email address.'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  return;
+                }
+                if (_otpController.text.length == 8) {
+                  context.read<AuthActionCubit>().verifyOtp(
+                    resolvedEmail,
+                    _otpController.text,
+                    AuthOtpType.signup,
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(52),
+              ),
+              child: const Text('Verify Email'),
+            ),
+            const SizedBox(height: AppSizes.s12),
+            if (hasSession) ...[
+              OutlinedButton(
+                onPressed: () =>
+                    context.read<AuthActionCubit>().sendEmailVerification(),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                  side: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  foregroundColor: Theme.of(context).colorScheme.primary,
+                ),
+                child: const Text('Resend Code'),
+              ),
+              const SizedBox(height: AppSizes.s12),
+              TextButton(
+                onPressed: () => context.read<AuthActionCubit>().signOut(),
+                child: Text(
+                  'Sign Out',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ] else ...[
+              TextButton(
+                onPressed: () => context.go('/login'),
+                child: Text(
+                  'Go to Login',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ],
+
+          AuthErrorText(
+            message: authState is AuthActionFailure ? authState.message : null,
+          ),
+        ],
       ),
     );
   }

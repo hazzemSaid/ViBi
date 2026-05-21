@@ -1,63 +1,129 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vibi/core/constants/app_assets.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:vibi/features/auth/presentation/cubit/password_reset_cubit.dart';
 import 'package:vibi/features/auth/presentation/helpers/auth_validators.dart';
-import 'package:vibi/features/auth/presentation/widgets/auth_video_background.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_button.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_error_text.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_form_card.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_header.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_scaffold.dart';
 import 'package:vibi/features/auth/presentation/widgets/password_text_field.dart';
 
 class SetNewPasswordScreen extends StatefulWidget {
-  const SetNewPasswordScreen({super.key});
+  final String email;
+
+  const SetNewPasswordScreen({super.key, required this.email});
 
   @override
   State<SetNewPasswordScreen> createState() => _SetNewPasswordScreenState();
 }
 
+enum _ResetAction { verify, update, resend }
+
 class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
+  final _otpController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _submitted = false;
-  bool _redirected = false;
+  bool _isOtpVerified = false;
+  String _verifiedOtp = '';
+  _ResetAction? _pendingAction;
+
+  @override
+  void initState() {
+    super.initState();
+    _otpController.addListener(_handleOtpChange);
+  }
 
   @override
   void dispose() {
+    _otpController.removeListener(_handleOtpChange);
+    _otpController.dispose();
     _passwordController.dispose();
     _confirmController.dispose();
     super.dispose();
   }
 
-  void _submit() {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _submitted = true);
-      context.read<PasswordResetCubit>().updatePassword(
-        _passwordController.text.trim(),
-      );
+  void _handleOtpChange() {
+    final currentOtp = _otpController.text.trim();
+    if (_isOtpVerified && currentOtp != _verifiedOtp) {
+      setState(() {
+        _isOtpVerified = false;
+        _verifiedOtp = '';
+      });
     }
+  }
+
+  void _verifyCode() {
+    if (_otpController.text.length != 8) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter the 8-digit verification code.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    setState(() {
+      _submitted = true;
+      _pendingAction = _ResetAction.verify;
+    });
+    context.read<PasswordResetCubit>().verifyResetOtp(
+      widget.email,
+      _otpController.text.trim(),
+    );
+  }
+
+  void _updatePassword() {
+    if (!_isOtpVerified) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Verify the code before updating your password.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    setState(() {
+      _submitted = true;
+      _pendingAction = _ResetAction.update;
+    });
+    context.read<PasswordResetCubit>().updatePassword(
+      _passwordController.text.trim(),
+    );
+  }
+
+  void _resendCode() {
+    final email = widget.email.trim();
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Missing email address. Please go back and try again.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    setState(() {
+      _submitted = true;
+      _pendingAction = _ResetAction.resend;
+      _isOtpVerified = false;
+      _verifiedOtp = '';
+    });
+    context.read<PasswordResetCubit>().sendResetEmail(email);
   }
 
   @override
   Widget build(BuildContext context) {
     final authState = context.watch<PasswordResetCubit>().state;
-    final currentUser = context.watch<AuthCubit>().currentUser;
-
-    if (currentUser == null && !_redirected) {
-      _redirected = true;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Reset link expired or invalid. Please request a new one.'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        context.go('/forgot-password');
-      });
-    }
+    final canEditPassword = _isOtpVerified;
 
     return BlocListener<PasswordResetCubit, AuthActionState>(
       listener: (context, state) {
@@ -75,7 +141,36 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
           return;
         }
         if (state is AuthActionSuccess) {
-          setState(() => _submitted = false);
+          final action = _pendingAction;
+          setState(() {
+            _submitted = false;
+            _pendingAction = null;
+            if (action == _ResetAction.verify) {
+              _isOtpVerified = true;
+              _verifiedOtp = _otpController.text.trim();
+            }
+          });
+          if (action == null) {
+            return;
+          }
+          if (action == _ResetAction.verify) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Code verified. You can update your password.'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+            return;
+          }
+          if (action == _ResetAction.resend) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Code resent to ${widget.email}'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+            return;
+          }
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Password updated successfully!'),
@@ -85,155 +180,131 @@ class _SetNewPasswordScreenState extends State<SetNewPasswordScreen> {
           context.go('/home');
         }
       },
-      child: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          title: const Text('Set New Password', style: TextStyle(fontWeight: FontWeight.bold)),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          foregroundColor: Theme.of(context).colorScheme.onSurface,
-          automaticallyImplyLeading: false,
-        ),
-        body: AuthVideoBackground(
-          child: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: AppSizes.s32),
+      child: AuthScaffold(
+        title: 'Set New Password',
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: AppSizes.s56),
+            AuthHeader(
+              leading: Image.asset(AppAssets.Newlogo, width: 100, height: 100),
+              title: 'Create New Password',
+              subtitle:
+                  'Your new password must be different from previously used passwords.',
+            ),
+            const SizedBox(height: AppSizes.s48),
+
+            AuthFormCard(
               child: Form(
                 key: _formKey,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 60),
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.primary.withValues(alpha: 0.12),
-                        shape: BoxShape.circle,
+                    TextFormField(
+                      controller: _otpController,
+                      keyboardType: TextInputType.number,
+                      maxLength: 8,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 24, letterSpacing: 8),
+                      decoration: InputDecoration(
+                        hintText: '00000000',
+                        counterText: '',
+                        labelText: 'Verification Code',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(AppSizes.r12),
+                        ),
                       ),
-                      child: Icon(
-                        Icons.lock_outline,
-                        size: 52,
-                        color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(height: AppSizes.s16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: OutlinedButton(
+                        onPressed: _verifyCode,
+                        child: const Text('Verify Code'),
                       ),
+                    ),
+                    if (_isOtpVerified) ...[
+                      const SizedBox(height: AppSizes.s12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: AppSizes.s8),
+                          Text(
+                            'Code verified',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    TextButton(
+                      onPressed: _resendCode,
+                      child: const Text('Resend Code'),
                     ),
                     const SizedBox(height: AppSizes.s24),
-                    Text(
-                      'Create New Password',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
+                    if (!canEditPassword)
+                      Text(
+                        'Verify the code to unlock password fields.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
                     const SizedBox(height: AppSizes.s12),
-                    Text(
-                      'Your new password must be different from previously used passwords.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 48),
-
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(AppSizes.r24),
-                      child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                        child: Container(
-                          padding: const EdgeInsets.all(AppSizes.s24),
-                          decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.08),
-                            borderRadius: BorderRadius.circular(AppSizes.r24),
-                            border: Border.all(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurface.withValues(alpha: 0.1),
+                    Opacity(
+                      opacity: canEditPassword ? 1 : 0.5,
+                      child: AbsorbPointer(
+                        absorbing: !canEditPassword,
+                        child: Column(
+                          children: [
+                            PasswordTextField(
+                              controller: _passwordController,
+                              labelText: 'New Password',
+                              validator: AuthValidators.password,
+                              textInputAction: TextInputAction.next,
                             ),
-                          ),
-                          child: Column(
-                            children: [
-                              PasswordTextField(
-                                controller: _passwordController,
-                                labelText: 'New Password',
-                                validator: AuthValidators.password,
-                                textInputAction: TextInputAction.next,
-                              ),
-                              const SizedBox(height: AppSizes.s16),
-                              PasswordTextField(
-                                controller: _confirmController,
-                                labelText: 'Confirm New Password',
-                                validator: (val) => AuthValidators.confirmPassword(
-                                  val,
-                                  _passwordController.text,
-                                ),
-                                textInputAction: TextInputAction.done,
-                                onFieldSubmitted: (_) => _submit(),
-                              ),
-                            ],
-                          ),
+                            const SizedBox(height: AppSizes.s16),
+                            PasswordTextField(
+                              controller: _confirmController,
+                              labelText: 'Confirm New Password',
+                              validator: (val) =>
+                                  AuthValidators.confirmPassword(
+                                    val,
+                                    _passwordController.text,
+                                  ),
+                              textInputAction: TextInputAction.done,
+                              onFieldSubmitted: (_) => _updatePassword(),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-
-                    const SizedBox(height: 48),
-
-                    if (authState is AuthActionLoading)
-                      Center(
-                        child: CircularProgressIndicator(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      )
-                    else
-                      SizedBox(
-                        width: double.infinity,
-                        height: 58,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            foregroundColor: Theme.of(context).colorScheme.onSurface,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(AppSizes.r16),
-                            ),
-                            elevation: 0,
-                          ),
-                          onPressed: _submit,
-                          child: const Text(
-                            'Update Password',
-                            style: TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                    if (authState is AuthActionFailure && !_submitted)
-                      Padding(
-                        padding: const EdgeInsets.only(top: AppSizes.s16),
-                        child: Text(
-                          authState.message,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.error,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),
             ),
-          ),
+
+            const SizedBox(height: AppSizes.s48),
+
+            AuthPrimaryButton(
+              label: 'Update Password',
+              isLoading: authState is AuthActionLoading,
+              onPressed: _isOtpVerified ? _updatePassword : null,
+            ),
+
+            AuthErrorText(
+              message: authState is AuthActionFailure && !_submitted
+                  ? authState.message
+                  : null,
+            ),
+          ],
         ),
       ),
     );

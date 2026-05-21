@@ -13,14 +13,14 @@ class AuthActionCubit extends Cubit<AuthActionState> {
 
   Future<void> signInWithEmail(String email, String password) async {
     emit(const AuthActionLoading());
-    final result = await _authRepository.signInWithEmailPassword(email, password);
-    result.fold(
-      (error) => emit(AuthActionFailure(error)),
-      (user) async {
-        await _notificationService.updateUserId(user.id);
-        emit(const AuthActionSuccess());
-      },
+    final result = await _authRepository.signInWithEmailPassword(
+      email,
+      password,
     );
+    result.fold((error) => emit(AuthActionFailure(error)), (user) async {
+      await _notificationService.updateUserId(user.id);
+      emit(const AuthActionSuccess());
+    });
   }
 
   Future<void> signUpWithEmail(
@@ -34,41 +34,34 @@ class AuthActionCubit extends Cubit<AuthActionState> {
       password,
       data: data,
     );
-    result.fold(
-      (error) => emit(AuthActionFailure(error)),
-      (user) async {
-        await _notificationService.updateUserId(user.id);
-        emit(const AuthActionSuccess());
-      },
-    );
+    result.fold((error) => emit(AuthActionFailure(error)), (user) async {
+      await _notificationService.updateUserId(user.id);
+      emit(const AuthActionSuccess());
+    });
   }
 
   Future<void> signInWithGoogle() async {
     emit(const AuthActionLoading());
     final result = await _authRepository.signInWithGoogle();
-    result.fold(
-      (error) => emit(AuthActionFailure(error)),
-      (user) async {
-        await _notificationService.updateUserId(user.id);
-        emit(const AuthActionSuccess());
-      },
-    );
+    result.fold((error) => emit(AuthActionFailure(error)), (user) async {
+      await _notificationService.updateUserId(user.id);
+      emit(const AuthActionSuccess());
+    });
   }
 
   Future<void> signOut() async {
     emit(const AuthActionLoading());
-    final userId = await _authRepository.authStateChanges.first.then((user) => user?.id);
-    final result = await _authRepository.signOut();
-    
-    result.fold(
-      (error) => emit(AuthActionFailure(error)),
-      (_) async {
-        if (userId != null) {
-          await _notificationService.clearUserId(userId);
-        }
-        emit(const AuthActionSuccess());
-      },
+    final userId = await _authRepository.authStateChanges.first.then(
+      (user) => user?.id,
     );
+    final result = await _authRepository.signOut();
+
+    result.fold((error) => emit(AuthActionFailure(error)), (_) async {
+      if (userId != null) {
+        await _notificationService.clearUserId(userId);
+      }
+      emit(const AuthActionSuccess());
+    });
   }
 
   Future<void> sendEmailVerification() async {
@@ -83,6 +76,15 @@ class AuthActionCubit extends Cubit<AuthActionState> {
   Future<void> reloadUser() async {
     emit(const AuthActionLoading());
     final result = await _authRepository.reloadUser();
+    result.fold(
+      (error) => emit(AuthActionFailure(error)),
+      (_) => emit(const AuthActionSuccess()),
+    );
+  }
+
+  Future<void> verifyOtp(String email, String token, AuthOtpType type) async {
+    emit(const AuthActionLoading());
+    final result = await _authRepository.verifyOtp(email, token, type);
     result.fold(
       (error) => emit(AuthActionFailure(error)),
       (_) => emit(const AuthActionSuccess()),

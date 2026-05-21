@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/core/nav_main_layout/main_layout.dart';
 import 'package:vibi/features/answer/presentation/screen/share_answer_screen.dart';
@@ -80,7 +81,12 @@ GoRouter createAppRouter(AuthCubit authCubit) {
       ),
       GoRoute(
         path: '/verify-email',
-        builder: (context, state) => const VerifyEmailScreen(),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return VerifyEmailScreen(
+            initialEmail: extra?['email'] as String? ?? '',
+          );
+        },
       ),
       GoRoute(
         path: '/forgot-password',
@@ -91,10 +97,15 @@ GoRouter createAppRouter(AuthCubit authCubit) {
       ),
       GoRoute(
         path: '/set-new-password',
-        builder: (context, state) => BlocProvider(
-          create: (context) => getIt<PasswordResetCubit>(),
-          child: const SetNewPasswordScreen(),
-        ),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return BlocProvider(
+            create: (context) => getIt<PasswordResetCubit>(),
+            child: SetNewPasswordScreen(
+              email: extra?['email'] as String? ?? '',
+            ),
+          );
+        },
       ),
       GoRoute(
         path: '/edit-profile',
@@ -225,47 +236,63 @@ GoRouter createAppRouter(AuthCubit authCubit) {
       ),
     ],
     redirect: (context, state) {
-      final authActionState = context.read<AuthActionCubit>().state;
-
-      final loggingIn =
-          state.matchedLocation == '/login' ||
-          state.matchedLocation == '/signup' ||
-          state.matchedLocation == '/welcome' ||
-          state.matchedLocation == '/forgot-password' ||
-          state.matchedLocation == '/set-new-password';
-
       final user = authCubit.currentUser;
-      if (user != null) {
-        if (user.isAnonymous) {
-          if (state.matchedLocation == '/splash' ||
-              state.matchedLocation == '/verify-email') {
-            return '/home';
-          }
-          return null;
-        }
-        if (!user.emailVerified) {
-          if (state.matchedLocation != '/verify-email') {
-            return '/verify-email';
-          }
-          return null;
-        } else {
-          if (loggingIn ||
-              state.matchedLocation == '/splash' ||
-              state.matchedLocation == '/verify-email') {
-            return '/home';
-          }
-        }
-      } else {
-        if (!loggingIn &&
-            state.matchedLocation != '/splash' &&
-            state.matchedLocation != '/onboarding' &&
-            state.matchedLocation != '/verify-email') {
+      final uri = state.uri;
+      final location = state.matchedLocation;
+
+      // Don't redirect while loading
+      if (authCubit.state.isLoading) return null;
+
+      // Handle Splash screen transition
+      if (location == '/splash') {
+        if (user != null) return '/home';
+
+        final prefs = getIt<SharedPreferences>();
+        final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
+        if (!hasSeenOnboarding) return '/onboarding';
+
+        return '/welcome';
+      }
+
+      // Define route categories
+      final isAuthRoute =
+          location == '/login' ||
+          location == '/signup' ||
+          location == '/welcome' ||
+          location == '/forgot-password';
+
+      final isResetRoute = location == '/set-new-password';
+
+      // Unauthenticated users
+      if (user == null) {
+        if (!isAuthRoute &&
+            !isResetRoute &&
+            location != '/verify-email' &&
+            location != '/onboarding') {
           return '/welcome';
         }
-      }
-      if (authCubit.state.isLoading || authActionState is AuthActionLoading) {
         return null;
       }
+
+      // Authenticated users
+      if (user.isAnonymous) {
+        if (location == '/verify-email') return '/home';
+        return null;
+      }
+
+      if (!user.emailVerified) {
+        if (location != '/verify-email') return '/verify-email';
+        return null;
+      }
+
+      // Authenticated and verified users shouldn't see auth screens
+      if (isAuthRoute || location == '/verify-email') {
+        return '/home';
+      }
+
+      // Allow reset password screen for authenticated users
+      if (isResetRoute) return null;
+
       return null;
     },
   );

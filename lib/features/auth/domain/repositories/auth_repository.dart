@@ -4,7 +4,10 @@ import 'package:vibi/features/auth/domain/entities/app_user.dart';
 abstract class AuthRepository {
   Stream<AppUser?> get authStateChanges;
 
-  Future<Either<String, AppUser>> signInWithEmailPassword(String email, String password);
+  Future<Either<String, AppUser>> signInWithEmailPassword(
+    String email,
+    String password,
+  );
   Future<Either<String, AppUser>> signUpWithEmailPassword(
     String email,
     String password, {
@@ -17,4 +20,11 @@ abstract class AuthRepository {
   Future<Either<String, void>> reloadUser();
   Future<Either<String, void>> resetPasswordForEmail(String email);
   Future<Either<String, void>> updatePassword(String newPassword);
+  Future<Either<String, void>> verifyOtp(
+    String email,
+    String token,
+    AuthOtpType type,
+  );
 }
+
+enum AuthOtpType { signup, recovery }

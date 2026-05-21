@@ -13,4 +13,9 @@ abstract class AuthDataSource {
   Future<Either<String, void>> reloadUser();
   Future<Either<String, void>> resetPasswordForEmail(String email);
   Future<Either<String, void>> updatePassword(String newPassword);
+  Future<Either<String, void>> verifyOtp(
+    String email,
+    String token,
+    OtpType type,
+  );
 }

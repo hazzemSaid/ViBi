@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -85,7 +86,6 @@ class SupabaseAuthDataSource implements AuthDataSource {
         email: dto.email,
         password: dto.password,
         data: dto.data,
-        emailRedirectTo: 'vibi://login-callback',
       );
       if (res.user == null) return left('Sign up failed');
       return right(res.user!);
@@ -151,11 +151,7 @@ class SupabaseAuthDataSource implements AuthDataSource {
     try {
       final email = _client.auth.currentUser?.email;
       if (email == null) return left('No signed-in user to resend email to');
-      await _client.auth.resend(
-        type: OtpType.signup,
-        email: email,
-        emailRedirectTo: 'vibi://login-callback',
-      );
+      await _client.auth.resend(type: OtpType.signup, email: email);
       return right(null);
     } on AuthException catch (e) {
       return left(_mapAuthError(e));
@@ -179,10 +175,7 @@ class SupabaseAuthDataSource implements AuthDataSource {
   @override
   Future<Either<String, void>> resetPasswordForEmail(String email) async {
     try {
-      await _client.auth.resetPasswordForEmail(
-        email,
-        redirectTo: 'vibi://reset-password',
-      );
+      await _client.auth.resetPasswordForEmail(email, redirectTo: null);
       return right(null);
     } on AuthException catch (e) {
       return left(_mapAuthError(e));
@@ -200,6 +193,41 @@ class SupabaseAuthDataSource implements AuthDataSource {
       return left(_mapAuthError(e));
     } catch (e) {
       return left('Failed to update password.');
+    }
+  }
+
+  @override
+  Future<Either<String, void>> verifyOtp(
+    String email,
+    String token,
+    OtpType type,
+  ) async {
+    if (kDebugMode) {
+      debugPrint(
+        'SupabaseAuthDataSource.verifyOtp type=$type emailProvided=${email.trim().isNotEmpty}',
+      );
+    }
+    try {
+      if (type == OtpType.recovery) {
+        if (email.trim().isNotEmpty) {
+          await _client.auth.verifyOTP(email: email, token: token, type: type);
+        } else {
+          await _client.auth.verifyOTP(token: token, type: type);
+        }
+      } else {
+        await _client.auth.verifyOTP(email: email, token: token, type: type);
+      }
+      return right(null);
+    } on AuthException catch (e) {
+      if (kDebugMode) {
+        debugPrint('SupabaseAuthDataSource.verifyOtp auth error: ${e.message}');
+      }
+      return left(_mapAuthError(e));
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('SupabaseAuthDataSource.verifyOtp unexpected error: $e');
+      }
+      return left('Failed to verify code.');
     }
   }
 }

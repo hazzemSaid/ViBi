@@ -13,6 +13,7 @@ import 'package:vibi/core/constants/app_caching.dart';
 class GraphQLFeedDataSource implements FeedRepository {
   final ferry.Client _ferryClient;
   static const Duration _queryTimeout = AppCaching.queryTimeout;
+  final Map<String, List<String>> _followingIdsCache = {};
 
   GraphQLFeedDataSource(this._ferryClient);
 
@@ -103,29 +104,38 @@ class GraphQLFeedDataSource implements FeedRepository {
     int offset = 0,
   }) async {
     try {
-      // First, fetch the list of user IDs that this user follows
-      final followingResult = await GraphQLConfig.ferryQuery(
-        'GetFollowingUserIds',
-        document: FeedQueries.getFollowingUserIds,
-        variables: {'userId': userId},
-        clientOverride: _ferryClient,
-      ).timeout(_queryTimeout);
+      final shouldRefreshFollowingIds =
+          offset == 0 || !_followingIdsCache.containsKey(userId);
 
-      if (followingResult.hasErrors) {
-        throw Exception(
-          'GraphQL error fetching following user IDs: ${SupabaseErrorHandler.getErrorMessage(followingResult)}',
-        );
+      if (shouldRefreshFollowingIds) {
+        final followingResult = await GraphQLConfig.ferryQuery(
+          'GetFollowingUserIds',
+          document: FeedQueries.getFollowingUserIds,
+          variables: {'userId': userId},
+          clientOverride: _ferryClient,
+        ).timeout(_queryTimeout);
+
+        if (followingResult.hasErrors) {
+          throw Exception(
+            'GraphQL error fetching following user IDs: ${SupabaseErrorHandler.getErrorMessage(followingResult)}',
+          );
+        }
+
+        final edges = followingResult.data?['followsCollection']?['edges']
+            as List? ??
+            [];
+
+        _followingIdsCache[userId] = edges
+            .map(
+              (e) =>
+                  (e['node'] as Map<String, dynamic>)['following_id'] as String?,
+            )
+            .where((id) => id != null)
+            .cast<String>()
+            .toList(growable: false);
       }
 
-      final edges = followingResult.data?['followsCollection']?['edges']
-          as List? ??
-          [];
-
-      final followingIds = edges
-          .map((e) => (e['node'] as Map<String, dynamic>)['following_id'] as String?)
-          .where((id) => id != null)
-          .cast<String>()
-          .toList();
+      final followingIds = _followingIdsCache[userId] ?? const <String>[];
 
       if (followingIds.isEmpty) {
         return const Right([]);

@@ -341,7 +341,6 @@ class GraphQLProfileDataSource implements ProfileDataSource {
       variables: {'userId': userId},
       clientOverride: _ferryClient,
     );
-    print(result);
     if (result.hasErrors) {
       return left(SupabaseErrorHandler.getErrorMessage(result));
     }

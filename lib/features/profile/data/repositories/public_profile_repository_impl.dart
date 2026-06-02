@@ -33,7 +33,6 @@ class PublicProfileRepositoryImpl implements PublicProfileRepository {
     String userId,
   ) async {
     final result = await _dataSource.getUserAnswers(userId);
-    print(result);
     return result.map((answers) => answers.cast<AnsweredQuestion>());
   }
 }

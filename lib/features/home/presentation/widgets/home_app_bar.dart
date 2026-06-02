@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:vibi/core/constants/app_assets.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
-import 'package:vibi/features/auth/presentation/cubit/auth_action_cubit.dart';
 
 class HomeAppBar extends StatelessWidget {
   const HomeAppBar({

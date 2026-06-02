@@ -237,7 +237,6 @@ GoRouter createAppRouter(AuthCubit authCubit) {
     ],
     redirect: (context, state) {
       final user = authCubit.currentUser;
-      final uri = state.uri;
       final location = state.matchedLocation;
 
       // Don't redirect while loading

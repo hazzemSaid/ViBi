@@ -112,13 +112,20 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   );
                   return;
                 }
-                if (_otpController.text.length == 8) {
-                  context.read<AuthActionCubit>().verifyOtp(
-                    resolvedEmail,
-                    _otpController.text,
-                    AuthOtpType.signup,
+                if (_otpController.text.length != 8) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter a valid 8-digit code.'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
                   );
+                  return;
                 }
+                context.read<AuthActionCubit>().verifyOtp(
+                  resolvedEmail,
+                  _otpController.text,
+                  AuthOtpType.signup,
+                );
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size.fromHeight(52),

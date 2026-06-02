@@ -84,6 +84,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _globalFeedCubit.close();
+    _followingFeedCubit.close();
     _profileCubit.close();
     super.dispose();
   }

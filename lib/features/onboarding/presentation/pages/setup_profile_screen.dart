@@ -624,6 +624,26 @@ class _SettingsStep extends StatelessWidget {
             onChanged: onAllowAnonymousChanged,
           ),
           const SizedBox(height: 16),
+          SwitchListTile(
+            title: const Text('Show Social Icons'),
+            subtitle: const Text(
+              'Display social media icons on your public profile.',
+            ),
+            contentPadding: EdgeInsets.zero,
+            value: showSocialIcons,
+            onChanged: onShowSocialIconsChanged,
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: placeholderController,
+            decoration: const InputDecoration(
+              labelText: 'Question Placeholder',
+              hintText: 'e.g. Ask me anything...',
+              helperText: 'The placeholder text shown in your question input.',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
           TextFormField(
             controller: ctaController,
             decoration: const InputDecoration(

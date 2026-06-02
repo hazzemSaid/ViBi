@@ -41,7 +41,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
       isVerified: profile.isVerified,
     );
     final result = await _dataSource.updateProfile(model);
-    return result.fold(
+    return await result.fold<Future<Either<String, void>>>(
       (error) async {
         if (error.contains('No rows affected')) {
           // Fallback to insert if the profile doesn't exist yet (upsert logic)
@@ -49,7 +49,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
         }
         return left(error);
       },
-      (success) => right(success),
+      (success) async => right(success),
     );
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibi/core/auth/login_required_guard.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/features/recommendation/presentation/cubits/recommendation_flow_cubit.dart';
 import 'package:vibi/features/recommendation/presentation/cubits/recommendation_flow_state.dart';
@@ -332,9 +333,17 @@ class _RecommendSearchScreenState extends State<RecommendSearchScreen> {
                       width: double.infinity,
                       child: ElevatedButton.icon(
                         onPressed: state.canSend
-                            ? () => cubit.sendRecommendation(
-                                recipientId: widget.recipientId,
-                              )
+                            ? () async {
+                                if (!await LoginRequiredGuard.ensureLoggedIn(
+                                  context,
+                                )) {
+                                  return;
+                                }
+                                if (!context.mounted) return;
+                                await cubit.sendRecommendation(
+                                  recipientId: widget.recipientId,
+                                );
+                              }
                             : null,
                         icon: state.isSending
                             ? const SizedBox(

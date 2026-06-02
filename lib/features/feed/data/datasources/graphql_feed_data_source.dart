@@ -13,6 +13,7 @@ import 'package:vibi/core/constants/app_caching.dart';
 class GraphQLFeedDataSource implements FeedRepository {
   final ferry.Client _ferryClient;
   static const Duration _queryTimeout = AppCaching.queryTimeout;
+  final Map<String, List<String>> _followingIdsCache = {};
 
   GraphQLFeedDataSource(this._ferryClient);
 
@@ -50,12 +51,8 @@ class GraphQLFeedDataSource implements FeedRepository {
 
       debugPrint('GraphQL response data: ${result.data}');
 
-      // Handle both feed_itemsCollection and answersCollection responses
       final edges =
-          (result.data?['feed_itemsCollection']?['edges'] ??
-                  result.data?['answersCollection']?['edges'])
-              as List? ??
-          [];
+          (result.data?['answersCollection']?['edges'] as List?) ?? [];
 
       debugPrint('Feed edges count: ${edges.length}');
       if (edges.isEmpty) return [];
@@ -107,10 +104,52 @@ class GraphQLFeedDataSource implements FeedRepository {
     int offset = 0,
   }) async {
     try {
+      final shouldRefreshFollowingIds =
+          offset == 0 || !_followingIdsCache.containsKey(userId);
+
+      if (shouldRefreshFollowingIds) {
+        final followingResult = await GraphQLConfig.ferryQuery(
+          'GetFollowingUserIds',
+          document: FeedQueries.getFollowingUserIds,
+          variables: {'userId': userId},
+          clientOverride: _ferryClient,
+        ).timeout(_queryTimeout);
+
+        if (followingResult.hasErrors) {
+          throw Exception(
+            'GraphQL error fetching following user IDs: ${SupabaseErrorHandler.getErrorMessage(followingResult)}',
+          );
+        }
+
+        final edges = followingResult.data?['followsCollection']?['edges']
+            as List? ??
+            [];
+
+        _followingIdsCache[userId] = edges
+            .map(
+              (e) =>
+                  (e['node'] as Map<String, dynamic>)['following_id'] as String?,
+            )
+            .where((id) => id != null)
+            .cast<String>()
+            .toList(growable: false);
+      }
+
+      final followingIds = _followingIdsCache[userId] ?? const <String>[];
+
+      if (followingIds.isEmpty) {
+        return const Right([]);
+      }
+
+      // Then fetch answers from those followed users
       final result = await _loadFeedFromAnswers(
         query: FeedQueries.getFollowingFeedItems,
         operationName: 'GetFollowingFeedItems',
-        variables: {'userId': userId, 'limit': limit, 'offset': offset},
+        variables: {
+          'userIds': followingIds,
+          'limit': limit,
+          'offset': offset,
+        },
       );
       return Right(result);
     } catch (e) {

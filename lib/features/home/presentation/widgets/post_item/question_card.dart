@@ -77,6 +77,14 @@ class QuestionCard extends StatelessWidget {
               drawingUrl: drawingUrl!,
               onTap: () => FullScreenMediaViewer.show(context, drawingUrl!),
             ),
+          ] else ...[
+            Text(
+              questionText,
+              style: TextStyle(
+                fontSize: questionFontSize,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ],
         ],
       ),

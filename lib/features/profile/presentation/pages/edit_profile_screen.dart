@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_assets.dart';
 import 'package:vibi/core/theme/theme_cubit.dart';
+import 'package:vibi/features/auth/presentation/cubit/auth_action_cubit.dart';
 
 class EditProfileScreen extends StatelessWidget {
   const EditProfileScreen({super.key});
@@ -187,7 +188,7 @@ class EditProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () => context.read<AuthActionCubit>().signOut(),
                       behavior: HitTestBehavior.opaque,
                       child: Container(
                         height: 50,

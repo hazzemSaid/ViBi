@@ -11,6 +11,8 @@ import 'package:vibi/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:vibi/features/auth/domain/repositories/auth_repository.dart';
 import 'package:vibi/features/auth/presentation/cubit/auth_action_cubit.dart';
 import 'package:vibi/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:vibi/features/auth/presentation/cubit/password_reset_cubit.dart';
+import 'package:vibi/features/auth/presentation/cubit/anonymous_auth_cubit.dart';
 import 'package:vibi/features/feed/data/datasources/graphql_feed_data_source.dart';
 import 'package:vibi/features/feed/data/repositories/feed_repository_impl.dart';
 import 'package:vibi/features/feed/domain/repositories/feed_repository.dart';
@@ -137,6 +139,12 @@ void _initAuth() {
       getIt<AuthRepository>(),
       getIt<PushNotificationService>(),
     ),
+  );
+  getIt.registerFactory<PasswordResetCubit>(
+    () => PasswordResetCubit(getIt<AuthRepository>()),
+  );
+  getIt.registerFactory<AnonymousAuthCubit>(
+    () => AnonymousAuthCubit(getIt<AuthRepository>()),
   );
 }
 

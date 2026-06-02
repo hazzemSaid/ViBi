@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -8,156 +6,189 @@ import 'package:vibi/features/auth/domain/entities/app_user.dart';
 import 'package:vibi/features/auth/domain/repositories/auth_repository.dart';
 import 'package:vibi/features/auth/presentation/cubit/auth_action_cubit.dart';
 
-class _FakeAuthRepository implements AuthRepository {
-  bool signInCalled = false;
-  bool signUpCalled = false;
-  bool signOutCalled = false;
-  bool signInWithGoogleCalled = false;
-  bool sendVerificationCalled = false;
-  bool reloadUserCalled = false;
-  bool throwOnSignIn = false;
-  String? lastUsedEmail;
-
+class _MockAuthRepository extends Mock implements AuthRepository {
   @override
-  Stream<AppUser?> get authStateChanges => Stream.value(null);
+  final Stream<AppUser?> authStateChanges;
 
-  @override
-  Future<Either<String, AppUser>> signInWithEmailPassword(
-    String email,
-    String password,
-  ) async {
-    signInCalled = true;
-    lastUsedEmail = email;
-    if (throwOnSignIn) {
-      return Left('sign in failed');
-    }
-    return Right(AppUser(id: 'mock-id-123', email: email));
-  }
-
-  @override
-  Future<Either<String, AppUser>> signUpWithEmailPassword(
-    String email,
-    String password, {
-    Map<String, dynamic>? data,
-  }) async {
-    signUpCalled = true;
-    lastUsedEmail = email;
-    return Right(AppUser(id: 'mock-id-123', email: email));
-  }
-
-  @override
-  Future<Either<String, AppUser>> signInWithGoogle() async {
-    signInWithGoogleCalled = true;
-    return Right(AppUser(id: 'mock-google-id', email: 'google@test.com'));
-  }
-
-  @override
-  Future<Either<String, void>> signOut() async {
-    signOutCalled = true;
-    return Right(null);
-  }
-
-  @override
-  Future<Either<String, void>> sendEmailVerification() async {
-    sendVerificationCalled = true;
-    return Right(null);
-  }
-
-  @override
-  Future<Either<String, void>> reloadUser() async {
-    reloadUserCalled = true;
-    return Right(null);
-  }
+  _MockAuthRepository()
+    : authStateChanges = Stream.value(
+        AppUser(id: 'user-1', email: 'test@test.com'),
+      );
 }
 
 class _MockPushNotificationService extends Mock
     implements PushNotificationService {}
 
 void main() {
-  late _FakeAuthRepository fakeRepository;
+  late _MockAuthRepository mockRepository;
   late _MockPushNotificationService mockNotificationService;
-  late AuthActionCubit controller;
+  late AuthActionCubit cubit;
 
   setUp(() {
-    fakeRepository = _FakeAuthRepository();
+    mockRepository = _MockAuthRepository();
     mockNotificationService = _MockPushNotificationService();
-    when(
-      () => mockNotificationService.updateUserId(any()),
-    ).thenAnswer((_) async {});
-    when(
-      () => mockNotificationService.clearUserId(any()),
-    ).thenAnswer((_) async {});
-    controller = AuthActionCubit(fakeRepository, mockNotificationService);
+
+    when(() => mockNotificationService.updateUserId(any()))
+        .thenAnswer((_) async {});
+    when(() => mockNotificationService.clearUserId(any()))
+        .thenAnswer((_) async {});
+
+    cubit = AuthActionCubit(mockRepository, mockNotificationService);
   });
 
   tearDown(() async {
-    await controller.close();
+    await cubit.close();
   });
 
   group('AuthActionCubit', () {
-    test('initial state is initial', () {
-      expect(controller.state, isA<AuthActionInitial>());
+    test('initial state is AuthActionInitial', () {
+      expect(cubit.state, const AuthActionInitial());
     });
 
     test('signInWithEmail emits success and calls repository', () async {
-      await controller.signInWithEmail('test@example.com', 'password123');
+      when(() => mockRepository.signInWithEmailPassword(
+            any(),
+            any(),
+          )).thenAnswer(
+        (_) async => Right(
+          AppUser(id: 'uid-1', email: 'test@example.com'),
+        ),
+      );
+
+      await cubit.signInWithEmail('test@example.com', 'password123');
       await Future<void>.delayed(Duration.zero);
 
-      expect(controller.state, isA<AuthActionSuccess>());
-      expect(fakeRepository.signInCalled, isTrue);
-      expect(fakeRepository.lastUsedEmail, 'test@example.com');
+      expect(cubit.state, isA<AuthActionSuccess>());
     });
 
-    test('signInWithEmail emits failure when repository throws', () async {
-      fakeRepository.throwOnSignIn = true;
+    test('signInWithEmail emits failure when repository returns error',
+        () async {
+      when(() => mockRepository.signInWithEmailPassword(
+            any(),
+            any(),
+          )).thenAnswer((_) async => Left('Invalid credentials'));
 
-      await controller.signInWithEmail('test@example.com', 'password123');
+      await cubit.signInWithEmail('test@example.com', 'wrong');
       await Future<void>.delayed(Duration.zero);
 
-      expect(controller.state, isA<AuthActionFailure>());
-      final failure = controller.state as AuthActionFailure;
-      expect(failure.message, contains('sign in failed'));
+      expect(cubit.state, isA<AuthActionFailure>());
+      final failure = cubit.state as AuthActionFailure;
+      expect(failure.message, contains('Invalid'));
     });
 
     test('signUpWithEmail calls repository correctly', () async {
-      await controller.signUpWithEmail('new@example.com', 'password123');
+      when(() => mockRepository.signUpWithEmailPassword(
+            any(),
+            any(),
+            data: any(named: 'data'),
+          )).thenAnswer(
+        (_) async => Right(
+          AppUser(id: 'uid-2', email: 'new@example.com'),
+        ),
+      );
+
+      await cubit.signUpWithEmail('new@example.com', 'password123');
       await Future<void>.delayed(Duration.zero);
 
-      expect(controller.state, isA<AuthActionSuccess>());
-      expect(fakeRepository.signUpCalled, isTrue);
-      expect(fakeRepository.lastUsedEmail, 'new@example.com');
+      expect(cubit.state, isA<AuthActionSuccess>());
+    });
+
+    test('signUpWithEmail emits failure on repository error', () async {
+      when(() => mockRepository.signUpWithEmailPassword(
+            any(),
+            any(),
+            data: any(named: 'data'),
+          )).thenAnswer((_) async => Left('Email already registered'));
+
+      await cubit.signUpWithEmail('existing@example.com', 'password123');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(cubit.state, isA<AuthActionFailure>());
     });
 
     test('signInWithGoogle calls repository correctly', () async {
-      await controller.signInWithGoogle();
+      when(() => mockRepository.signInWithGoogle()).thenAnswer(
+        (_) async => Right(
+          AppUser(id: 'google-1', email: 'google@test.com'),
+        ),
+      );
+
+      await cubit.signInWithGoogle();
       await Future<void>.delayed(Duration.zero);
 
-      expect(controller.state, isA<AuthActionSuccess>());
-      expect(fakeRepository.signInWithGoogleCalled, isTrue);
+      expect(cubit.state, isA<AuthActionSuccess>());
+    });
+
+    test('signInWithGoogle emits failure on repository error', () async {
+      when(() => mockRepository.signInWithGoogle())
+          .thenAnswer((_) async => Left('Google sign-in failed'));
+
+      await cubit.signInWithGoogle();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(cubit.state, isA<AuthActionFailure>());
     });
 
     test('signOut calls repository correctly', () async {
-      await controller.signOut();
+      when(() => mockRepository.signOut())
+          .thenAnswer((_) async => const Right(null));
+
+      await cubit.signOut();
       await Future<void>.delayed(Duration.zero);
 
-      expect(controller.state, isA<AuthActionSuccess>());
-      expect(fakeRepository.signOutCalled, isTrue);
+      expect(cubit.state, isA<AuthActionSuccess>());
+    });
+
+    test('signOut emits failure on repository error', () async {
+      when(() => mockRepository.signOut())
+          .thenAnswer((_) async => Left('Sign out failed'));
+
+      await cubit.signOut();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(cubit.state, isA<AuthActionFailure>());
     });
 
     test('sendEmailVerification calls repository correctly', () async {
-      await controller.sendEmailVerification();
+      when(() => mockRepository.sendEmailVerification())
+          .thenAnswer((_) async => const Right(null));
+
+      await cubit.sendEmailVerification();
       await Future<void>.delayed(Duration.zero);
 
-      expect(controller.state, isA<AuthActionSuccess>());
-      expect(fakeRepository.sendVerificationCalled, isTrue);
+      expect(cubit.state, isA<AuthActionSuccess>());
     });
 
     test('reloadUser calls repository correctly', () async {
-      await controller.reloadUser();
+      when(() => mockRepository.reloadUser())
+          .thenAnswer((_) async => const Right(null));
+
+      await cubit.reloadUser();
       await Future<void>.delayed(Duration.zero);
 
-      expect(controller.state, isA<AuthActionSuccess>());
-      expect(fakeRepository.reloadUserCalled, isTrue);
+      expect(cubit.state, isA<AuthActionSuccess>());
+    });
+
+    test('verifyOtp calls repository correctly', () async {
+      when(
+        () => mockRepository.verifyOtp(any(), any(), AuthOtpType.signup),
+      ).thenAnswer((_) async => const Right(null));
+
+      await cubit.verifyOtp('test@test.com', '12345678', AuthOtpType.signup);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(cubit.state, isA<AuthActionSuccess>());
+    });
+
+    test('verifyOtp emits failure on repository error', () async {
+      when(
+        () => mockRepository.verifyOtp(any(), any(), AuthOtpType.signup),
+      ).thenAnswer((_) async => Left('Invalid OTP'));
+
+      await cubit.verifyOtp('test@test.com', '00000000', AuthOtpType.signup);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(cubit.state, isA<AuthActionFailure>());
     });
   });
 }

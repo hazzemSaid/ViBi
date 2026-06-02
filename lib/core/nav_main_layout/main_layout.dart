@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:vibi/core/auth/login_required_guard.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/core/notifiers/answerScreenVisibilityNotifier.dart';
 import 'package:vibi/features/inbox/presentation/cubit/padding_question/pending_questions_cubit.dart';
@@ -24,7 +25,11 @@ class MainLayout extends StatelessWidget {
 
   final StatefulNavigationShell navigationShell;
 
-  void _onTap(int index) {
+  Future<void> _onTap(BuildContext context, int index) async {
+    if ((index == 2 || index == 3 || index == 4) &&
+        !await LoginRequiredGuard.ensureLoggedIn(context)) {
+      return;
+    }
     navigationShell.goBranch(
       index,
       initialLocation: index == navigationShell.currentIndex,
@@ -46,7 +51,7 @@ class MainLayout extends StatelessWidget {
               ? null
               : _BottomNavBar(
                   currentIndex: navigationShell.currentIndex,
-                  onTap: _onTap,
+                  onTap: (index) => _onTap(context, index),
                 ),
         );
       },
@@ -58,7 +63,7 @@ class _BottomNavBar extends StatefulWidget {
   const _BottomNavBar({required this.currentIndex, required this.onTap});
 
   final int currentIndex;
-  final Function(int) onTap;
+  final ValueChanged<int> onTap;
 
   @override
   State<_BottomNavBar> createState() => _BottomNavBarState();

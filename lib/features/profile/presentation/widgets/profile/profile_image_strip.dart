@@ -274,14 +274,16 @@ class _ProfileImageCard extends StatelessWidget {
   }
 
   Widget _buildPlaceholder(BuildContext context, {bool isLoading = false}) {
+    final isDark = ThemeData.estimateBrightnessForColor(borderColor) == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Theme.of(context).colorScheme.surfaceContainerHighest,
-            Theme.of(context).colorScheme.surface,
+            borderColor,
+            borderColor.withValues(alpha: 0.8),
           ],
         ),
       ),
@@ -294,9 +296,7 @@ class _ProfileImageCard extends StatelessWidget {
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation(
-                    Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.3),
+                    isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.3),
                   ),
                 ),
               ),
@@ -304,15 +304,13 @@ class _ProfileImageCard extends StatelessWidget {
           : Text(
               placeholderInitial,
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
+                color: isDark ? Colors.white : Colors.black87,
                 fontSize: (width * 0.25).clamp(24, 48),
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
                 shadows: [
                   Shadow(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.scrim.withValues(alpha: 0.3),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),

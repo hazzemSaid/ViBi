@@ -55,8 +55,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final user = context.watch<AuthCubit>().currentUser;
 
-    if (user == null) {
-      return const Scaffold(body: Center(child: Text('Not signed in')));
+    if (user == null || user.isAnonymous) {
+      return _LoginRequiredProfileState(
+        onLoginPressed: () => context.go('/login'),
+      );
     }
 
     _loadProfileIfNeeded(user.id);
@@ -109,20 +111,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       backgroundColor: Colors.transparent,
                       elevation: 0,
                       pinned: true,
-                      leading: IconButton(
-                        icon: ImageIcon(
-                          AssetImage(AppAssets.iconSettings),
-                          color: Theme.of(context).colorScheme.onSurface,
-                          size: 18,
+                      actions: [
+                        IconButton(
+                          icon: ImageIcon(
+                            AssetImage(AppAssets.iconSettings),
+                            color: Theme.of(context).colorScheme.onSurface,
+                            size: 18,
+                          ),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.06),
+                            shape: const CircleBorder(),
+                          ),
+                          onPressed: () => context.pushNamed('edit-profile'),
                         ),
-                        style: IconButton.styleFrom(
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.06),
-                          shape: const CircleBorder(),
-                        ),
-                        onPressed: () => context.pushNamed('edit-profile'),
-                      ),
+                        AppSizes.gapW8,
+                      ],
                     ),
                     SliverToBoxAdapter(
                       child: Column(
@@ -218,6 +223,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _LoginRequiredProfileState extends StatelessWidget {
+  const _LoginRequiredProfileState({required this.onLoginPressed});
+
+  final VoidCallback onLoginPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.lock_outline_rounded,
+                  size: 44,
+                  color: theme.colorScheme.primary,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Login required',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'You need to login first to view and edit your profile.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                FilledButton(
+                  onPressed: onLoginPressed,
+                  child: const Text('Login'),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

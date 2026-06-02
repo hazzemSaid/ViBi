@@ -23,12 +23,12 @@ class RecommendationRepository {
   }) async {
     final currentUserId = _supabase.auth.currentUser?.id;
 
-    await _supabase.rpc(
-      'send_recommendation',
-      params: {
-        'p_recipient_id': recipientId,
-        'p_sender_id': isAnonymous ? null : currentUserId,
-        'p_is_anonymous': isAnonymous,
+     await _supabase.rpc(
+       'send_recommendation',
+       params: {
+         'p_recipient_id': recipientId,
+         'p_sender_id': isAnonymous ? null : currentUserId,
+         'p_is_anonymous': isAnonymous,
         'p_tmdb_id': media.tmdbId,
         'p_media_type': media.mediaType,
         'p_title': media.title,

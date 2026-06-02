@@ -11,14 +11,19 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this.dataSource);
 
   AppUser _mapUser(User user) {
+    final isAnonymous =
+        user.appMetadata['provider'] == 'anonymous' ||
+        (user.identities?.isEmpty ?? false);
+
     return AppUser(
       id: user.id,
       email: user.email ?? '',
       displayName:
           user.userMetadata?['full_name'] as String? ??
           user.userMetadata?['name'] as String?,
-      // Supabase sets emailConfirmedAt once the user clicks the confirmation link
+      avatarUrl: user.userMetadata?['avatar_url'] as String?,
       emailVerified: user.emailConfirmedAt != null,
+      isAnonymous: isAnonymous,
     );
   }
 
@@ -30,8 +35,13 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<String, AppUser>> signInWithEmailPassword(String email, String password) async {
-    final result = await dataSource.signInWithEmailPassword(SignInDto(email: email, password: password));
+  Future<Either<String, AppUser>> signInWithEmailPassword(
+    String email,
+    String password,
+  ) async {
+    final result = await dataSource.signInWithEmailPassword(
+      SignInDto(email: email, password: password),
+    );
     return result.map((user) => _mapUser(user));
   }
 
@@ -41,7 +51,9 @@ class AuthRepositoryImpl implements AuthRepository {
     String password, {
     Map<String, dynamic>? data,
   }) async {
-    final result = await dataSource.signUpWithEmailPassword(SignUpDto(email: email, password: password, data: data));
+    final result = await dataSource.signUpWithEmailPassword(
+      SignUpDto(email: email, password: password, data: data),
+    );
     return result.map((user) => _mapUser(user));
   }
 
@@ -52,11 +64,38 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<String, AppUser>> signInAnonymously() async {
+    final result = await dataSource.signInAnonymously();
+    return result.map((user) => _mapUser(user));
+  }
+
+  @override
   Future<Either<String, void>> signOut() => dataSource.signOut();
 
   @override
-  Future<Either<String, void>> sendEmailVerification() => dataSource.sendEmailVerification();
+  Future<Either<String, void>> sendEmailVerification() =>
+      dataSource.sendEmailVerification();
 
   @override
   Future<Either<String, void>> reloadUser() => dataSource.reloadUser();
+
+  @override
+  Future<Either<String, void>> resetPasswordForEmail(String email) =>
+      dataSource.resetPasswordForEmail(email);
+
+  @override
+  Future<Either<String, void>> updatePassword(String newPassword) =>
+      dataSource.updatePassword(newPassword);
+
+  @override
+  Future<Either<String, void>> verifyOtp(
+    String email,
+    String token,
+    AuthOtpType type,
+  ) {
+    final supabaseType = type == AuthOtpType.signup
+        ? OtpType.signup
+        : OtpType.recovery;
+    return dataSource.verifyOtp(email, token, supabaseType);
+  }
 }

@@ -27,8 +27,8 @@ class UserProfileModel extends UserProfile {
   factory UserProfileModel.fromMap(Map<String, dynamic> map) {
     return UserProfileModel(
       uid: map['id'] as String,
-      name: map['full_name'],
-      username: map['username'],
+      name: map['full_name'] as String? ?? '',
+      username: map['username'] as String? ?? '',
       bio: map['bio'] as String? ?? '',
       avatarUrls: _parseAvatarUrls(map['avatar_urls']),
       updatedAt: map['updated_at'] != null
@@ -57,8 +57,8 @@ class UserProfileModel extends UserProfile {
   factory UserProfileModel.fromGraphQL(Map<String, dynamic> node) {
     return UserProfileModel(
       uid: node['id'] as String,
-      name: node['full_name'] as String,
-      username: node['username'] as String,
+      name: node['full_name'] as String? ?? '',
+      username: node['username'] as String? ?? '',
       bio: node['bio'] as String?,
       avatarUrls: _parseAvatarUrls(node['avatar_urls']),
       updatedAt: node['updated_at'] != null

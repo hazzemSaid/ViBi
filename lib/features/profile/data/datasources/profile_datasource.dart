@@ -9,7 +9,7 @@ abstract class ProfileDataSource {
   Future<Either<String, UserProfileModel>> fetchProfile(String uid);
 
   Future<Either<String, void>> updateProfile(UserProfileModel profile);
-
+  Future<Either<String, void>> insertProfile(UserProfileModel profile);
   Future<Either<String, String>> uploadProfileImage(String uid, File image);
 
   Future<Either<String, List<String>>> uploadAndSaveAvatar(

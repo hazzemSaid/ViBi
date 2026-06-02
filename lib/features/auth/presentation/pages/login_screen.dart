@@ -1,10 +1,15 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/auth/presentation/cubit/auth_action_cubit.dart';
-import 'package:vibi/features/auth/presentation/widgets/auth_video_background.dart';
+import 'package:vibi/features/auth/presentation/helpers/auth_validators.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_button.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_error_text.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_form_card.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_header.dart';
+import 'package:vibi/features/auth/presentation/widgets/auth_scaffold.dart';
+import 'package:vibi/features/auth/presentation/widgets/password_text_field.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -41,143 +46,105 @@ class _LoginScreenState extends State<LoginScreen> {
     return BlocListener<AuthActionCubit, AuthActionState>(
       listener: (context, state) {
         if (state is AuthActionSuccess) {
-          // TODO: Add navigation or success handling
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Login successful!'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
       },
-      child: Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: Text('Login', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Theme.of(context).colorScheme.onSurface,
-      ),
-      body: AuthVideoBackground(
-        child: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: AppSizes.s32),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 40),
-                  Text(
-                    'Welcome Back',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'Login to your account to continue',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  SizedBox(height: MediaQuery.sizeOf(context).height * 0.1),
+      child: AuthScaffold(
+        title: 'Login',
+        showBackButton: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: AppSizes.s40),
+            AuthHeader(
+              title: 'Welcome Back',
+              titleFontSize: 32,
+              subtitle: 'Login to your account to continue',
+            ),
+            const SizedBox(height: AppSizes.s48),
 
-                  // Glassmorphism Form Container
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(AppSizes.r24),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                      child: Container(
-                        padding: EdgeInsets.all(AppSizes.s24),
-                        decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(AppSizes.r24),
-                          border: Border.all(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurface.withValues(alpha: 0.1),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            TextFormField(
-                              controller: _emailController,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                              decoration: InputDecoration(
-                                labelText: 'Email',
-                                prefixIcon: Icon(
-                                  Icons.email_outlined,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              keyboardType: TextInputType.emailAddress,
-                              validator: (val) =>
-                                  val != null && val.contains('@')
-                                  ? null
-                                  : 'Enter a valid email',
-                            ),
-                            SizedBox(height: 16),
-                            TextFormField(
-                              controller: _passwordController,
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                              decoration: InputDecoration(
-                                labelText: 'Password',
-                                prefixIcon: Icon(
-                                  Icons.lock_outline,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                              obscureText: true,
-                              validator: (val) => val != null && val.length >= 6
-                                  ? null
-                                  : 'Password must be 6+ chars',
-                            ),
-                          ],
+            AuthFormCard(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      controller: _emailController,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        prefixIcon: Icon(
+                          Icons.email_outlined,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      validator: AuthValidators.email,
                     ),
-                  ),
-
-                  const SizedBox(height: 48),
-
-                  if (authState is AuthActionLoading)
-                    Center(
-                      child: CircularProgressIndicator(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    )
-                  else
-                    ElevatedButton(onPressed: _submit, child: Text('Login')),
-
-                  if (authState is AuthActionFailure)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20),
-                      child: Text(
-                        (authState as AuthActionFailure).message,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                          fontSize: 13,
-                        ),
-                      ),
+                    const SizedBox(height: AppSizes.s16),
+                    PasswordTextField(
+                      controller: _passwordController,
+                      labelText: 'Password',
+                      validator: AuthValidators.password,
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted: (_) => _submit(),
                     ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
+
+            const SizedBox(height: AppSizes.s12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => context.push('/forgot-password'),
+                child: Text(
+                  'Forgot Password?',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: AppSizes.s24),
+
+            AuthPrimaryButton(
+              label: 'Login',
+              isLoading: authState is AuthActionLoading,
+              onPressed: _submit,
+            ),
+
+            const SizedBox(height: AppSizes.s12),
+            TextButton(
+              onPressed: () => context.pop(),
+              child: Text(
+                "Don't have an account? Sign Up",
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+
+            AuthErrorText(
+              message: authState is AuthActionFailure
+                  ? authState.message
+                  : null,
+            ),
+          ],
         ),
       ),
-    ));
+    );
   }
 }

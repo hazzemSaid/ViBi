@@ -72,4 +72,30 @@ class ProfileMutations {
       }
     }
   ''';
+
+  static const String insertProfile = r'''
+    mutation InsertProfile(
+      $userId: UUID!
+      $username: String
+      $fullName: String
+      $avatarUrls: [String]
+      $createdAt: Datetime!
+      $updatedAt: Datetime!
+    ) {
+      insertIntoprofilesCollection(
+        objects: [{
+          id: $userId
+          username: $username
+          full_name: $fullName
+          avatar_urls: $avatarUrls
+          created_at: $createdAt
+          updated_at: $updatedAt
+        }]
+      ) {
+        records {
+          id
+        }
+      }
+    }
+  ''';
 }

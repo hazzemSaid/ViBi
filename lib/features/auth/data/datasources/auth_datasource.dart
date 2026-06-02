@@ -7,7 +7,15 @@ abstract class AuthDataSource {
   Future<Either<String, User>> signInWithEmailPassword(SignInDto dto);
   Future<Either<String, User>> signUpWithEmailPassword(SignUpDto dto);
   Future<Either<String, User>> signInWithGoogle();
+  Future<Either<String, User>> signInAnonymously();
   Future<Either<String, void>> signOut();
   Future<Either<String, void>> sendEmailVerification();
   Future<Either<String, void>> reloadUser();
+  Future<Either<String, void>> resetPasswordForEmail(String email);
+  Future<Either<String, void>> updatePassword(String newPassword);
+  Future<Either<String, void>> verifyOtp(
+    String email,
+    String token,
+    OtpType type,
+  );
 }

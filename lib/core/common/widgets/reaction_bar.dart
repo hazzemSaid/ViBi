@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibi/core/auth/login_required_guard.dart';
 import 'package:vibi/core/di/service_locator.dart';
 import 'package:vibi/features/reactions/domain/entities/reaction_summary.dart';
 import 'package:vibi/features/reactions/domain/repositories/reactions_repository.dart';
@@ -69,9 +70,11 @@ class _ReactionBarState extends State<ReactionBar> {
       final count = await _repository.getCommentsCount(widget.answerId);
       if (!mounted) return;
       setState(() => _commentCount = count);
-      
+
       final currentState = _reactionCubit.state;
-      final reactionsCount = (currentState is ReactionLoaded) ? currentState.summary.total : 0;
+      final reactionsCount = (currentState is ReactionLoaded)
+          ? currentState.summary.total
+          : 0;
       _notifyCounts(reactionsCount: reactionsCount);
     } catch (_) {
       // Keep existing count if refresh fails.
@@ -83,6 +86,7 @@ class _ReactionBarState extends State<ReactionBar> {
   }
 
   Future<void> _pick(String reaction) async {
+    if (!await LoginRequiredGuard.ensureLoggedIn(context)) return;
     HapticFeedback.selectionClick();
 
     await _reactionCubit.toggleReaction(
@@ -105,8 +109,12 @@ class _ReactionBarState extends State<ReactionBar> {
         children: [
           BlocConsumer<ReactionCubit, ReactionState>(
             listenWhen: (previous, current) {
-              final previousTotal = (previous is ReactionLoaded) ? previous.summary.total : null;
-              final currentTotal = (current is ReactionLoaded) ? current.summary.total : null;
+              final previousTotal = (previous is ReactionLoaded)
+                  ? previous.summary.total
+                  : null;
+              final currentTotal = (current is ReactionLoaded)
+                  ? current.summary.total
+                  : null;
               return previousTotal != currentTotal;
             },
             listener: (_, state) {
@@ -118,8 +126,8 @@ class _ReactionBarState extends State<ReactionBar> {
               final data = (state is ReactionLoaded)
                   ? state.summary
                   : const ReactionSummary(
-                    counts: {'love': 0, 'sad': 0, 'haha': 0},
-                  );
+                      counts: {'love': 0, 'sad': 0, 'haha': 0},
+                    );
 
               if (widget.compact) {
                 final inactiveColor =

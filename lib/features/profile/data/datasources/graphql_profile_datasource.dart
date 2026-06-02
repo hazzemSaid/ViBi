@@ -95,6 +95,33 @@ class GraphQLProfileDataSource implements ProfileDataSource {
     return right(null);
   }
 
+  @override
+  Future<Either<String, void>> insertProfile(UserProfileModel profile) async {
+    final result = await GraphQLConfig.ferryMutate(
+      'InsertProfile',
+      document: ProfileMutations.insertProfile,
+      variables: {
+        'userId': profile.uid,
+        'username': profile.username,
+        'fullName': profile.name,
+        'avatarUrls': profile.avatarUrls,
+        'createdAt': DateTime.now().toIso8601String(),
+        'updatedAt': DateTime.now().toIso8601String(),
+      },
+      clientOverride: _ferryClient,
+    );
+
+    if (result.hasErrors) {
+      return left(SupabaseErrorHandler.getErrorMessage(result));
+    }
+
+    final records = result.data?['insertIntoprofilesCollection']?['records'];
+    if (records == null || (records as List).isEmpty) {
+      return left('Profile insert failed: No rows affected');
+    }
+    return right(null);
+  }
+
   /// Upload profile image to storage
   @override
   Future<Either<String, String>> uploadProfileImage(
@@ -314,7 +341,6 @@ class GraphQLProfileDataSource implements ProfileDataSource {
       variables: {'userId': userId},
       clientOverride: _ferryClient,
     );
-
     if (result.hasErrors) {
       return left(SupabaseErrorHandler.getErrorMessage(result));
     }
@@ -351,9 +377,10 @@ class GraphQLProfileDataSource implements ProfileDataSource {
           }
         }
 
-        final rawQuestionType = (question?['question_type'] as String? ?? 'text')
-            .trim()
-            .toLowerCase();
+        final rawQuestionType =
+            (question?['question_type'] as String? ?? 'text')
+                .trim()
+                .toLowerCase();
         final questionType = rawQuestionType.isEmpty ? 'text' : rawQuestionType;
         final drawingUrl = parseDrawingUrl(
           question?['question_mediaCollection'],
@@ -385,5 +412,4 @@ class GraphQLProfileDataSource implements ProfileDataSource {
       }).toList(),
     );
   }
-
 }

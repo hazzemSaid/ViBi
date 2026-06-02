@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vibi/core/auth/login_required_guard.dart';
 import 'package:vibi/core/constants/app_sizes.dart';
 import 'package:vibi/features/profile/domain/entities/public_profile.dart';
 import 'package:vibi/features/follow/presentation/cubit/follow/follow_cubit.dart';
@@ -53,6 +54,8 @@ class FollowButton extends StatelessWidget {
       return buildButton(
         text: 'Following',
         onPressed: () async {
+          if (!await LoginRequiredGuard.ensureLoggedIn(context)) return;
+          if (!context.mounted) return;
           final shouldUnfollow = await showDialog<bool>(
             context: context,
             builder: (context) => AlertDialog(
@@ -110,6 +113,8 @@ class FollowButton extends StatelessWidget {
       return buildButton(
         text: 'Follow',
         onPressed: () async {
+          if (!await LoginRequiredGuard.ensureLoggedIn(context)) return;
+          if (!context.mounted) return;
           final cubit = context.read<FollowCubit>();
           await cubit.followUser(profile.id);
           if (!context.mounted) return;
